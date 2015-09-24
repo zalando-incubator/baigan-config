@@ -17,19 +17,25 @@
 package org.zalando.baigan.proxy.handler;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.zalando.baigan.context.ContextProviderRetriever;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.provider.ContextProvider;
 import org.zalando.baigan.proxy.ProxyUtils;
 import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigService;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author mchand
@@ -47,6 +53,12 @@ public class ConfigurationMethodInvocationHandler
 
     @Autowired
     private ConditionsProcessor conditionsProcessor;
+
+    @Autowired
+    private ContextProviderRetriever contextProviderRetriever;
+
+    private final Set<String> contextParams = ImmutableSet.of("appdomain",
+            "merchantid");
 
     @Override
     protected Object handleInvocation(Object proxy, Method method,
@@ -67,14 +79,20 @@ public class ConfigurationMethodInvocationHandler
         if (!optional.isPresent()) {
             return null;
         }
+
+        final Map<String, String> context = new HashMap<String, String>();
+
+        for (final String param : contextParams) {
+            Collection<ContextProvider> providers = contextProviderRetriever
+                    .getProvidersFor(param);
+            if (CollectionUtils.isEmpty(providers)) {
+                continue;
+            }
+            final ContextProvider provider = providers.iterator().next();
+            context.put(param, provider.getContextParam(param));
+        }
+
         final Configuration configuration = optional.get();
-
-        // TODO: get this from the context param providers
-        final Map<String, String> context = ImmutableMap.of("appdomain", "1",
-                "ip", "169.10.25.1");
-        // final Map<String, String> context = multiToSingleValueMap(
-        // ui.getQueryParameters());
-
         return String
                 .valueOf(conditionsProcessor.process(configuration, context));
 
