@@ -19,8 +19,24 @@ What makes Baigan a rockstar configuration framework ?
 
     mvn clean install -Pintegration-test
 
-
-
+## Examples
+### Equals 
+This is a sample configuration
+{
+  "defaultValue": false,
+  "conditions": [
+    {
+      "value": true,
+      "conditionType": {
+        "onValue": "3",
+        "type": "Equals"
+      },
+      "paramName": "appdomain"
+    }
+  ],
+  "description": "Feature toggle",
+  "alias": "express.feature.toggle"
+}
 
 
 
