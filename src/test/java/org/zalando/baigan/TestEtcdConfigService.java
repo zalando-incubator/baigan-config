@@ -66,10 +66,13 @@ public class TestEtcdConfigService {
     }
 
     private void testConfiguration(final Configuration<Boolean> configuration) {
-        assertTrue(ConditionsProcessor.process(configuration,
+
+        final ConditionsProcessor conditionsProcessor = new ConditionsProcessor();
+
+        assertTrue(conditionsProcessor.process(configuration,
                 ImmutableMap.of("appdomain", "1")));
 
-        assertFalse(ConditionsProcessor.process(configuration,
+        assertFalse(conditionsProcessor.process(configuration,
                 ImmutableMap.of("appdomain", "2")));
     }
 

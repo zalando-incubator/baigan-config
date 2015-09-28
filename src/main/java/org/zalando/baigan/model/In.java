@@ -14,30 +14,35 @@
  * limitations under the License.
  */
 
-package org.zalando.baigan.proxy.handler;
+package org.zalando.baigan.model;
 
 import java.util.Set;
 
-import com.google.common.reflect.AbstractInvocationHandler;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This class provides an abstraction on the Method invocation handler.
+ * Implementation of ConditionType that evaluates to true if the context param
+ * matches the configured value..
  *
  * @author mchand
  *
  */
-public abstract class ContextAwareMethodInvocationHandler
-        extends AbstractInvocationHandler {
+public class In extends ConditionType {
 
-    private Set<String> contextParameterKeys;
+    private static final long serialVersionUID = 5346539855029708345L;
 
-    public void setContextParameterKeys(
-            final Set<String> contextParameterKeys) {
-        this.contextParameterKeys = contextParameterKeys;
+    @JsonProperty("inValue")
+    private final Set<String> inValue;
+
+    @JsonCreator
+    public In(@JsonProperty("inValue") final Set<String> inValue) {
+        this.inValue = inValue;
     }
 
-    public Set<String> getContextParameterKeys() {
-        return contextParameterKeys;
+    @Override
+    public boolean eval(final String forValue) {
+        return inValue.contains(forValue);
     }
 
 }

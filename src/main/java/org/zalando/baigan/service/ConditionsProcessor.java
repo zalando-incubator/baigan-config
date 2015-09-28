@@ -32,14 +32,21 @@ import org.zalando.baigan.model.Configuration;
 public class ConditionsProcessor {
 
     @Nonnull
-    public static <T> T process(Configuration<T> configuration,
+    public <T> T process(Configuration<T> configuration,
             Map<String, String> context) {
 
         T value = configuration.getDefaultValue();
+
+        // Return if any of the condition evalutes to true from the ordered set
+        // of conditions.
         for (Condition<T> condition : configuration.getConditions()) {
-            if (condition.getConditionType()
-                    .eval(context.get(condition.getParamName()))) {
-                value = condition.getValue();
+
+            final String conditionalContxtParamValue = context
+                    .get(condition.getParamName());
+            final boolean result = condition.getConditionType()
+                    .eval(conditionalContxtParamValue);
+            if (result) {
+                return condition.getValue();
             }
         }
         return value;

@@ -61,7 +61,7 @@ public class ConfigurationBeanRegistrarIT {
 
     @Test
     public void testConfiguration() {
-        assertThat(config.enableXyzFeature(), Matchers.equalTo("false"));
+        assertThat(config.enableXyzFeature(), Matchers.equalTo(Boolean.FALSE));
     }
 
 }

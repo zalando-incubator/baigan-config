@@ -21,7 +21,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.annotation.BaiganConfig;
-import org.zalando.baigan.proxy.handler.ContextAwareMethodInvocationHandler;
+import org.zalando.baigan.proxy.handler.ConfigurationMethodInvocationHandler;
 import org.zalando.baigan.service.ConfigService;
 
 import com.google.common.base.Preconditions;
@@ -60,8 +60,8 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
                 "This BeanFactory could only create Beans for classes annotated with "
                         + BaiganConfig.class.getName());
 
-        final ContextAwareMethodInvocationHandler invocationHandler = applicationContext
-                .getBean(ContextAwareMethodInvocationHandler.class);
+        final ConfigurationMethodInvocationHandler invocationHandler = applicationContext
+                .getBean(ConfigurationMethodInvocationHandler.class);
         return Reflection.newProxy(candidateInterface, invocationHandler);
     }
 
