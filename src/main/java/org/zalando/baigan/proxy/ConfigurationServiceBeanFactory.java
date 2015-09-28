@@ -21,7 +21,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.annotation.BaiganConfig;
-import org.zalando.baigan.proxy.handler.AbstractConfigurationMethodInvocationHandler;
+import org.zalando.baigan.proxy.handler.ContextAwareMethodInvocationHandler;
 import org.zalando.baigan.service.ConfigService;
 
 import com.google.common.base.Preconditions;
@@ -44,20 +44,12 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
     private ApplicationContext applicationContext;
 
     public void setCandidateInterface(final Class<?> candidateInterface) {
-
         this.candidateInterface = candidateInterface;
     }
 
     /**
      * Returns a proxy that implements the given interface.
      *
-     * @param appConfigServiceInterface
-     *            Must have AppConfigService annotation
-     *
-     * @return A proxy that implements the given interface.
-     *
-     * @throws AppConfigServiceException
-     *             if something was wrong with the interface
      */
 
     protected Object createInstance() {
@@ -68,8 +60,8 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
                 "This BeanFactory could only create Beans for classes annotated with "
                         + BaiganConfig.class.getName());
 
-        final AbstractConfigurationMethodInvocationHandler invocationHandler = applicationContext
-                .getBean(AbstractConfigurationMethodInvocationHandler.class);
+        final ContextAwareMethodInvocationHandler invocationHandler = applicationContext
+                .getBean(ContextAwareMethodInvocationHandler.class);
         return Reflection.newProxy(candidateInterface, invocationHandler);
     }
 
@@ -92,4 +84,5 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
     public ConfigService getService() {
         return this.configService;
     }
+
 }

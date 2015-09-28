@@ -17,6 +17,7 @@
 package org.zalando.baigan.context;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -27,6 +28,7 @@ import org.zalando.baigan.provider.ContextProvider;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 /**
@@ -62,7 +64,12 @@ public class ConfigurationContextProviderRegistryImpl
             @Nonnull final String contextName) {
         Preconditions.checkArgument(StringUtils.hasLength(contextName),
                 "Attempt to access value for an empty context name!");
-        return providerMap.get(contextName);
+        return ImmutableSet.copyOf(providerMap.get(contextName));
+    }
+
+    @Override
+    public Set<String> getContextParameterKeys() {
+        return ImmutableSet.copyOf(providerMap.keySet());
     }
 
 }

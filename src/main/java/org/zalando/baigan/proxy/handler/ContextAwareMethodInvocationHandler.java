@@ -16,6 +16,8 @@
 
 package org.zalando.baigan.proxy.handler;
 
+import java.util.Set;
+
 import com.google.common.reflect.AbstractInvocationHandler;
 
 /**
@@ -24,7 +26,18 @@ import com.google.common.reflect.AbstractInvocationHandler;
  * @author mchand
  *
  */
-public abstract class AbstractConfigurationMethodInvocationHandler
+public abstract class ContextAwareMethodInvocationHandler
         extends AbstractInvocationHandler {
+
+    private Set<String> contextParameterKeys;
+
+    public void setContextParameterKeys(
+            final Set<String> contextParameterKeys) {
+        this.contextParameterKeys = contextParameterKeys;
+    }
+
+    public Set<String> getContextParameterKeys() {
+        return contextParameterKeys;
+    }
 
 }

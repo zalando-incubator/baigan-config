@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,6 @@ import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigService;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * @author mchand
@@ -43,7 +41,7 @@ import com.google.common.collect.ImmutableSet;
 
 @Service
 public class ConfigurationMethodInvocationHandler
-        extends AbstractConfigurationMethodInvocationHandler {
+        extends ContextAwareMethodInvocationHandler {
 
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationMethodInvocationHandler.class);
@@ -56,9 +54,6 @@ public class ConfigurationMethodInvocationHandler
 
     @Autowired
     private ContextProviderRetriever contextProviderRetriever;
-
-    private final Set<String> contextParams = ImmutableSet.of("appdomain",
-            "merchantid");
 
     @Override
     protected Object handleInvocation(Object proxy, Method method,
@@ -82,7 +77,8 @@ public class ConfigurationMethodInvocationHandler
 
         final Map<String, String> context = new HashMap<String, String>();
 
-        for (final String param : contextParams) {
+        for (final String param : contextProviderRetriever
+                .getContextParameterKeys()) {
             Collection<ContextProvider> providers = contextProviderRetriever
                     .getProvidersFor(param);
             if (CollectionUtils.isEmpty(providers)) {

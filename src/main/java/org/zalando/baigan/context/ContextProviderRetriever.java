@@ -17,6 +17,7 @@
 package org.zalando.baigan.context;
 
 import java.util.Collection;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -33,4 +34,7 @@ public interface ContextProviderRetriever {
 
     @Nonnull
     Collection<ContextProvider> getProvidersFor(@Nonnull final String contextName );
+
+    @Nonnull
+    Set<String> getContextParameterKeys();
 }
