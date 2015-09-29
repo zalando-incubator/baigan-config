@@ -17,13 +17,14 @@
 package org.zalando.baigan;
 
 import org.springframework.context.annotation.ComponentScan;
-import org.zalando.baigan.context.ConfigurationContextProviderBeanPostprocessor;
+import org.springframework.context.annotation.Import;
+import org.zalando.baigan.proxy.ConfigurationBeanDefinitionRegistrar;
 
 /**
  * @author mchand
  */
-@ComponentScan(basePackages = { "org.zalando.baigan" }, basePackageClasses = {
-        ConfigurationContextProviderBeanPostprocessor.class })
+@ComponentScan(basePackages = { "org.zalando.baigan" })
+@Import(ConfigurationBeanDefinitionRegistrar.class)
 public class BaiganSpringContext {
 
 }
