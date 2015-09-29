@@ -17,7 +17,9 @@ What makes Baigan a rockstar configuration framework ?
 
 ### To build project execute on root folder:
 
+```bash
     mvn clean install -Pintegration-test
+```
     
 ## Configuration schema
 Configurations are stored in its simplest form as key values.
@@ -71,7 +73,7 @@ A configuration object has the following JSON Schema:
 
 
 ### Equals 
-This sample json defines a configuration for key _express.feature.toggle_ that the value is _true_ if the _country___code_ is 3, with the default value being _false_.   
+This sample json defines a configuration for key _express.feature.toggle_ that the value is _true_ if the _country__code_ is 3, with the default value being _false_.   
 
 ```json
 {
