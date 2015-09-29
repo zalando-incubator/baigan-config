@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.proxy.handler.ConfigurationMethodInvocationHandler;
-import org.zalando.baigan.service.ConfigService;
+import org.zalando.baigan.service.ConfigurationRespository;
 
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
@@ -39,7 +39,7 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
 
     private Class<?> candidateInterface;
 
-    private ConfigService configService;
+    private ConfigurationRespository configurationRepository;
 
     private ApplicationContext applicationContext;
 
@@ -77,12 +77,12 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
         return this.candidateInterface;
     }
 
-    public void setConfigService(final ConfigService configService) {
-        this.configService = configService;
+    public void setConfigurationRepository(final ConfigurationRespository configurationRespository) {
+        this.configurationRepository = configurationRespository;
     }
 
-    public ConfigService getService() {
-        return this.configService;
+    public ConfigurationRespository getConfigurationRespository() {
+        return this.configurationRepository;
     }
 
 }

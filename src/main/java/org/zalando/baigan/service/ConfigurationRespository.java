@@ -26,10 +26,10 @@ import com.google.common.base.Optional;
  * @author mchand
  */
 
-public interface ConfigService {
+public interface ConfigurationRespository {
 
     @Nonnull
-    Optional<Configuration> getConfig(@Nonnull final String key) ;
+    Optional<Configuration<?>> getConfig(@Nonnull final String key) ;
 
     void put(@Nonnull final String key, @Nonnull final String value);
 

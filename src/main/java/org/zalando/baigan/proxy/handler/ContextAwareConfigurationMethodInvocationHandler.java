@@ -32,7 +32,7 @@ import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.provider.ContextProvider;
 import org.zalando.baigan.proxy.ProxyUtils;
 import org.zalando.baigan.service.ConditionsProcessor;
-import org.zalando.baigan.service.ConfigService;
+import org.zalando.baigan.service.ConfigurationRespository;
 
 import com.google.common.base.Optional;
 
@@ -50,7 +50,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
             .getLogger(ConfigurationMethodInvocationHandler.class);
 
     @Autowired
-    private ConfigService configService;
+    private ConfigurationRespository configurationRepository;
 
     @Autowired
     private ConditionsProcessor conditionsProcessor;
@@ -73,13 +73,13 @@ public class ContextAwareConfigurationMethodInvocationHandler
             return null;
         }
 
-        Class clazz = method.getReturnType();
+        Class<?> clazz = method.getReturnType();
         if (clazz.isInstance(result)) {
             return result;
         }
 
         try {
-            Constructor constructor = clazz
+            Constructor<?> constructor = clazz
                     .getDeclaredConstructor(result.getClass());
             return constructor.newInstance(result);
         } catch (Exception exception) {
@@ -94,7 +94,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     private Object getConfig(final String key) {
 
-        Optional<Configuration> optional = configService.getConfig(key);
+        Optional<Configuration<?>> optional = configurationRepository.getConfig(key);
         if (!optional.isPresent()) {
             return null;
         }
@@ -112,7 +112,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
             context.put(param, provider.getContextParam(param));
         }
 
-        final Configuration configuration = optional.get();
+        final Configuration<?> configuration = optional.get();
         final Object result = conditionsProcessor.process(configuration,
                 context);
         return result;
