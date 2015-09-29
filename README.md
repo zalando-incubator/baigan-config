@@ -18,11 +18,61 @@ What makes Baigan a rockstar configuration framework ?
 ### To build project execute on root folder:
 
     mvn clean install -Pintegration-test
+    
+## Configuration schema
+Configurations are stored in its simplest form as key values.
+A configuration is a pair of a dot(.) separated key and a value object in JSON format.
+
+A configuration object has the following JSON Schema:
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Configuration",
+    "description": "A baigan configuration object value.",
+    "type": "object",
+    "properties": {
+        "alias": {
+            "description": "The identifier for the configuration, same as its key.",
+            "type": "string"
+        },
+         "description": {
+            "description": "Summary of the configuration.",
+            "type": "string"
+        },
+         "defaultValue": {
+            "description": "Default configuration if none of the condition is satisfied.",
+            "type": {}
+        },
+         "conditions": {
+            "description": "List of conditions to check",
+            "type": "array",
+            "items": {
+            	"type": "object",
+            	"properties": {
+                    "value": {
+                        "description": "Configuration value if this condition evaluates to true.",
+                        "type": {}
+                    },
+            		"conditionType": {
+                        "description": "Type of condition to evaluate. This can be custom defined, with custom defined properties.",
+                        "type": "object",
+                    }
+                }
+            }
+        }
+    },
+    "required": ["defaultValue"]
+}
+
+
 
 ## Examples
+
+
 ### Equals 
 This is a sample configuration
 {
+  "alias": "express.feature.toggle",
+  "description": "Feature toggle",
   "defaultValue": false,
   "conditions": [
     {
@@ -33,9 +83,7 @@ This is a sample configuration
       },
       "paramName": "appdomain"
     }
-  ],
-  "description": "Feature toggle",
-  "alias": "express.feature.toggle"
+  ] 
 }
 
 
