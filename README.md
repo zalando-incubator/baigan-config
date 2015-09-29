@@ -71,7 +71,7 @@ A configuration object has the following JSON Schema:
 
 
 ### Equals 
-This is a sample configuration
+This sample json defines a configuration for key _express.feature.toggle_ that the value is _true_ if the _country___code_ is 3, with the default value being _false_.   
 
 ```json
 {
@@ -85,7 +85,7 @@ This is a sample configuration
         "onValue": "3",
         "type": "Equals"
       },
-      "paramName": "appdomain"
+      "paramName": "country_code"
     }
   ] 
 }
