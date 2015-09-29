@@ -10,7 +10,7 @@ What makes Baigan a rockstar configuration framework ?
  
 ## Prerequisites
 - Java 1.8
-- [etcd](https://github.com/coreos/etcd)
+- [etcd](https://github.com/coreos/etcd) started and running on default port.
 
 
 ## Getting started
@@ -19,6 +19,80 @@ What makes Baigan a rockstar configuration framework ?
 
 ```bash
     mvn clean install -Pintegration-test
+```
+### Integrating Baigan config
+Baigan config is a spring project. The larger part of integration involves configuring beans to facilitate the spring beans.
+
+
+
+#### 1. Create configuration on etcd 
+This sample json defines a configuration for key _express.feature.enabled_ that the value is _true_ if the _country_code_ is 3, with the default value being _false_.   
+
+```json
+{
+  "alias": "express.feature.enabled",
+  "description": "Feature toggle",
+  "defaultValue": false,
+  "conditions": [
+    {
+      "value": true,
+      "conditionType": {
+        "onValue": "3",
+        "type": "Equals"
+      },
+      "paramName": "country_code"
+    }
+  ] 
+}
+```
+
+#### 2. Configuring components and Configuration interface scanning.
+
+```Java
+
+import org.zalando.baigan.BaiganSpringContext;
+
+@ComponentScan(basePackageClasses = {
+                BaiganSpringContext.class })
+@ConfigurationServiceScan(basePackages = {
+        "com.foo.configurations" })
+public class Application {
+}
+```
+
+The _BaiganSpringContext_ class includes the Baigan-Config beans required to be loaded into the spring application context.
+And the _@ConfigurationServiceScan_ annotation hints the Baigan registrar to look into the packages where the _@BaiganConfig_ annotated interfaces could be found.
+
+ 
+#### 3. Annotate your configuration interfaces with _@BaiganConfig_
+
+```Java
+	@BaiganConfig
+	public interface ExpressFeature {
+	
+	    public Boolean enabled();
+	    
+	    public String serviceUrl();
+
+	}
+```
+
+The above example code enables the application to inject _ExpressFeature_ spring bean into any Spring bean and do the following:
+
+```Java
+	@Component
+	public class ExpressServiceImpl implements ExpressService{
+ 
+		@Inject
+		private ExpressFeature expressFeature;
+	
+		@Override
+		public void sendShipment(final Shipment shipment){
+			if (expressFeature.enabled()){
+				final String serviceUrl = expressFeature.serviceUrl();
+			}
+		}
+	}
 ```
     
 ## Configuration schema
@@ -68,30 +142,6 @@ A configuration object has the following JSON Schema:
 }
 ```
 
-
-## Examples
-
-
-### Equals 
-This sample json defines a configuration for key _express.feature.toggle_ that the value is _true_ if the _country_code_ is 3, with the default value being _false_.   
-
-```json
-{
-  "alias": "express.feature.toggle",
-  "description": "Feature toggle",
-  "defaultValue": false,
-  "conditions": [
-    {
-      "value": true,
-      "conditionType": {
-        "onValue": "3",
-        "type": "Equals"
-      },
-      "paramName": "country_code"
-    }
-  ] 
-}
-```
 
 ## License
 

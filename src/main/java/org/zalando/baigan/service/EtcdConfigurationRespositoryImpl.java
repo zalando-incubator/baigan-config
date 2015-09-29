@@ -39,17 +39,17 @@ import com.google.common.base.Strings;
  */
 
 @Component
-public class EtcdConfigurationRespositoryImpl implements ConfigurationRespository {
+public class EtcdConfigurationRespositoryImpl
+        implements ConfigurationRespository {
 
-    private Logger LOG = LoggerFactory.getLogger(EtcdConfigurationRespositoryImpl.class);
+    private Logger LOG = LoggerFactory
+            .getLogger(EtcdConfigurationRespositoryImpl.class);
 
     private EtcdClient etcdClient;
 
     private final String ETCD_URL_ENV_NAME = "ETCD_URL";
 
     private final String CONFIG_PATH_PREFIX = "/v2/keys/";
-
-    private final String DEFAULT_ETCD_URL = "http://etcd.coast.zalan.do:2379";
 
     private ObjectMapper objectMapper;
 
@@ -71,10 +71,8 @@ public class EtcdConfigurationRespositoryImpl implements ConfigurationRespositor
     private String getUrl() {
         String systemEtcdUrl = System.getenv(ETCD_URL_ENV_NAME);
         if (Strings.isNullOrEmpty(systemEtcdUrl)) {
-            systemEtcdUrl = DEFAULT_ETCD_URL;
-            LOG.warn("$" + ETCD_URL_ENV_NAME
-                    + " null or empty, will try to reach ETCD at the default url "
-                    + DEFAULT_ETCD_URL);
+            LOG.error("$" + ETCD_URL_ENV_NAME
+                    + " is undefined. This is required in order to by the baigan configuration service.");
         }
         return systemEtcdUrl;
     }
