@@ -24,6 +24,8 @@ Configurations are stored in its simplest form as key values.
 A configuration is a pair of a dot(.) separated key and a value object in JSON format.
 
 A configuration object has the following JSON Schema:
+
+```json
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Configuration",
@@ -62,7 +64,7 @@ A configuration object has the following JSON Schema:
     },
     "required": ["defaultValue"]
 }
-
+```
 
 
 ## Examples
@@ -70,6 +72,8 @@ A configuration object has the following JSON Schema:
 
 ### Equals 
 This is a sample configuration
+
+```json
 {
   "alias": "express.feature.toggle",
   "description": "Feature toggle",
@@ -85,7 +89,7 @@ This is a sample configuration
     }
   ] 
 }
-
+```
 
 
 
