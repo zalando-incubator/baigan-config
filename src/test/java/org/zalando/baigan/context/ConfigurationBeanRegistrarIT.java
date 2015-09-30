@@ -31,11 +31,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.config.TestConfig;
-import org.zalando.baigan.context.ConfigurationContextProviderBeanPostprocessor;
-import org.zalando.baigan.context.ConfigurationContextProviderRegistryImpl;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.service.ConditionsProcessor;
-import org.zalando.baigan.service.ConfigService;
+import org.zalando.baigan.service.ConfigurationRespository;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -61,7 +59,7 @@ public class ConfigurationBeanRegistrarIT {
 
     @Test
     public void testConfiguration() {
-        assertThat(config.enableXyzFeature(), Matchers.equalTo("false"));
+        assertThat(config.enableXyzFeature(), Matchers.equalTo(Boolean.FALSE));
     }
 
 }
@@ -75,8 +73,8 @@ class TestBeans {
     }
 
     @Bean
-    public ConfigService configService() {
-        return new ConfigService() {
+    public ConfigurationRespository configurationRespository() {
+        return new ConfigurationRespository() {
             public final static String KEY = "test.config.enable.xyz.feature";
 
             @Override
@@ -84,7 +82,7 @@ class TestBeans {
             }
 
             @Override
-            public Optional<org.zalando.baigan.model.Configuration> getConfig(
+            public Optional<org.zalando.baigan.model.Configuration<?>> getConfig(
                     String key) {
                 if (KEY.equalsIgnoreCase(key)) {
                     return Optional.of(mockConfiguration(key));

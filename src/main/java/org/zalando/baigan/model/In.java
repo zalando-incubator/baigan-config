@@ -14,27 +14,35 @@
  * limitations under the License.
  */
 
-package org.zalando.baigan.context;
+package org.zalando.baigan.model;
 
-import java.util.Collection;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
-import org.zalando.baigan.provider.ContextProvider;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This interface offers method to retrieve registered {@link ContextProvider}
- * for a {@link ConfigurationContext}.
+ * Implementation of ConditionType that evaluates to true if the context param
+ * matches the configured value..
  *
  * @author mchand
  *
  */
-public interface ContextProviderRetriever {
+public class In extends ConditionType {
 
-    @Nonnull
-    Collection<ContextProvider> getProvidersFor(@Nonnull final String contextName );
+    private static final long serialVersionUID = 5346539855029708345L;
 
-    @Nonnull
-    Set<String> getContextParameterKeys();
+    @JsonProperty("inValue")
+    private final Set<String> inValue;
+
+    @JsonCreator
+    public In(@JsonProperty("inValue") final Set<String> inValue) {
+        this.inValue = inValue;
+    }
+
+    @Override
+    public boolean eval(final String forValue) {
+        return inValue.contains(forValue);
+    }
+
 }

@@ -78,8 +78,6 @@ public class ConfigurationBeanDefinitionRegistrar
             final BeanDefinitionRegistry registry) {
         for (final String singlePackage : packages) {
 
-            // final ConfigurationServiceBeanFactory factory = new
-            // ConfigurationServiceBeanFactory();
             final Set<Class<?>> configServiceInterfaces = new Reflections(
                     singlePackage).getTypesAnnotatedWith(BaiganConfig.class);
 
@@ -89,12 +87,9 @@ public class ConfigurationBeanDefinitionRegistrar
                                 ConfigurationServiceBeanFactory.class);
                 builder.addPropertyValue("candidateInterface",
                         interfaceToImplement);
-                // builder.addPropertyValue("targetClass",
-                // interfaceToImplement.getClass());
-                // builder.addPropertyValue("configurationService", null);
 
                 final String factoryBeanName = interfaceToImplement.getName()
-                        + "AppConfigServiceFactoryBean";
+                        + "BaiganProxyConfigurationFactoryBean";
                 registry.registerBeanDefinition(factoryBeanName,
                         builder.getBeanDefinition());
             }

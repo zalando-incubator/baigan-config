@@ -21,8 +21,8 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.annotation.BaiganConfig;
-import org.zalando.baigan.proxy.handler.AbstractConfigurationMethodInvocationHandler;
-import org.zalando.baigan.service.ConfigService;
+import org.zalando.baigan.proxy.handler.ConfigurationMethodInvocationHandler;
+import org.zalando.baigan.service.ConfigurationRespository;
 
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
@@ -39,25 +39,17 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
 
     private Class<?> candidateInterface;
 
-    private ConfigService configService;
+    private ConfigurationRespository configurationRepository;
 
     private ApplicationContext applicationContext;
 
     public void setCandidateInterface(final Class<?> candidateInterface) {
-
         this.candidateInterface = candidateInterface;
     }
 
     /**
      * Returns a proxy that implements the given interface.
      *
-     * @param appConfigServiceInterface
-     *            Must have AppConfigService annotation
-     *
-     * @return A proxy that implements the given interface.
-     *
-     * @throws AppConfigServiceException
-     *             if something was wrong with the interface
      */
 
     protected Object createInstance() {
@@ -68,8 +60,8 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
                 "This BeanFactory could only create Beans for classes annotated with "
                         + BaiganConfig.class.getName());
 
-        final AbstractConfigurationMethodInvocationHandler invocationHandler = applicationContext
-                .getBean(AbstractConfigurationMethodInvocationHandler.class);
+        final ConfigurationMethodInvocationHandler invocationHandler = applicationContext
+                .getBean(ConfigurationMethodInvocationHandler.class);
         return Reflection.newProxy(candidateInterface, invocationHandler);
     }
 
@@ -85,11 +77,12 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
         return this.candidateInterface;
     }
 
-    public void setConfigService(final ConfigService configService) {
-        this.configService = configService;
+    public void setConfigurationRepository(final ConfigurationRespository configurationRespository) {
+        this.configurationRepository = configurationRespository;
     }
 
-    public ConfigService getService() {
-        return this.configService;
+    public ConfigurationRespository getConfigurationRespository() {
+        return this.configurationRepository;
     }
+
 }

@@ -51,4 +51,5 @@ public @interface ConfigurationServiceScan {
      * Base packages to scan for AppConfigService interfaces.
      */
     String[] basePackages() default {};
+
 }

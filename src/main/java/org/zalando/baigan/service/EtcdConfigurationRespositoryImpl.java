@@ -39,9 +39,11 @@ import com.google.common.base.Strings;
  */
 
 @Component
-public class EtcdConfigServiceImpl implements ConfigService {
+public class EtcdConfigurationRespositoryImpl
+        implements ConfigurationRespository {
 
-    private Logger LOG = LoggerFactory.getLogger(EtcdConfigServiceImpl.class);
+    private Logger LOG = LoggerFactory
+            .getLogger(EtcdConfigurationRespositoryImpl.class);
 
     private EtcdClient etcdClient;
 
@@ -49,12 +51,10 @@ public class EtcdConfigServiceImpl implements ConfigService {
 
     private final String CONFIG_PATH_PREFIX = "/v2/keys/";
 
-    private final String DEFAULT_ETCD_URL = "http://etcd.coast.zalan.do:2379";
-
     private ObjectMapper objectMapper;
 
     @VisibleForTesting
-    public EtcdConfigServiceImpl(final EtcdClient etcdClient) {
+    public EtcdConfigurationRespositoryImpl(final EtcdClient etcdClient) {
         checkArgument(etcdClient != null);
         this.objectMapper = new ObjectMapper()
                 .registerModule(new GuavaModule());
@@ -62,7 +62,7 @@ public class EtcdConfigServiceImpl implements ConfigService {
 
     }
 
-    public EtcdConfigServiceImpl() {
+    public EtcdConfigurationRespositoryImpl() {
         etcdClient = new EtcdClient(getUrl());
         this.objectMapper = new ObjectMapper()
                 .registerModule(new GuavaModule());
@@ -71,10 +71,8 @@ public class EtcdConfigServiceImpl implements ConfigService {
     private String getUrl() {
         String systemEtcdUrl = System.getenv(ETCD_URL_ENV_NAME);
         if (Strings.isNullOrEmpty(systemEtcdUrl)) {
-            systemEtcdUrl = DEFAULT_ETCD_URL;
-            LOG.warn("$" + ETCD_URL_ENV_NAME
-                    + " null or empty, will try to reach ETCD at the default url "
-                    + DEFAULT_ETCD_URL);
+            LOG.error("$" + ETCD_URL_ENV_NAME
+                    + " is undefined. This is required in order to by the baigan configuration service.");
         }
         return systemEtcdUrl;
     }
@@ -85,7 +83,7 @@ public class EtcdConfigServiceImpl implements ConfigService {
     }
 
     @Nonnull
-    public Optional<Configuration> getConfig(@Nonnull final String key) {
+    public Optional<Configuration<?>> getConfig(@Nonnull final String key) {
         try {
             checkArgument(!Strings.isNullOrEmpty(key),
                     "Attempt to get configuration for an empty key !");

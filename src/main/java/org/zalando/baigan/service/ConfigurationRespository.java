@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package org.zalando.baigan.proxy.handler;
+package org.zalando.baigan.service;
 
-import com.google.common.reflect.AbstractInvocationHandler;
+import javax.annotation.Nonnull;
+
+import org.zalando.baigan.model.Configuration;
+
+import com.google.common.base.Optional;
 
 /**
- * This class provides an abstraction on the Method invocation handler.
- *
  * @author mchand
- *
  */
-public abstract class AbstractConfigurationMethodInvocationHandler
-        extends AbstractInvocationHandler {
+
+public interface ConfigurationRespository {
+
+    @Nonnull
+    Optional<Configuration<?>> getConfig(@Nonnull final String key) ;
+
+    void put(@Nonnull final String key, @Nonnull final String value);
 
 }

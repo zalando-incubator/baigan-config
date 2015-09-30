@@ -23,5 +23,5 @@ import org.zalando.baigan.proxy.ConfigurationBeanDefinitionRegistrar;
 @BaiganConfig
 @Import(ConfigurationBeanDefinitionRegistrar.class)
 public interface TestConfig {
-    public String enableXyzFeature();
+    public Boolean enableXyzFeature();
 }
