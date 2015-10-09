@@ -24,7 +24,6 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.zalando.baigan.etcd.service.EtcdClient;
 import org.zalando.baigan.model.Configuration;
 
@@ -36,7 +35,6 @@ import com.google.common.base.Strings;
  * @author mchand
  */
 
-@Component
 public class EtcdConfigurationRespositoryImpl
         extends AbstractConfigurationRespository {
 
@@ -48,8 +46,6 @@ public class EtcdConfigurationRespositoryImpl
     private final String ETCD_URL_ENV_NAME = "ETCD_URL";
 
     private final String CONFIG_PATH_PREFIX = "/v2/keys/";
-
-
 
     @VisibleForTesting
     public EtcdConfigurationRespositoryImpl(final EtcdClient etcdClient) {

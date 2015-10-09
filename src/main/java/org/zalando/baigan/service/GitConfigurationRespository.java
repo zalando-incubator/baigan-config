@@ -12,6 +12,13 @@ import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 
+/**
+ * Implementation of {link ConfigurationRespository} supporting the Github as
+ * the persistence storage for the baigan configuration.
+ *
+ * @author mchand
+ *
+ */
 public class GitConfigurationRespository
         extends AbstractConfigurationRespository {
 
@@ -32,8 +39,8 @@ public class GitConfigurationRespository
     @Override
     public Optional<Configuration<?>> getConfig(String key) {
         try {
-            return Optional.fromNullable(
-                    cachedConfigurations.get(gitConfig.getRepoRefs()).get(key));
+            return Optional.fromNullable(cachedConfigurations
+                    .get(gitConfig.getSourceFile()).get(key));
         } catch (ExecutionException e) {
             LOG.warn("Exception while trying to get configuration for key "
                     + key, e);
@@ -44,50 +51,6 @@ public class GitConfigurationRespository
     @Override
     public void put(String key, String value) {
         throw new UnsupportedOperationException();
-    }
-
-}
-
-class GitConfig {
-    private String repoRefs;
-    private String repoName;
-    private String repoOwner;
-    private String gitHost;
-    private String oauthToken;
-    private String sourceFile;
-
-    public GitConfig(String gitHost, String repoOwner, String repoName,
-            String repoRefs, String sourceFile, String oauthToken) {
-        this.repoRefs = repoRefs;
-        this.repoName = repoName;
-        this.repoOwner = repoOwner;
-        this.gitHost = gitHost;
-        this.oauthToken = oauthToken;
-        this.sourceFile = sourceFile;
-    }
-
-    public String getRepoRefs() {
-        return repoRefs;
-    }
-
-    public String getRepoName() {
-        return repoName;
-    }
-
-    public String getRepoOwner() {
-        return repoOwner;
-    }
-
-    public String getGitHost() {
-        return gitHost;
-    }
-
-    public String getOauthToken() {
-        return oauthToken;
-    }
-
-    public String getSourceFile() {
-        return sourceFile;
     }
 
 }
