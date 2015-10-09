@@ -18,6 +18,7 @@ public abstract class AbstractConfigurationRespository
 
     private Logger LOG = LoggerFactory
             .getLogger(AbstractConfigurationRespository.class);
+
     protected ObjectMapper objectMapper;
 
     public AbstractConfigurationRespository() {

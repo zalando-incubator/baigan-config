@@ -64,7 +64,6 @@ public class ContextAwareConfigurationMethodInvocationHandler
         final String methodName = method.getName();
 
         final String nameSpace = method.getDeclaringClass().getSimpleName();
-        LOG.info("Called " + methodName);
 
         final String key = ProxyUtils.dottify(nameSpace) + "."
                 + ProxyUtils.dottify(methodName);

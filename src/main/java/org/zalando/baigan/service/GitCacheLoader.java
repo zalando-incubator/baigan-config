@@ -79,6 +79,9 @@ public class GitCacheLoader
 
     private Map<String, Configuration> updateContent(
             final RepositoryContents contents) {
+        LOG.info("Loading the new repository contents [ SHA:{} ; NAME:{} ] ",
+                contents.getSha(), contents.getPath());
+
         List<Configuration> configurations = getConfigurations(
                 getTextContent(contents));
 
