@@ -28,8 +28,6 @@ import org.springframework.stereotype.Component;
 import org.zalando.baigan.etcd.service.EtcdClient;
 import org.zalando.baigan.model.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -40,7 +38,7 @@ import com.google.common.base.Strings;
 
 @Component
 public class EtcdConfigurationRespositoryImpl
-        implements ConfigurationRespository {
+        extends AbstractConfigurationRespository {
 
     private Logger LOG = LoggerFactory
             .getLogger(EtcdConfigurationRespositoryImpl.class);
@@ -51,21 +49,17 @@ public class EtcdConfigurationRespositoryImpl
 
     private final String CONFIG_PATH_PREFIX = "/v2/keys/";
 
-    private ObjectMapper objectMapper;
+
 
     @VisibleForTesting
     public EtcdConfigurationRespositoryImpl(final EtcdClient etcdClient) {
         checkArgument(etcdClient != null);
-        this.objectMapper = new ObjectMapper()
-                .registerModule(new GuavaModule());
         this.etcdClient = etcdClient;
 
     }
 
     public EtcdConfigurationRespositoryImpl() {
         etcdClient = new EtcdClient(getUrl());
-        this.objectMapper = new ObjectMapper()
-                .registerModule(new GuavaModule());
     }
 
     private String getUrl() {

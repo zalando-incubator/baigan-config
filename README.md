@@ -25,11 +25,23 @@ Baigan config is a spring project. The larger part of integration involves confi
 
 
 
-#### 1. Create configuration on etcd 
-This sample json defines a configuration for key _express.feature.enabled_ that the value is _true_ if the _country_code_ is 3, with the default value being _false_.   
+#### 1. Prepare etcd
+
+##### a. Define $ETCD_URL environment variable with the url of your ETCD cluster.
+```bash
+ #example
+ export ETCD_URL=http://127.0.0.1:2379
+````
+  
+
+##### b. Create a configuration
+To create a key in etcd, you can either use the etcd client etcdctl or the good old curl in the following way.
+This sample json defines a configuration for key _express.feature.enabled_ that the value is _true_ if the _country_code_ is 3, with the default value being _false_.
+
+Save this content in a file named _express-feature.json_
 
 ```json
-{
+value= '{
   "alias": "express.feature.enabled",
   "description": "Feature toggle",
   "defaultValue": false,
@@ -43,8 +55,15 @@ This sample json defines a configuration for key _express.feature.enabled_ that 
       "paramName": "country_code"
     }
   ] 
-}
+}'
 ```
+
+Put the new etcd key with _curl_ cli
+
+```bash
+curl -v -XPUT http://127.0.0.1:2379/v2/keys/express.feature.enabled -d @express-feature.json
+```
+
 
 #### 2. Configuring components and Configuration interface scanning.
 
