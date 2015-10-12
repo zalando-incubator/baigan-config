@@ -35,9 +35,11 @@ import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRespository;
 
 import com.google.common.base.Optional;
+import com.google.common.primitives.Primitives;
 
 /**
- * This class provides an abstraction on the Method invocation handler.
+ * This class provides a concrete implementation for the Method invocation
+ * handler.
  *
  * @author mchand
  *
@@ -75,6 +77,10 @@ public class ContextAwareConfigurationMethodInvocationHandler
         Class<?> clazz = method.getReturnType();
         if (clazz.isInstance(result)) {
             return result;
+        } else if (clazz.isPrimitive()) {
+            final Constructor<?> constructor = Primitives.wrap(clazz)
+                    .getDeclaredConstructor(result.getClass());
+            return constructor.newInstance(result);
         }
 
         try {
@@ -93,7 +99,8 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     private Object getConfig(final String key) {
 
-        Optional<Configuration<?>> optional = configurationRepository.getConfig(key);
+        Optional<Configuration<?>> optional = configurationRepository
+                .getConfig(key);
         if (!optional.isPresent()) {
             return null;
         }

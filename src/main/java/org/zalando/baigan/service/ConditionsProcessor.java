@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 
@@ -37,14 +38,19 @@ public class ConditionsProcessor {
 
         T value = configuration.getDefaultValue();
 
-        // Return if any of the condition evalutes to true from the ordered set
-        // of conditions.
+        if (CollectionUtils.isEmpty(configuration.getConditions())) {
+            return value;
+        }
+
         for (Condition<T> condition : configuration.getConditions()) {
 
             final String conditionalContxtParamValue = context
                     .get(condition.getParamName());
             final boolean result = condition.getConditionType()
                     .eval(conditionalContxtParamValue);
+
+            // Return if any of the condition evaluates to true from the ordered
+            // set of conditions.
             if (result) {
                 return condition.getValue();
             }
