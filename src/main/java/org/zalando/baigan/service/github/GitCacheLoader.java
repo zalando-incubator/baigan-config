@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.service.github;
 
 import java.io.IOException;
 import java.util.HashMap;

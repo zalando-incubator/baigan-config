@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.service.github;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.service.AbstractConfigurationRespository;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;

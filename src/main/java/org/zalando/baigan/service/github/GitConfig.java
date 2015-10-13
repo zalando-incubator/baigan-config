@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.service.github;
 
 public class GitConfig {
     private String repoRefs;
