@@ -35,9 +35,11 @@ import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRespository;
 
 import com.google.common.base.Optional;
+import com.google.common.primitives.Primitives;
 
 /**
- * This class provides an abstraction on the Method invocation handler.
+ * This class provides a concrete implementation for the Method invocation
+ * handler.
  *
  * @author mchand
  *
@@ -69,23 +71,31 @@ public class ContextAwareConfigurationMethodInvocationHandler
                 + ProxyUtils.dottify(methodName);
         final Object result = getConfig(key);
         if (result == null) {
+            LOG.warn("Configuration not found for key: {}", key);
             return null;
         }
 
-        Class<?> clazz = method.getReturnType();
-        if (clazz.isInstance(result)) {
-            return result;
-        }
+        final Class<?> declaredReturnType = method.getReturnType();
 
         try {
-            Constructor<?> constructor = clazz
-                    .getDeclaredConstructor(result.getClass());
+
+            Constructor<?> constructor = null;
+            if (declaredReturnType.isInstance(result)) {
+                return result;
+            } else if (declaredReturnType.isPrimitive()) {
+                final Class<?> resultClass = result.getClass();
+                constructor = Primitives.wrap(declaredReturnType)
+                        .getDeclaredConstructor(resultClass);
+            } else {
+                constructor = declaredReturnType
+                        .getDeclaredConstructor(result.getClass());
+            }
             return constructor.newInstance(result);
         } catch (Exception exception) {
             LOG.warn(
                     "Wrong or Incompatible configuration. Cannot find a constructor to create object of type "
-                            + clazz + " for value of the configuration key "
-                            + key,
+                            + declaredReturnType
+                            + " for value of the configuration key " + key,
                     exception);
         }
         return null;
@@ -93,7 +103,8 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     private Object getConfig(final String key) {
 
-        Optional<Configuration<?>> optional = configurationRepository.getConfig(key);
+        Optional<Configuration<?>> optional = configurationRepository
+                .getConfig(key);
         if (!optional.isPresent()) {
             return null;
         }

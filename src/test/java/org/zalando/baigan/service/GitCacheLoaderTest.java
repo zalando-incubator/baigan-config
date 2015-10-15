@@ -14,6 +14,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.service.github.GitCacheLoader;
+import org.zalando.baigan.service.github.GitConfig;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
