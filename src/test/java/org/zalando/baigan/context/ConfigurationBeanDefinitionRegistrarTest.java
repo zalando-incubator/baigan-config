@@ -40,7 +40,7 @@ import com.google.common.collect.ImmutableMap;
  *
  */
 @RunWith(JUnit4.class)
-public class ConfigurationBeanDefinitionRegistrarIT {
+public class ConfigurationBeanDefinitionRegistrarTest {
 
     @Test
     public void testRegistration() {
