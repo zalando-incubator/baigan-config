@@ -35,7 +35,6 @@ import org.zalando.baigan.proxy.ProxyUtils;
 import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRespository;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.primitives.Primitives;
 
@@ -53,20 +52,17 @@ public class ContextAwareConfigurationMethodInvocationHandler
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationMethodInvocationHandler.class);
 
-    @Autowired
     private ConfigurationRespository configurationRepository;
 
-    @Autowired
     private ConditionsProcessor conditionsProcessor;
 
-    @Autowired
     private ContextProviderRetriever contextProviderRetriever;
 
-    @VisibleForTesting
+    @Autowired
     public ContextAwareConfigurationMethodInvocationHandler(
-            ConfigurationRespository configurationRepository,
-            ConditionsProcessor conditionsProcessor,
-            ContextProviderRetriever contextProviderRetriever) {
+            final ConfigurationRespository configurationRepository,
+            final ConditionsProcessor conditionsProcessor,
+            final ContextProviderRetriever contextProviderRetriever) {
         this.configurationRepository = configurationRepository;
         this.conditionsProcessor = conditionsProcessor;
         this.contextProviderRetriever = contextProviderRetriever;
