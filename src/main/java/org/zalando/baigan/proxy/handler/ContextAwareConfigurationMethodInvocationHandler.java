@@ -18,6 +18,7 @@ package org.zalando.baigan.proxy.handler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.zalando.baigan.proxy.ProxyUtils;
 import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRespository;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.primitives.Primitives;
 
@@ -59,6 +61,16 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     @Autowired
     private ContextProviderRetriever contextProviderRetriever;
+
+    @VisibleForTesting
+    public ContextAwareConfigurationMethodInvocationHandler(
+            ConfigurationRespository configurationRepository,
+            ConditionsProcessor conditionsProcessor,
+            ContextProviderRetriever contextProviderRetriever) {
+        this.configurationRepository = configurationRepository;
+        this.conditionsProcessor = conditionsProcessor;
+        this.contextProviderRetriever = contextProviderRetriever;
+    }
 
     @Override
     protected Object handleInvocation(Object proxy, Method method,
@@ -86,6 +98,14 @@ public class ContextAwareConfigurationMethodInvocationHandler
                 final Class<?> resultClass = result.getClass();
                 constructor = Primitives.wrap(declaredReturnType)
                         .getDeclaredConstructor(resultClass);
+            } else if (declaredReturnType.isEnum()) {
+                for (Object t : Arrays
+                        .asList(declaredReturnType.getEnumConstants())) {
+                    if (result.toString().equalsIgnoreCase(t.toString())) {
+                        return t;
+                    }
+                }
+                return result;
             } else {
                 constructor = declaredReturnType
                         .getDeclaredConstructor(result.getClass());
@@ -128,4 +148,5 @@ public class ContextAwareConfigurationMethodInvocationHandler
         return result;
 
     }
+
 }
