@@ -18,6 +18,7 @@ package org.zalando.baigan.proxy.handler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,14 +52,21 @@ public class ContextAwareConfigurationMethodInvocationHandler
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationMethodInvocationHandler.class);
 
-    @Autowired
     private ConfigurationRespository configurationRepository;
 
-    @Autowired
     private ConditionsProcessor conditionsProcessor;
 
-    @Autowired
     private ContextProviderRetriever contextProviderRetriever;
+
+    @Autowired
+    public ContextAwareConfigurationMethodInvocationHandler(
+            final ConfigurationRespository configurationRepository,
+            final ConditionsProcessor conditionsProcessor,
+            final ContextProviderRetriever contextProviderRetriever) {
+        this.configurationRepository = configurationRepository;
+        this.conditionsProcessor = conditionsProcessor;
+        this.contextProviderRetriever = contextProviderRetriever;
+    }
 
     @Override
     protected Object handleInvocation(Object proxy, Method method,
@@ -86,6 +94,14 @@ public class ContextAwareConfigurationMethodInvocationHandler
                 final Class<?> resultClass = result.getClass();
                 constructor = Primitives.wrap(declaredReturnType)
                         .getDeclaredConstructor(resultClass);
+            } else if (declaredReturnType.isEnum()) {
+                for (Object t : Arrays
+                        .asList(declaredReturnType.getEnumConstants())) {
+                    if (result.toString().equalsIgnoreCase(t.toString())) {
+                        return t;
+                    }
+                }
+                return result;
             } else {
                 constructor = declaredReturnType
                         .getDeclaredConstructor(result.getClass());
@@ -128,4 +144,5 @@ public class ContextAwareConfigurationMethodInvocationHandler
         return result;
 
     }
+
 }

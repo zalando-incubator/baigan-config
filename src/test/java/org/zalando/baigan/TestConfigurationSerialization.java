@@ -94,11 +94,9 @@ public class TestConfigurationSerialization {
 
     @Test
     public void testSerialize() throws Exception {
-
         final Configuration config = createConfigurationForAppdomain1();
         final String serialized = mapper.writeValueAsString(config);
         assertThat(serialized, Matchers.equalTo(stringy));
-
     }
 
 }
