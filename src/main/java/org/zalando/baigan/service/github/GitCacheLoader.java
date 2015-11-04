@@ -54,7 +54,6 @@ public class GitCacheLoader
         client.setOAuth2Token(config.getOauthToken());
 
         contentsService = new ContentsService(client);
-
     }
 
     @VisibleForTesting
@@ -72,6 +71,9 @@ public class GitCacheLoader
     public Map<String, Configuration> load(String key) throws Exception {
         final RepositoryContents contents = getContentsForFile(key);
         if (contents == null) {
+            LOG.warn(
+                    "Loading the repository contents first time [ SHA:{} ; NAME:{} ] and it is empty !!",
+                    contents.getSha(), contents.getPath());
             return ImmutableMap.of();
         }
         return updateContent(contents);
@@ -82,7 +84,7 @@ public class GitCacheLoader
         LOG.info("Loading the new repository contents [ SHA:{} ; NAME:{} ] ",
                 contents.getSha(), contents.getPath());
 
-        List<Configuration> configurations = getConfigurations(
+        final List<Configuration> configurations = getConfigurations(
                 getTextContent(contents));
 
         latestSha = contents.getSha();
@@ -105,18 +107,16 @@ public class GitCacheLoader
             final String sourceFile,
             final Map<String, Configuration> oldValue) {
 
-        Callable<Map<String, Configuration>> callable = new Callable<Map<String, Configuration>>() {
+        final Callable<Map<String, Configuration>> callable = new Callable<Map<String, Configuration>>() {
             @Override
             public Map<String, Configuration> call() throws Exception {
                 final RepositoryContents contents = getContentsForFile(
                         sourceFile);
-                if (contents == null) {
-                    return ImmutableMap.of();
-                }
-
+                // If the contents is null, return old value, this is to
+                // preserve in case the github is down.
                 // If the hash is null which is very unlikely, or it is same as
                 // the earlier one, we dont reload it
-                if (Strings.isNullOrEmpty(contents.getSha())
+                if (contents == null || Strings.isNullOrEmpty(contents.getSha())
                         || contents.getSha().equals(latestSha)) {
                     return oldValue;
                 }
@@ -143,7 +143,7 @@ public class GitCacheLoader
                             sourceFile, config.getRepoRefs());
             final RepositoryContents content = contents.get(0);
             return content;
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.warn("Failed to get contents from the Github repository ", e);
         }
         return null;

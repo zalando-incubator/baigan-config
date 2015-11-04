@@ -149,41 +149,30 @@ public class GitCacheLoaderTest {
         final GitCacheLoader loader = new GitCacheLoader(config,
                 contentService);
 
-//        Mockito.when(
-//                contentService.getContents(org.mockito.Matchers.anyObject(),
-//                        org.mockito.Matchers.eq("staging.json"),
-//                        org.mockito.Matchers.eq("master")))
-//                .thenReturn(ImmutableList
-//                        .of(createRepositoryContents(testConfiguration1)));
-        Mockito.doThrow(new IOException()).when(contentService).getContents(org.mockito.Matchers.anyObject(),
-                org.mockito.Matchers.eq("staging.json"),
-                org.mockito.Matchers.eq("master"));
+        Mockito.when(
+                contentService.getContents(org.mockito.Matchers.anyObject(),
+                        org.mockito.Matchers.eq("staging.json"),
+                        org.mockito.Matchers.eq("master")))
+                .thenReturn(ImmutableList
+                        .of(createRepositoryContents(testConfiguration1)));
+
 
         Map<String, Configuration> configurations = loader.load("staging.json");
         assertThat(configurations.size(), Matchers.equalTo(1));
         assertThat(configurations.get("express.feature.toggle"),
                 Matchers.notNullValue());
 
-        Mockito.when(
-                contentService.getContents(org.mockito.Matchers.anyObject(),
-                        org.mockito.Matchers.eq("staging.json"),
-                        org.mockito.Matchers.eq("master")))
-                .thenReturn(ImmutableList
-                        .of(createRepositoryContents(testConfiguration2)));
+        //throw exception on retrieval
+        Mockito.doThrow(new IOException()).when(contentService).getContents(org.mockito.Matchers.anyObject(),
+                org.mockito.Matchers.eq("staging.json"),
+                org.mockito.Matchers.eq("master"));
 
         final ListenableFuture<Map<String, Configuration>> configurations2Future = loader
                 .reload("staging.json", configurations);
 
         final Map<String, Configuration> configurations2 = configurations2Future
                 .get();
-        assertThat(configurations2, Matchers.not(configurations));
-
-        assertThat(configurations2.size(), Matchers.equalTo(2));
-        assertThat(configurations.get("express.feature.toggle"),
-                Matchers.notNullValue());
-
-        assertThat(configurations2.get("express.feature.serviceUrl"),
-                Matchers.notNullValue());
+        assertThat(configurations2, Matchers.equalTo(configurations));
 
     }
 
