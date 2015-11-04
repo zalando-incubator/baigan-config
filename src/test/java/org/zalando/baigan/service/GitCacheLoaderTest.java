@@ -2,6 +2,7 @@ package org.zalando.baigan.service;
 
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.apache.cassandra.utils.MD5Digest;
@@ -135,6 +136,54 @@ public class GitCacheLoaderTest {
                 .get();
 
         assertThat(configurations2, Matchers.equalTo(configurations1));
+
+    }
+
+    @Test
+    public void testReloadWithIOExceptionInConcentService() throws Exception {
+
+        final GitConfig config = new GitConfig("somehost", "someowner",
+                "somerepo", "master", "somefile", "aoth_token");
+        ContentsService contentService = Mockito.mock(ContentsService.class);
+
+        final GitCacheLoader loader = new GitCacheLoader(config,
+                contentService);
+
+//        Mockito.when(
+//                contentService.getContents(org.mockito.Matchers.anyObject(),
+//                        org.mockito.Matchers.eq("staging.json"),
+//                        org.mockito.Matchers.eq("master")))
+//                .thenReturn(ImmutableList
+//                        .of(createRepositoryContents(testConfiguration1)));
+        Mockito.doThrow(new IOException()).when(contentService).getContents(org.mockito.Matchers.anyObject(),
+                org.mockito.Matchers.eq("staging.json"),
+                org.mockito.Matchers.eq("master"));
+
+        Map<String, Configuration> configurations = loader.load("staging.json");
+        assertThat(configurations.size(), Matchers.equalTo(1));
+        assertThat(configurations.get("express.feature.toggle"),
+                Matchers.notNullValue());
+
+        Mockito.when(
+                contentService.getContents(org.mockito.Matchers.anyObject(),
+                        org.mockito.Matchers.eq("staging.json"),
+                        org.mockito.Matchers.eq("master")))
+                .thenReturn(ImmutableList
+                        .of(createRepositoryContents(testConfiguration2)));
+
+        final ListenableFuture<Map<String, Configuration>> configurations2Future = loader
+                .reload("staging.json", configurations);
+
+        final Map<String, Configuration> configurations2 = configurations2Future
+                .get();
+        assertThat(configurations2, Matchers.not(configurations));
+
+        assertThat(configurations2.size(), Matchers.equalTo(2));
+        assertThat(configurations.get("express.feature.toggle"),
+                Matchers.notNullValue());
+
+        assertThat(configurations2.get("express.feature.serviceUrl"),
+                Matchers.notNullValue());
 
     }
 
