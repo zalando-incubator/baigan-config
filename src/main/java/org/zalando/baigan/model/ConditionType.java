@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * @author mchand
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({ @Type(value = Equals.class, name = "Equals") })
+@JsonSubTypes({ @Type(value = Equals.class, name = "Equals"), @Type(value = In.class, name = "In") })
 public abstract class ConditionType implements Serializable {
 
     private static final long serialVersionUID = 8948546383560656976L;
