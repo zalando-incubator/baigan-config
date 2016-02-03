@@ -27,5 +27,18 @@
       "paramName": "appdomain"
     }
   ] 
+ },
+ {
+    "alias": "pession.sync.feature.toggle",
+    "description": "Feature toggle",
+    "defaultValue": false,
+    "conditions": [{
+      "value": true,
+      "conditionType": {
+        "inValue": ["24", "15"],
+        "type": "In"
+      },
+      "paramName": "appdomain"
+    }]
  }
 ]
