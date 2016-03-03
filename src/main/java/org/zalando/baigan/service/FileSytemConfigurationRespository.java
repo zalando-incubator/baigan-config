@@ -1,7 +1,9 @@
 package org.zalando.baigan.service;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,11 +20,10 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Resources;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * Implementation of {link ConfigurationRespository} supporting a file on
+ * Implementation of {@link ConfigurationRespository} supporting a file on
  * Classpath as the persistence storage for the Baigan configuration.
  *
  * @author mchand
@@ -90,10 +91,9 @@ public class FileSytemConfigurationRespository
         throw new UnsupportedOperationException();
     }
 
-    public String loadResource(final String name) throws IOException {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        return Resources.toString(cl.getResource(name),
-                Charset.forName("UTF-8"));
-
-    }
+	public String loadResource(final String file) throws IOException {
+		final Path filePath = Paths.get(file);
+		final String contents = new String(Files.readAllBytes(filePath));
+		return contents;
+	}
 }

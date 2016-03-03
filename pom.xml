@@ -4,7 +4,7 @@
 
     <groupId>org.zalando</groupId>
     <artifactId>baigan-config</artifactId>
-    <version>0.9.6</version>
+    <version>0.9.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>baigan-config</name>
@@ -47,6 +47,7 @@
 
 
     <build>
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -184,6 +185,7 @@
             <artifactId>reflections</artifactId>
             <version>0.9.10</version>
         </dependency>
+
     </dependencies>
 
     <profiles>
