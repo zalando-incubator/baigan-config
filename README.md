@@ -7,7 +7,7 @@ What makes Baigan a rockstar configuration framework ?
 * *Simple*: Baigan configuration is as simple as annotating a Java class.
 * *Extensible*: Extend configurations, create rules, define types that suits you.
 * *Distributed*: Baigan uses etcd cluster to persis the configurations, which means that in an auto-scalable cluster setting you dont have to worry about updating configuration on each of your server isntance anymore.
- 
+
 ## Prerequisites
 - Java 1.8
 - [etcd](https://github.com/coreos/etcd) started and running on default port.
@@ -32,7 +32,7 @@ Baigan config is a spring project. The larger part of integration involves confi
  #example
  export ETCD_URL=http://127.0.0.1:2379
 ````
-  
+
 
 ##### b. Create a configuration
 To create a key in etcd, you can either use the etcd client etcdctl or the good old curl in the following way.
@@ -54,7 +54,7 @@ value= '{
       },
       "paramName": "country_code"
     }
-  ] 
+  ]
 }'
 ```
 
@@ -82,15 +82,15 @@ public class Application {
 The _BaiganSpringContext_ class includes the Baigan-Config beans required to be loaded into the spring application context.
 And the _@ConfigurationServiceScan_ annotation hints the Baigan registrar to look into the packages where the _@BaiganConfig_ annotated interfaces could be found.
 
- 
+
 #### 3. Annotate your configuration interfaces with _@BaiganConfig_
 
 ```Java
 	@BaiganConfig
 	public interface ExpressFeature {
-	
+
 	    public Boolean enabled();
-	    
+
 	    public String serviceUrl();
 
 	}
@@ -101,10 +101,10 @@ The above example code enables the application to inject _ExpressFeature_ spring
 ```Java
 	@Component
 	public class ExpressServiceImpl implements ExpressService{
- 
+
 		@Inject
 		private ExpressFeature expressFeature;
-	
+
 		@Override
 		public void sendShipment(final Shipment shipment){
 			if (expressFeature.enabled()){
@@ -113,7 +113,7 @@ The above example code enables the application to inject _ExpressFeature_ spring
 		}
 	}
 ```
-    
+
 ## Configuration schema
 Configurations are stored in its simplest form as key values.
 A configuration is a pair of a dot(.) separated key and a value object in JSON format.
@@ -164,7 +164,7 @@ A configuration object has the following JSON Schema:
 
 ## License
 
-Copyright 2015 Zalando SE
+Copyright 2016 Zalando SE
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
 
