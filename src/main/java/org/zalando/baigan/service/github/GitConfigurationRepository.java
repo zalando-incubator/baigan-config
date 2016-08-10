@@ -1,6 +1,5 @@
 package org.zalando.baigan.service.github;
 
-import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.zalando.baigan.service.AbstractConfigurationRepository;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -19,13 +19,11 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mchand
  */
-public class GitConfigurationRepository
-        extends AbstractConfigurationRepository {
+public class GitConfigurationRepository extends AbstractConfigurationRepository {
+    private static final Logger LOG = LoggerFactory.getLogger(GitConfigurationRepository.class);
 
     private final LoadingCache<String, Map<String, Configuration>> cachedConfigurations;
     private final GitConfig gitConfig;
-    private Logger LOG = LoggerFactory
-            .getLogger(GitConfigurationRepository.class);
 
     public GitConfigurationRepository(long refreshIntervalInMinutes, GitConfig gitConfig) {
         this.gitConfig = gitConfig;
@@ -36,15 +34,13 @@ public class GitConfigurationRepository
 
     @Nonnull
     @Override
-    public Optional<Configuration<?>> getConfig(@Nonnull String key) {
+    public Optional<Configuration> get(@Nonnull String key) {
         try {
-            return Optional.fromNullable(cachedConfigurations
-                    .get(gitConfig.getSourceFile()).get(key));
+            return Optional.ofNullable(cachedConfigurations.get(gitConfig.getSourceFile()).get(key));
         } catch (ExecutionException e) {
-            LOG.warn("Exception while trying to get configuration for key "
-                    + key, e);
+            LOG.warn("Exception while trying to get configuration for key {}", key, e);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

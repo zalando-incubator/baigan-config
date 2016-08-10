@@ -1,6 +1,5 @@
 package org.zalando.baigan.context;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +8,7 @@ import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRepository;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -31,11 +31,11 @@ class SpringTestContext {
             }
 
             @Nonnull
-            public Optional<org.zalando.baigan.model.Configuration<?>> getConfig(@Nonnull String key) {
+            public Optional<org.zalando.baigan.model.Configuration> get(@Nonnull String key) {
                 if (KEY.equalsIgnoreCase(key)) {
                     return Optional.of(mockConfiguration(key));
                 } else {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
 
             }
