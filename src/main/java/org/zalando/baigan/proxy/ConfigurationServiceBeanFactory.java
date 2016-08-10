@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2015 Zalando SE (http://tech.zalando.com)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.zalando.baigan.proxy;
 
 import org.springframework.beans.BeansException;
@@ -22,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.proxy.handler.ConfigurationMethodInvocationHandler;
-import org.zalando.baigan.service.ConfigurationRespository;
+import org.zalando.baigan.service.ConfigurationRepository;
 
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
@@ -39,7 +23,7 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
 
     private Class<?> candidateInterface;
 
-    private ConfigurationRespository configurationRepository;
+    private ConfigurationRepository configurationRepository;
 
     private ApplicationContext applicationContext;
 
@@ -77,11 +61,11 @@ public class ConfigurationServiceBeanFactory extends AbstractFactoryBean<Object>
         return this.candidateInterface;
     }
 
-    public void setConfigurationRepository(final ConfigurationRespository configurationRespository) {
-        this.configurationRepository = configurationRespository;
+    public void setConfigurationRepository(final ConfigurationRepository configurationRepository) {
+        this.configurationRepository = configurationRepository;
     }
 
-    public ConfigurationRespository getConfigurationRespository() {
+    public ConfigurationRepository getConfigurationRespository() {
         return this.configurationRepository;
     }
 
