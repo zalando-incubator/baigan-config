@@ -81,7 +81,13 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
 
     private void setupRefresh() {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(this::loadConfigurations, this.refreshInterval, this.refreshInterval,
+        executor.scheduleAtFixedRate(() -> {
+                    try {
+                        loadConfigurations();
+                    } catch (RuntimeException e) {
+                        LOG.warn("Failed to refresh S3 configuration", e);
+                    }
+                }, this.refreshInterval, this.refreshInterval,
                 TimeUnit.SECONDS);
     }
 
