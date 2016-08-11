@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This class provides a concrete implementation for the Method invocation
@@ -101,7 +102,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     private Object getConfig(final String key) {
 
-        java.util.Optional<Configuration<?>> optional = configurationRepository.get(key);
+        final Optional<Configuration> optional = configurationRepository.get(key);
         if (!optional.isPresent()) {
             return null;
         }

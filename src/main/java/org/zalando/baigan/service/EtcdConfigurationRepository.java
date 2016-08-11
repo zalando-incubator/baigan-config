@@ -1,7 +1,6 @@
 package org.zalando.baigan.service;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,7 @@ import org.zalando.baigan.model.Configuration;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -50,12 +50,11 @@ public class EtcdConfigurationRepository extends AbstractConfigurationRepository
     }
 
     @Nonnull
-    public Optional<Configuration<?>> getConfig(@Nonnull final String key) {
+    public Optional<Configuration> get(@Nonnull final String key) {
         try {
             checkArgument(!Strings.isNullOrEmpty(key),
                     "Attempt to get configuration for an empty key !");
-            final Optional<String> optionalConfig = etcdClient
-                    .get(CONFIG_PATH_PREFIX + key);
+            final Optional<String> optionalConfig = etcdClient.get(CONFIG_PATH_PREFIX + key);
 
             if (optionalConfig.isPresent()) {
                 return Optional.of(objectMapper.readValue(optionalConfig.get(),
@@ -65,6 +64,6 @@ public class EtcdConfigurationRepository extends AbstractConfigurationRepository
         } catch (IOException e) {
             LOG.warn("Error while loading configuration for key: " + key, e);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

@@ -16,18 +16,16 @@
 
 package org.zalando.baigan.etcd.service;
 
-import java.io.IOException;
-import java.net.URL;
-
-import javax.annotation.Nonnull;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.etcd.model.KeyResultNode;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.google.common.base.Optional;
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Optional;
 
 /**
  * @author mchand
@@ -53,12 +51,12 @@ public final class EtcdClient {
                     KeyResultNode.class);
             final String response = resultNode.getNode().getValue();
 
-            return Optional.fromNullable(response);
+            return Optional.ofNullable(response);
         } catch (IOException e) {
             LOG.warn("There was an exception trying to get key: " + key, e);
         } catch (NullPointerException npe) {
             LOG.warn("There was an exception trying to get key: " + key);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

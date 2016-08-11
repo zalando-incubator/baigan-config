@@ -1,6 +1,5 @@
 package org.zalando.baigan.service;
 
-import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -17,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -26,8 +26,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mchand
  */
-public class FileSystemConfigurationRepository
-        extends AbstractConfigurationRepository {
+public class FileSystemConfigurationRepository extends AbstractConfigurationRepository {
 
     private final LoadingCache<String, Map<String, Configuration>> cachedConfigurations;
     private final String fileName;
@@ -60,7 +59,7 @@ public class FileSystemConfigurationRepository
                     public ListenableFuture<Map<String, Configuration>> reload(
                             String key, Map<String, Configuration> oldValue)
                             throws Exception {
-                        LOG.info("Reloading the configuration from file: " + key);
+                        LOG.info("Reloading the configuration from file {}", key);
                         return super.reload(key, oldValue);
                     }
                 });
@@ -68,15 +67,13 @@ public class FileSystemConfigurationRepository
 
     @Nonnull
     @Override
-    public Optional<Configuration<?>> getConfig(@Nonnull String key) {
+    public Optional<Configuration> get(@Nonnull String key) {
         try {
-            return Optional
-                    .fromNullable(cachedConfigurations.get(fileName).get(key));
+            return Optional.ofNullable(cachedConfigurations.get(fileName).get(key));
         } catch (ExecutionException e) {
-            LOG.warn("Exception while trying to get configuration for key "
-                    + key, e);
+            LOG.warn("Exception while trying to get configuration for key {}", key, e);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

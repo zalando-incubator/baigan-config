@@ -19,16 +19,12 @@ public interface ConfigurationRepository {
      */
     @Nonnull
     @Deprecated
-    Optional<Configuration<?>> getConfig(@Nonnull final String key);
+    default Optional<Configuration> getConfig(@Nonnull final String key) {
+        return get(key).map(Optional::of).orElse(Optional.absent());
+    }
 
     @Nonnull
-    default java.util.Optional<Configuration<?>> get(@Nonnull final String key) {
-        final Optional<Configuration<?>> config = getConfig(key);
-        if (config.isPresent()) {
-            return java.util.Optional.of(config.get());
-        }
-        return java.util.Optional.empty();
-    }
+    java.util.Optional<Configuration> get(@Nonnull final String key);
 
     void put(@Nonnull final String key, @Nonnull final String value);
 
