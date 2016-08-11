@@ -1,12 +1,11 @@
 package org.zalando.baigan.service.github;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import org.eclipse.egit.github.core.RepositoryContents;
 import org.eclipse.egit.github.core.RepositoryId;
@@ -26,7 +25,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+
+import javax.annotation.Nonnull;
+
+import static com.google.common.util.concurrent.MoreExecutors.listeningDecorator;
+import static org.apache.commons.codec.binary.Base64.*;
 
 /**
  * This class implements the {@link CacheLoader} offering Configuration loading
@@ -45,57 +48,53 @@ public class GitCacheLoader
 
     private GitConfig config;
 
+    private final ListeningExecutorService executorService = listeningDecorator(Executors.newFixedThreadPool(1));
+    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
+
     private final ContentsService contentsService;
 
-    public GitCacheLoader(GitConfig gitConfig) {
-        this.config = gitConfig;
+    private static ContentsService buildContentsService(@Nonnull final GitConfig gitConfig) {
+        Objects.requireNonNull(gitConfig, "gitConfig is required");
+        final GitHubClient client = new GitHubClient(gitConfig.getGitHost());
+        client.setOAuth2Token(gitConfig.getOauthToken());
+        return new ContentsService(client);
+    }
 
-        final GitHubClient client = new GitHubClient(config.getGitHost());
-        client.setOAuth2Token(config.getOauthToken());
-
-        contentsService = new ContentsService(client);
+    public GitCacheLoader(@Nonnull final  GitConfig gitConfig) {
+        this(gitConfig, buildContentsService(gitConfig));
     }
 
     @VisibleForTesting
-    public GitCacheLoader(GitConfig gitConfig,
-            ContentsService contentsService) {
+    GitCacheLoader(GitConfig gitConfig, ContentsService contentsService) {
         this.config = gitConfig;
         this.contentsService = contentsService;
-
     }
-
-    private ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new GuavaModule());
 
     @Override
     public Map<String, Configuration> load(String key) throws Exception {
         final RepositoryContents contents = getContentsForFile(key);
-        if (contents == null) {
-            LOG.warn(
-                    "Loading the repository contents first time [ SHA:{} ; NAME:{} ] and it is empty !!",
-                    contents.getSha(), contents.getPath());
-            return ImmutableMap.of();
+        if (contents != null) {
+            return updateContent(contents);
         }
-        return updateContent(contents);
+        LOG.warn("Failed to load the repository contents for {}", key);
+        return ImmutableMap.of();
     }
 
     private Map<String, Configuration> updateContent(
-            final RepositoryContents contents) {
+            @Nonnull final RepositoryContents contents) {
+        final String contentsSha = contents.getSha();
         LOG.info("Loading the new repository contents [ SHA:{} ; NAME:{} ] ",
-                contents.getSha(), contents.getPath());
+                contentsSha, contents.getPath());
 
-        final List<Configuration> configurations = getConfigurations(
-                getTextContent(contents));
+        final List<Configuration> configurations = getConfigurations(getTextContent(contents));
 
-        latestSha = contents.getSha();
+        latestSha = contentsSha;
 
-        final Map<String, Configuration> map = new HashMap<String, Configuration>();
-        configurations.stream().forEach(new Consumer<Configuration>() {
-            public void accept(Configuration each) {
-                map.put(each.getAlias(), each);
-            };
-        });
-        return ImmutableMap.copyOf(map);
+        final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();
+        for (final Configuration each : configurations) {
+            builder.put(each.getAlias(), each);
+        }
+        return builder.build();
     }
 
     public ListenableFuture<Map<String, Configuration>> reload(final String key,
@@ -107,30 +106,20 @@ public class GitCacheLoader
             final String sourceFile,
             final Map<String, Configuration> oldValue) {
 
-        final Callable<Map<String, Configuration>> callable = new Callable<Map<String, Configuration>>() {
-            @Override
-            public Map<String, Configuration> call() throws Exception {
-                final RepositoryContents contents = getContentsForFile(
-                        sourceFile);
-                // If the contents is null, return old value, this is to
-                // preserve in case the github is down.
-                // If the hash is null which is very unlikely, or it is same as
-                // the earlier one, we dont reload it
-                if (contents == null || Strings.isNullOrEmpty(contents.getSha())
-                        || contents.getSha().equals(latestSha)) {
-                    return oldValue;
-                }
-                return updateContent(contents);
+        final Callable<Map<String, Configuration>> callable = () -> {
+            final RepositoryContents contents = getContentsForFile(sourceFile);
+            // If the contents is null, return old value, this is to
+            // preserve in case Github is down.
+            // If the hash is null which is very unlikely, or it is same as
+            // the earlier one, we don't reload it
+            if (contents == null || Strings.isNullOrEmpty(contents.getSha())
+                    || contents.getSha().equals(latestSha)) {
+                return oldValue;
             }
+            return updateContent(contents);
         };
 
-        final ListeningExecutorService service = MoreExecutors
-                .listeningDecorator(Executors.newFixedThreadPool(10));
-
-        final ListenableFuture<java.util.Map<String, Configuration>> future = service
-                .submit(callable);
-
-        return future;
+        return executorService.submit(callable);
     }
 
     private RepositoryContents getContentsForFile(final String sourceFile) {
@@ -141,8 +130,7 @@ public class GitCacheLoader
                             new RepositoryId(config.getRepoOwner(),
                                     config.getRepoName()),
                             sourceFile, config.getRepoRefs());
-            final RepositoryContents content = contents.get(0);
-            return content;
+            return contents.get(0);
         } catch (Exception e) {
             LOG.warn("Failed to get contents from the Github repository ", e);
         }
@@ -151,10 +139,7 @@ public class GitCacheLoader
 
     private String getTextContent(final RepositoryContents content) {
         final String stringContent = content.getContent();
-
-        final String text = new String(org.apache.commons.codec.binary.Base64
-                .decodeBase64(stringContent.getBytes()));
-        return text;
+        return new String(decodeBase64(stringContent.getBytes()));
     }
 
     private List<Configuration> getConfigurations(final String text) {
@@ -164,7 +149,9 @@ public class GitCacheLoader
                     });
         } catch (IOException e) {
             LOG.warn(
-                    "Exception while deserializing the Configuration from the Github repository contents. Please check to see if if matches the Configuration schema at https://github.com/zalando/baigan-config.",
+                    "Exception while deserializing the Configuration from the Github repository contents." +
+                            "Please check to see if if matches the Configuration schema at " +
+                            "https://github.com/zalando/baigan-config.",
                     e);
         }
         return ImmutableList.of();

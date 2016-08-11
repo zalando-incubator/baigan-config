@@ -19,7 +19,7 @@ In order to contribute code and documentation:
  - *GreateThan*
  - *LesserThan*
 
-* **ConfigurationRespository**: Go ahead and implement repositories for Databases of your liking, MongoDB anyone ?
+* **ConfigurationRepository**: Go ahead and implement repositories for Databases of your liking, MongoDB anyone ?
 
 * **Parameterised configuration methods**:
  Please refer the issue [here](https://github.com/zalando/baigan-config/issues/3).
