@@ -37,7 +37,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
      * It refreshes configurations using the default refresh interval (60 seconds)
      *
      * @param bucketName The name of the bucket
-     * @param key        The object key, usually, the "ull path" to the JSON file stored in the bucket
+     * @param key        The object key, usually, the "full path" to the JSON file stored in the bucket
      */
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key) {
         this(bucketName, key, DEFAULT_REFRESH_INTERVAL);
@@ -47,7 +47,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
      * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
      *
      * @param bucketName      The name of the bucket
-     * @param key             The object key, usually, the "ull path" to the JSON file stored in the bucket
+     * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
      * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
      *                        <p>
      *                        {@see #S3ConfigurationRepository(String, String)}
