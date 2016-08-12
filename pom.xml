@@ -3,7 +3,7 @@
 
     <groupId>org.zalando</groupId>
     <artifactId>baigan-config</artifactId>
-    <version>0.11.0</version>
+    <version>0.12.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>baigan-config</name>
@@ -21,7 +21,7 @@
     <scm>
         <connection>scm:git:git://github.com:zalando/baygan-config.git</connection>
         <developerConnection>scm:git:git@github.com:zalando/baygan-config.git</developerConnection>
-        <tag>baigan-config-0.11.0</tag>
+        <tag>HEAD</tag>
         <url>https://github.com/zalando/baigan-config.git</url>
     </scm>
 
