@@ -20,8 +20,8 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/zalando/baygan-config.git</connection>
-        <developerConnection>scm:git:git@github.com/zalando/baygan-config.git</developerConnection>
+        <connection>scm:git:git://github.com:zalando/baygan-config.git</connection>
+        <developerConnection>scm:git:git@github.com:zalando/baygan-config.git</developerConnection>
         <tag>HEAD</tag>
         <url>https://github.com/zalando/baigan-config.git</url>
     </scm>
