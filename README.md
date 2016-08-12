@@ -1,11 +1,11 @@
 # Baigan configuration
 
-Baigan configuration is a easy to use configuration framework for Spring based applications.
+Baigan configuration is an easy to use configuration framework for [Spring](https://spring.io/) based applications.
 
 What makes Baigan a rockstar configuration framework ?
 
-* *Simple*: Baigan configuration is as simple as annotating a Java class.
-* *Extensible*: Extend configurations, create rules, define types that suits you.
+* *Simple*: Using Baigan configurations is as simple as annotating a Java interface.
+* *Extensible*: Extend configurations, create rules, define types that suit you.
 * *Flexible*: Baigan is a client library that can read configurations from multiple repositories:
 	* Filesystem
 	* Github
