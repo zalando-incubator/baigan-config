@@ -21,7 +21,7 @@
     <scm>
         <connection>scm:git:git://github.com:zalando/baygan-config.git</connection>
         <developerConnection>scm:git:git@github.com:zalando/baygan-config.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>baigan-config-0.11.0</tag>
         <url>https://github.com/zalando/baigan-config.git</url>
     </scm>
 
