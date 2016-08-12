@@ -39,7 +39,7 @@ import com.google.common.collect.Lists;
  * packages and proxy bean creation further down to the corresponding
  * implementations.
  *
- * @see {@link ConfigurationServiceBeanFactory}
+ * @see ConfigurationServiceBeanFactory
  *
  * @author mchand
  *

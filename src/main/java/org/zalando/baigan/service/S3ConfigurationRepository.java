@@ -50,7 +50,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
      * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
      * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
      *                        <p>
-     *                        {@see #S3ConfigurationRepository(String, String)}
+     * @see #S3ConfigurationRepository(String, String)
      */
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key, final long refreshInterval) {
         checkNotNull(bucketName, "bucketName is required");
