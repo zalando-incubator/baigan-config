@@ -1,13 +1,20 @@
 package org.zalando.baigan.service;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.AWSKMSClient;
+import com.amazonaws.services.kms.model.DecryptRequest;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.service.aws.S3FileLoader;
 
 import javax.annotation.Nonnull;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,8 +32,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
      */
     private static final long DEFAULT_REFRESH_INTERVAL = 60;
 
-
-    private final AmazonS3 s3Client;
+    private final S3FileLoader s3Loader;
     private final String bucketName;
     private final String key;
     private long refreshInterval = DEFAULT_REFRESH_INTERVAL;
@@ -61,7 +67,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
         this.key = key;
         this.refreshInterval = refreshInterval;
 
-        s3Client = new AmazonS3Client();
+        s3Loader = new S3FileLoader(bucketName, key);
         loadConfigurations();
 
         if (refreshInterval > 0) {
@@ -70,7 +76,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     }
 
     private void loadConfigurations() {
-        final String configurationText = s3Client.getObjectAsString(bucketName, key);
+        final String configurationText = s3Loader.loadContent();
         final List<Configuration> configurations = getConfigurations(configurationText);
         final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();
         for (final Configuration configuration : configurations) {
