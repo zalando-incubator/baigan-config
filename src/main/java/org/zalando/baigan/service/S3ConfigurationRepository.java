@@ -33,8 +33,6 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     private static final long DEFAULT_REFRESH_INTERVAL = 60;
 
     private final S3FileLoader s3Loader;
-    private final String bucketName;
-    private final String key;
     private long refreshInterval = DEFAULT_REFRESH_INTERVAL;
     private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
 
@@ -63,8 +61,6 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
         checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
 
-        this.bucketName = bucketName;
-        this.key = key;
         this.refreshInterval = refreshInterval;
 
         s3Loader = new S3FileLoader(bucketName, key);
