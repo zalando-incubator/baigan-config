@@ -1,6 +1,5 @@
 package org.zalando.baigan.service.aws;
 
-import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.kms.model.DecryptRequest;
@@ -8,14 +7,16 @@ import com.amazonaws.services.kms.model.DependencyTimeoutException;
 import com.amazonaws.services.kms.model.KMSInternalException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.github.rholder.retry.*;
 import com.google.common.io.BaseEncoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /* Provides transparent content decryption of encrypted configuration content using AWS KMS. All configuration values
  * starting with {@value #KMS_START_TAG} are decrypted automatically. The content must be Base64 encoded and
@@ -23,15 +24,10 @@ import java.util.Optional;
 
 public class S3FileLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(S3FileLoader.class);
-
     // standard prefix
     private static final String KMS_START_TAG = "aws:kms:";
-
-    /*
-     * Usually should be enough
-     */
-    private static final short MAX_RETRIES_BEFORE_EXCEPTION = 50;
+    private static final int MAX_RETRIES = 5;
+    private static final int RETRY_SECONDS_WAIT = 10;
 
     private final AmazonS3 s3Client;
     private final AWSKMS kmsClient;
@@ -54,33 +50,30 @@ public class S3FileLoader {
     private String decryptIfNecessary(final String candidate) {
         final Optional<byte[]> encryptedValue = getEncryptedValue(candidate);
         if (encryptedValue.isPresent()) {
-            return new String(toByteArray(decryptValue(encryptedValue.get())), StandardCharsets.UTF_8);
+            ByteBuffer decryptedValue = decryptValue(encryptedValue.get());
+            return new String(toByteArray(decryptedValue), StandardCharsets.UTF_8);
         }
        return candidate;
     }
 
     private ByteBuffer decryptValue(final byte[] encryptedBytes) {
         final DecryptRequest request = new DecryptRequest().withCiphertextBlob(ByteBuffer.wrap(encryptedBytes));
-        short tries = 0;
-        while(true) {
-            try {
-                return kmsClient.decrypt(request).getPlaintext();
-            } catch (final KMSInternalException|DependencyTimeoutException e) { // Retry on exceptions related to amazon infrastructure
-                if(tries++ <= MAX_RETRIES_BEFORE_EXCEPTION) {  // ...unless retrying for too long
-                    LOG.info("KMS is not responding, retrying...");
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e1) {
-                        // This would be interesting
-                        throw new RuntimeException("decryption failed, interrupted while waiting: " + e.getMessage(), e);
-                    }
-                    continue;
-                }
-                throw new RuntimeException("too many retries, decryption failed: " + e.getMessage(), e);
-            } catch (final AmazonClientException e) {
-                throw new RuntimeException("decryption failed: " + e.getMessage(), e);
-            }
+       try {
+            return callWithRetries(() -> kmsClient.decrypt(request).getPlaintext(), RETRY_SECONDS_WAIT, MAX_RETRIES);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("decryption failed: " + e.getMessage(), e);
+        } catch (RetryException e) {
+            throw new RuntimeException("too many retries, decryption failed: " + e.getMessage(), e);
         }
+    }
+
+    private <T> T callWithRetries(Callable<T> call, int waitSeconds, int maxAttempts) throws ExecutionException, RetryException {
+        final Retryer<T> retryer = RetryerBuilder.<T>newBuilder()
+                .retryIfExceptionOfType(KMSInternalException.class)
+                .retryIfExceptionOfType(DependencyTimeoutException.class)
+                .withWaitStrategy(WaitStrategies.exponentialWait(waitSeconds, TimeUnit.SECONDS))
+                .withStopStrategy(StopStrategies.stopAfterAttempt(maxAttempts)).build();
+        return retryer.call(call);
     }
 
     private static Optional<byte[]> getEncryptedValue(final String value) {
