@@ -71,7 +71,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
         }
     }
 
-    private void loadConfigurations() {
+    protected void loadConfigurations() {
         final String configurationText = s3Loader.loadContent();
         final List<Configuration> configurations = getConfigurations(configurationText);
         final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();
