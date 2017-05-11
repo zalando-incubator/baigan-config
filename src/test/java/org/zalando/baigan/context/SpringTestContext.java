@@ -15,7 +15,7 @@ import java.util.Set;
  * @author mchand
  */
 @Configuration
-class SpringTestContext {
+public class SpringTestContext {
 
     @Bean
     public ConditionsProcessor ConditionsProcessor() {
