@@ -1,8 +1,11 @@
 package org.zalando.baigan.proxy.handler;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.primitives.Primitives;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -21,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Suppliers.memoize;
+
 /**
  * This class provides a concrete implementation for the Method invocation
  * handler.
@@ -35,20 +40,21 @@ public class ContextAwareConfigurationMethodInvocationHandler
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationMethodInvocationHandler.class);
 
-    private ConfigurationRepository configurationRepository;
+    private Supplier<ConfigurationRepository> configurationRepository;
 
-    private ConditionsProcessor conditionsProcessor;
+    private Supplier<ConditionsProcessor> conditionsProcessor;
 
-    private ContextProviderRetriever contextProviderRetriever;
+    private Supplier<ContextProviderRetriever> contextProviderRetriever;
 
     @Autowired
     public ContextAwareConfigurationMethodInvocationHandler(
-            final ConfigurationRepository configurationRepository,
-            final ConditionsProcessor conditionsProcessor,
-            final ContextProviderRetriever contextProviderRetriever) {
-        this.configurationRepository = configurationRepository;
-        this.conditionsProcessor = conditionsProcessor;
-        this.contextProviderRetriever = contextProviderRetriever;
+            final ObjectFactory<ConfigurationRepository> configurationRepository,
+            final ObjectFactory<ConditionsProcessor> conditionsProcessor,
+            final ObjectFactory<ContextProviderRetriever> contextProviderRetriever) {
+
+        this.configurationRepository = memoize(configurationRepository::getObject);;
+        this.conditionsProcessor = memoize(conditionsProcessor::getObject);;
+        this.contextProviderRetriever = memoize(contextProviderRetriever::getObject);;
     }
 
     @Override
@@ -102,13 +108,14 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     private Object getConfig(final String key) {
 
-        final Optional<Configuration> optional = configurationRepository.get(key);
+        final Optional<Configuration> optional = configurationRepository.get().get(key);
         if (!optional.isPresent()) {
             return null;
         }
 
         final Map<String, String> context = new HashMap<>();
 
+        final ContextProviderRetriever contextProviderRetriever = this.contextProviderRetriever.get();
         for (final String param : contextProviderRetriever.getContextParameterKeys()) {
             Collection<ContextProvider> providers = contextProviderRetriever.getProvidersFor(param);
             if (CollectionUtils.isEmpty(providers)) {
@@ -118,7 +125,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
             context.put(param, provider.getContextParam(param));
         }
 
-        return conditionsProcessor.process(optional.get(), context);
+        return conditionsProcessor.get().process(optional.get(), context);
 
     }
 

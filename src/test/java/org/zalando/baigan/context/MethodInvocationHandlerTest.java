@@ -23,6 +23,7 @@ enum State {
 }
 
 interface Express {
+
     State stateDefault();
 
     int maxDeliveryDays();
@@ -48,7 +49,7 @@ public class MethodInvocationHandlerTest {
                 org.mockito.Answers.RETURNS_SMART_NULLS.toString());
 
         ContextAwareConfigurationMethodInvocationHandler handler = new ContextAwareConfigurationMethodInvocationHandler(
-                repo, new ConditionsProcessor(), retriever);
+                () -> repo, ConditionsProcessor::new, () -> retriever);
 
         Method method = Express.class.getMethod("stateDefault");
         Object object = handler.invoke("", method, new String[]{});
@@ -69,7 +70,7 @@ public class MethodInvocationHandlerTest {
                 org.mockito.Answers.RETURNS_SMART_NULLS.toString());
 
         ContextAwareConfigurationMethodInvocationHandler handler = new ContextAwareConfigurationMethodInvocationHandler(
-                repo, new ConditionsProcessor(), retriever);
+                () -> repo, ConditionsProcessor::new, () -> retriever);
 
         Method method = Express.class.getMethod("maxDeliveryDays");
         Object object = handler.invoke("", method, new String[]{});
