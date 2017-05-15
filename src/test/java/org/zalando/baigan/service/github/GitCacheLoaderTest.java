@@ -2,7 +2,6 @@ package org.zalando.baigan.service.github;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.cassandra.utils.MD5Digest;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.egit.github.core.RepositoryContents;
 import org.eclipse.egit.github.core.service.ContentsService;
@@ -13,6 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.zalando.baigan.model.Configuration;
 
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -161,13 +161,12 @@ public class GitCacheLoaderTest {
 
     }
 
-    private RepositoryContents createRepositoryContents(final String text) {
+    private RepositoryContents createRepositoryContents(final String text) throws Exception {
         final RepositoryContents contents = new RepositoryContents();
         byte[] base64OfConfig1 = Base64.encodeBase64(text.getBytes());
         contents.setContent(new String(base64OfConfig1));
-        contents.setSha(MD5Digest.compute(text).toString());
+        contents.setSha(new String(MessageDigest.getInstance("MD5").digest(text.getBytes())));
         contents.setEncoding("base64");
-
         return contents;
     }
 }
