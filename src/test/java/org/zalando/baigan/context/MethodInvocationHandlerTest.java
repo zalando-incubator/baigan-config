@@ -1,8 +1,6 @@
 package org.zalando.baigan.context;
 
-import com.google.common.collect.ImmutableSet;
 import org.hamcrest.Matchers;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -12,9 +10,12 @@ import org.zalando.baigan.proxy.handler.ContextAwareConfigurationMethodInvocatio
 import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRepository;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.InvocationHandler;
 import java.util.Optional;
 
+import static com.google.common.collect.ImmutableSet.of;
+import static com.google.common.reflect.Reflection.newProxy;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -24,7 +25,13 @@ enum State {
     SHIPPING, SHIPPED, DELIVERED
 }
 
-interface Express {
+interface Base {
+
+    boolean isActive();
+
+}
+
+interface Express extends Base {
 
     State stateDefault();
 
@@ -37,19 +44,18 @@ interface Express {
 @RunWith(JUnit4.class)
 public class MethodInvocationHandlerTest {
 
+    private static final String DESCRIPTION = "This is a test configuration object.";
+
     @Test
     public void testEnumValue() throws Throwable {
 
         final ConfigurationRepository repo = mock(ConfigurationRepository.class);
-        final Configuration<String> configuration = new Configuration<>(
-                "express.state.default", "This is a test configuration object.",
-                ImmutableSet.of(), "SHIPPING");
+        final Configuration<String> configuration = new Configuration<>("express.state.default", DESCRIPTION, of(), "SHIPPING");
         when(repo.get(anyString())).thenReturn(Optional.of(configuration));
 
         final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
 
-        Method method = Express.class.getMethod("stateDefault");
-        Object object = handler.invoke("", method, new String[]{});
+        Object object = invokeHandler(handler, Express.class, "stateDefault");
         assertThat(object, Matchers.equalTo(State.SHIPPING));
     }
 
@@ -57,16 +63,26 @@ public class MethodInvocationHandlerTest {
     public void testPrimitiveType() throws Throwable {
 
         final ConfigurationRepository repo = mock(ConfigurationRepository.class);
-        final Configuration<String> configuration = new Configuration<>(
-                "express.max.delivery.days",
-                "This is a test configuration object.", ImmutableSet.of(), "3");
+        final Configuration<String> configuration = new Configuration<>("express.max.delivery.days", DESCRIPTION, of(), "3");
         when(repo.get(anyString())).thenReturn(Optional.of(configuration));
 
         final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
 
-        Method method = Express.class.getMethod("maxDeliveryDays");
-        Object object = handler.invoke("", method, new String[]{});
+        Object object = invokeHandler(handler, Express.class, "maxDeliveryDays");
         assertThat(object, Matchers.equalTo(3));
+    }
+
+    @Test
+    public void testInheritedToggle() throws Throwable {
+
+        final ConfigurationRepository repo = mock(ConfigurationRepository.class);
+        final Configuration<String> configuration = new Configuration<>("express.is.active", DESCRIPTION, of(), Boolean.TRUE.toString());
+        when(repo.get(anyString())).thenReturn(Optional.of(configuration));
+
+        final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
+
+        Object object = invokeHandler(handler, Express.class, "isActive");
+        assertThat(object, is(true));
     }
 
     private ContextAwareConfigurationMethodInvocationHandler createHandler(final ConfigurationRepository repository) {
@@ -83,6 +99,10 @@ public class MethodInvocationHandlerTest {
                 new ContextAwareConfigurationMethodInvocationHandler();
         handler.setBeanFactory(beanFactory);
         return handler;
+    }
+
+    private Object invokeHandler(final InvocationHandler handler, final Class<?> handlerInterface, final String methodName) throws Throwable {
+        return handler.invoke(newProxy(handlerInterface, handler), handlerInterface.getMethod(methodName), new String[]{});
     }
 
 }
