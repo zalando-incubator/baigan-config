@@ -1,12 +1,12 @@
 package org.zalando.baigan.proxy.handler;
 
 import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.primitives.Primitives;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.zalando.baigan.context.ContextProviderRetriever;
@@ -31,11 +31,10 @@ import static com.google.common.base.Suppliers.memoize;
  * handler.
  *
  * @author mchand
- *
  */
 @Service
 public class ContextAwareConfigurationMethodInvocationHandler
-        extends ConfigurationMethodInvocationHandler {
+        extends ConfigurationMethodInvocationHandler implements BeanFactoryAware {
 
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationMethodInvocationHandler.class);
@@ -46,15 +45,16 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     private Supplier<ContextProviderRetriever> contextProviderRetriever;
 
-    @Autowired
-    public ContextAwareConfigurationMethodInvocationHandler(
-            final ObjectFactory<ConfigurationRepository> configurationRepository,
-            final ObjectFactory<ConditionsProcessor> conditionsProcessor,
-            final ObjectFactory<ContextProviderRetriever> contextProviderRetriever) {
-
-        this.configurationRepository = memoize(configurationRepository::getObject);;
-        this.conditionsProcessor = memoize(conditionsProcessor::getObject);;
-        this.contextProviderRetriever = memoize(contextProviderRetriever::getObject);;
+    /**
+     * We have to defer dependency injection and bean resolution as this bean is required by the
+     * {@link org.zalando.baigan.proxy.ConfigurationServiceBeanFactory}, which is loaded very
+     * early by {@link org.springframework.beans.factory.config.BeanPostProcessor}s.
+     */
+    @Override
+    public void setBeanFactory(final BeanFactory beanFactory) throws BeansException {
+        this.configurationRepository = memoize(() -> beanFactory.getBean(ConfigurationRepository.class));
+        this.conditionsProcessor = memoize(() -> beanFactory.getBean(ConditionsProcessor.class));
+        this.contextProviderRetriever = memoize(() -> beanFactory.getBean(ContextProviderRetriever.class));
     }
 
     @Override
@@ -128,5 +128,4 @@ public class ContextAwareConfigurationMethodInvocationHandler
         return conditionsProcessor.get().process(optional.get(), context);
 
     }
-
 }
