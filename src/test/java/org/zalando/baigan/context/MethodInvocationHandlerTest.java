@@ -16,6 +16,7 @@ import java.util.Optional;
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.reflect.Reflection.newProxy;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -57,6 +58,19 @@ public class MethodInvocationHandlerTest {
 
         Object object = invokeHandler(handler, Express.class, "stateDefault");
         assertThat(object, Matchers.equalTo(State.SHIPPING));
+    }
+
+    @Test
+    public void testIllegalEnumValue() throws Throwable {
+
+        final ConfigurationRepository repo = mock(ConfigurationRepository.class);
+        final Configuration<String> configuration = new Configuration<>("express.state.default", DESCRIPTION, of(), "42");
+        when(repo.get(anyString())).thenReturn(Optional.of(configuration));
+
+        final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
+
+        Object object = invokeHandler(handler, Express.class, "stateDefault");
+        assertThat(object, is(nullValue()));
     }
 
     @Test
