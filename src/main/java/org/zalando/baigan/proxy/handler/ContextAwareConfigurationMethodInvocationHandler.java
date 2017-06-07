@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 
 /**
@@ -61,8 +62,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
     protected Object handleInvocation(Object proxy, Method method,
             Object[] args) throws Throwable {
         final String methodName = method.getName();
-
-        final String nameSpace = method.getDeclaringClass().getSimpleName();
+        final String nameSpace = getNamespace(proxy);
 
         final String key = ProxyUtils.dottify(nameSpace) + "."
                 + ProxyUtils.dottify(methodName);
@@ -104,6 +104,12 @@ public class ContextAwareConfigurationMethodInvocationHandler
                     exception);
         }
         return null;
+    }
+
+    private String getNamespace(final Object proxy) {
+        final Class<?>[] interfaces = proxy.getClass().getInterfaces();
+        checkState(interfaces.length == 1, "Expected exactly one interface on proxy object.");
+        return interfaces[0].getSimpleName();
     }
 
     private Object getConfig(final String key) {
