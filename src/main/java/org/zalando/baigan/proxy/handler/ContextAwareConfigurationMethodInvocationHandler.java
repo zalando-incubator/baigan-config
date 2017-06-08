@@ -90,7 +90,8 @@ public class ContextAwareConfigurationMethodInvocationHandler
                         return t;
                     }
                 }
-                return result;
+                LOG.warn("Unable to map [{}] to enum type [{}].", result, declaredReturnType.getName());
+                return null;
             } else {
                 constructor = declaredReturnType
                         .getDeclaredConstructor(result.getClass());
