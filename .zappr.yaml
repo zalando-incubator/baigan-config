@@ -1,0 +1,5 @@
+approvals:
+  from:
+    orgs:
+      - zalando
+    collaborators: true
