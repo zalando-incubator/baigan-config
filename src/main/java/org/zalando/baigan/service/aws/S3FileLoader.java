@@ -7,15 +7,14 @@ import com.amazonaws.services.kms.model.DependencyTimeoutException;
 import com.amazonaws.services.kms.model.KMSInternalException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.github.rholder.retry.*;
 import com.google.common.io.BaseEncoding;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
 
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /* Provides transparent content decryption of encrypted configuration content using AWS KMS. All configuration values
@@ -28,6 +27,12 @@ public class S3FileLoader {
     private static final String KMS_START_TAG = "aws:kms:";
     private static final int MAX_RETRIES = 5;
     private static final int RETRY_SECONDS_WAIT = 10;
+
+    private final RetryPolicy retryPolicy = new RetryPolicy()
+            .retryOn(KMSInternalException.class)
+            .retryOn(DependencyTimeoutException.class)
+            .withBackoff(1, RETRY_SECONDS_WAIT, TimeUnit.SECONDS)
+            .withMaxRetries(MAX_RETRIES);
 
     private final AmazonS3 s3Client;
     private final AWSKMS kmsClient;
@@ -53,27 +58,12 @@ public class S3FileLoader {
             ByteBuffer decryptedValue = decryptValue(encryptedValue.get());
             return new String(toByteArray(decryptedValue), StandardCharsets.UTF_8);
         }
-       return candidate;
+        return candidate;
     }
 
     private ByteBuffer decryptValue(final byte[] encryptedBytes) {
         final DecryptRequest request = new DecryptRequest().withCiphertextBlob(ByteBuffer.wrap(encryptedBytes));
-       try {
-            return callWithRetries(() -> kmsClient.decrypt(request).getPlaintext(), RETRY_SECONDS_WAIT, MAX_RETRIES);
-        } catch (ExecutionException e) {
-            throw new RuntimeException("decryption failed: " + e.getMessage(), e);
-        } catch (RetryException e) {
-            throw new RuntimeException("too many retries, decryption failed: " + e.getMessage(), e);
-        }
-    }
-
-    private <T> T callWithRetries(Callable<T> call, int waitSeconds, int maxAttempts) throws ExecutionException, RetryException {
-        final Retryer<T> retryer = RetryerBuilder.<T>newBuilder()
-                .retryIfExceptionOfType(KMSInternalException.class)
-                .retryIfExceptionOfType(DependencyTimeoutException.class)
-                .withWaitStrategy(WaitStrategies.exponentialWait(waitSeconds, TimeUnit.SECONDS))
-                .withStopStrategy(StopStrategies.stopAfterAttempt(maxAttempts)).build();
-        return retryer.call(call);
+        return Failsafe.with(retryPolicy).get(() -> kmsClient.decrypt(request).getPlaintext());
     }
 
     private static Optional<byte[]> getEncryptedValue(final String value) {
