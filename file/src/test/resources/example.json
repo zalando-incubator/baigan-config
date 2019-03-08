@@ -1,0 +1,22 @@
+{
+  "ns1": {
+    "key-1": {
+      "value": 42,
+      "description": "A description"
+    },
+    "key-2": {
+      "value": [
+        "1",
+        "2",
+        "3"
+      ],
+      "description": "Key description"
+    }
+  },
+  "ns2": {
+    "key-1": {
+      "value": "Some value",
+      "description": "Some description"
+    }
+  }
+}

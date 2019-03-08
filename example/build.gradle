@@ -1,0 +1,30 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.3.RELEASE")
+    }
+}
+
+plugins {
+    id 'application'
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+application {
+    mainClassName = 'org.zalando.baigan.example.Example'
+}
+
+dependencies {
+    implementation project(':file')
+    implementation project(':s3')
+    implementation project(':spring-boot-autoconfigure')
+
+    implementation("org.springframework.boot:spring-boot-starter")
+}

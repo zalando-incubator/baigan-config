@@ -1,0 +1,5 @@
+dependencies {
+    api project(':spring')
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: versions.springboot
+}
