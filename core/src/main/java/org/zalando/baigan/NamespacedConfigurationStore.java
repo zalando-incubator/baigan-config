@@ -6,9 +6,16 @@ import java.util.Optional;
 
 public final class NamespacedConfigurationStore implements ConfigurationStore {
 
+    public static ConfigurationStore forward(final Map<String, ConfigurationStore> stores) {
+        if (stores.isEmpty()) {
+            throw new IllegalArgumentException("At least one store must be given");
+        }
+        return new NamespacedConfigurationStore(stores);
+    }
+
     private final Map<String, ConfigurationStore> stores;
 
-    public NamespacedConfigurationStore(final Map<String, ConfigurationStore> stores) {
+    private NamespacedConfigurationStore(final Map<String, ConfigurationStore> stores) {
         this.stores = new HashMap<>(stores);
     }
 

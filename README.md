@@ -13,7 +13,9 @@ Its simple but extensible interfaces allow for powerful integrations.
 
 ## Usage
 
-Usage of Baigan configuration with the provided Spring Boot integration is as easy as:
+The following example makes use of the [File](file), [S3](s3) and [Spring Boot](spring-boot-autoconfigure) module.
+
+Usage of Baigan configuration is as easy as:
 
 ```
 @BaiganConfiguration
@@ -34,7 +36,7 @@ class Service {
 
 ```
 
-Serving of such runtime configuration may be done via a simple configuration YAML:
+Serving of such runtime configuration is done via a simple configuration YAML:
 
 ```
 ServiceConfiguration:
@@ -43,7 +45,27 @@ ServiceConfiguration:
     description: Defining the service's name.
 ```
 
-See the [Spring Boot](spring-boot-autoconfigure) and [Spring](spring) module for further information.
+Ultimately in order to expose this file to your service code above, you need to tell Baigan how to fetch it:
+
+```java
+class StoreConfiguration {
+    @Bean
+    ConfigurationStore configurationStore() {
+        return forward(of(
+                "ServiceConfiguration", FileStores.builder()
+                    .cached(ofMinutes(2))
+                    .onLocalFile(Path.of("example.yaml"))
+                    .asYaml(),
+                "OtherConfiguration", chain(
+                            FileStores.builder()
+                            .cached(ofMinutes(3))
+                            .on(s3("my-bucket", "config.json"))
+                            .asJson(),
+                        new CustomInMemoryStore())
+        ));
+    }
+}
+```
 
 ## Concepts
 

@@ -15,10 +15,16 @@ All you need to do is providing a `ConfigurationStore` bean:
 class StoreConfiguration {
     @Bean
     ConfigurationStore configurationStore() {
-        return new NamespacedConfigurationStore(of(
-                "FeatureAlpha", FileStores.builder().cached(ofMinutes(2)).onLocalFile(Path.of("example.json")).asJson(),
-                "FeatureBeta", new CompositeConfigurationStore(
-                        FileStores.builder().cached(ofMinutes(3)).on(s3("my-bucket", "config.yaml")).asYaml(),
+        return forward(of(
+                "FeatureAlpha", FileStores.builder()
+                    .cached(ofMinutes(2))
+                    .onLocalFile(Path.of("example.json"))
+                    .asJson(),
+                "FeatureBeta", chain(
+                            FileStores.builder()
+                            .cached(ofMinutes(3))
+                            .on(s3("my-bucket", "config.yaml"))
+                            .asYaml(),
                         new CustomInMemoryStore())
         ));
     }

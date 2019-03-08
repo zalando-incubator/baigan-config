@@ -28,7 +28,7 @@ class Service {
 
 ```
 
-In order to install such dynamic configuration *beans* make sure to activate the module and provide a `ConfigurationStore` bean:
+In order to install such dynamic configuration *beans* make sure to activate the module via `@EnableBaigan` and provide a `ConfigurationStore` bean:
 
 ```java
 @EnableBaigan
@@ -45,7 +45,7 @@ class ServiceConfiguration {
 ```
 
 By default the package of the `@Configuration` class annotated with `@EnableBaigain` 
-is used as the base package to scan for ´@BaiganConfiguration` annotated interfaces.
+is used as the base package to scan for `@BaiganConfiguration` annotated interfaces.
 
 ## Dependencies
 

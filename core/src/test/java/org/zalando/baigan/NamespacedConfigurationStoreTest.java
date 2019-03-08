@@ -1,19 +1,20 @@
 package org.zalando.baigan;
 
 import org.junit.jupiter.api.Test;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static java.util.Collections.emptyMap;
+import static java.util.Map.of;
 
 class NamespacedConfigurationStoreTest {
 
     private final ConfigurationStore store1 = mock(ConfigurationStore.class);
     private final ConfigurationStore store2 = mock(ConfigurationStore.class);
 
-    private final NamespacedConfigurationStore unit = new NamespacedConfigurationStore(Map.of(
+    private final ConfigurationStore unit = NamespacedConfigurationStore.forward(of(
             "ns1", store1,
             "ns2", store2));
 
@@ -29,5 +30,10 @@ class NamespacedConfigurationStoreTest {
     @Test
     void givesUp() {
         assertThrows(IllegalStateException.class, () -> unit.getConfiguration("ns3", "key"));
+    }
+
+    @Test
+    void rejectsEmptyMapOfStores() {
+        assertThrows(IllegalArgumentException.class, () -> NamespacedConfigurationStore.forward(emptyMap()));
     }
 }
