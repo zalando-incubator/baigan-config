@@ -1,10 +1,9 @@
-/target/
-build/
+.idea/
+.idea_modules/
+*.iml
 out/
-.gradle/
+.gradle
+build/
+**/build/
 .project
 .settings
-.classpath
-.idea
-*.iml
-.idea/
