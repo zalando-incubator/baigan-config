@@ -9,11 +9,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-class ConfigurationFileSupplierTest {
+class ConfigurationFileAdapterTest {
 
     private final Supplier<String> supplier = mock(Supplier.class);
     private final Function<String, ConfigurationFile> mapper = mock(Function.class);
-    private final ConfigurationFileSupplier unit = new ConfigurationFileSupplier(supplier, mapper);
+    private final ConfigurationFileAdapter unit = new ConfigurationFileAdapter(supplier, mapper);
 
     @Test
     void mapsSuppliedContent() {

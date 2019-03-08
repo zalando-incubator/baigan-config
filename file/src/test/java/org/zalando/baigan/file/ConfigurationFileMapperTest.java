@@ -12,10 +12,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class JacksonConfigurationFileMapperTest {
+class ConfigurationFileMapperTest {
 
     private final ObjectMapper mapper = mock(ObjectMapper.class);
-    private final JacksonConfigurationFileMapper unit = new JacksonConfigurationFileMapper(mapper);
+    private final ConfigurationFileMapper unit = new ConfigurationFileMapper(mapper);
 
     @Test
     void mapsValueToConfiguration() throws IOException {

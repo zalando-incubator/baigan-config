@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 import static java.util.Optional.ofNullable;
 
-class FileBasedConfigurationStore implements ConfigurationStore {
+final class FileBasedConfigurationStore implements ConfigurationStore {
 
     private final Supplier<ConfigurationFile> configurationSupplier;
 

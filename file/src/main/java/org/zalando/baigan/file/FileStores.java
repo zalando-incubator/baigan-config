@@ -15,7 +15,7 @@ public final class FileStores {
         return duration -> supplier -> mapper -> new FileBasedConfigurationStore(
                 new CachingConfigurationFileSupplier(
                         duration,
-                        new ConfigurationFileSupplier(
+                        new ConfigurationFileAdapter(
                                 supplier,
                                 mapper)));
     }
@@ -28,18 +28,18 @@ public final class FileStores {
             FormatBuilder on(final Supplier<String> supplier);
 
             default FormatBuilder onLocalFile(final Path path) {
-                return on(new LocalFileSupplier(path));
+                return on(new LocalConfigurationFileSupplier(path));
             }
 
             interface FormatBuilder {
                 ConfigurationStore asFormat(final Function<String, ConfigurationFile> mapper);
 
                 default ConfigurationStore asJson() {
-                    return asFormat(new JacksonConfigurationFileMapper(new ObjectMapper(new MappingJsonFactory())));
+                    return asFormat(new ConfigurationFileMapper(new ObjectMapper(new MappingJsonFactory())));
                 }
 
                 default ConfigurationStore asYaml() {
-                    return asFormat(new JacksonConfigurationFileMapper(new ObjectMapper(new YAMLFactory())));
+                    return asFormat(new ConfigurationFileMapper(new ObjectMapper(new YAMLFactory())));
                 }
             }
         }
