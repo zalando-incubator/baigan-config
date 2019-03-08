@@ -41,12 +41,12 @@ class FileBasedConfigurationStoreTest {
         final ConfigurationFile file = new ConfigurationFile();
         file.getNamespaces().put("ns1", new ConfigurationFile.Namespace());
         when(supplier.get()).thenReturn(file);
-        assertEquals(Optional.empty(), unit.getConfiguration("ns1", "key-1"));
+        assertEquals(Optional.empty(), unit.getConfiguration("ns1", "key1"));
     }
 
     @Test
     void unknownNamespace() {
         when(supplier.get()).thenReturn(new ConfigurationFile());
-        assertEquals(Optional.empty(), unit.getConfiguration("ns1", "key-1"));
+        assertEquals(Optional.empty(), unit.getConfiguration("ns1", "key1"));
     }
 }

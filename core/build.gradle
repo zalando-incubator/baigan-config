@@ -1,5 +1,1 @@
-dependencies {
-    implementation group: 'org.springframework', name: 'spring-context', version: versions.spring
 
-    testImplementation group: 'org.springframework', name: 'spring-test', version: versions.spring
-}

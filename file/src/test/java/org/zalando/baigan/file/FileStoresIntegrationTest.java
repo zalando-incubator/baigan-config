@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static java.lang.ClassLoader.getSystemResource;
 import static java.util.Arrays.asList;
 
-class FileSystemStoresIntegrationTest {
+class FileStoresIntegrationTest {
 
     @Test
     void jsonStore() throws Exception {
-        final ConfigurationStore store = FileSystemStores.builder()
+        final ConfigurationStore store = FileStores.builder()
                 .cached(Duration.ofHours(24))
                 .onLocalFile(Paths.get(getSystemResource("example.json").toURI()))
                 .asJson();
@@ -24,7 +24,7 @@ class FileSystemStoresIntegrationTest {
 
     @Test
     void yamlStore() throws Exception {
-        final ConfigurationStore store = FileSystemStores.builder()
+        final ConfigurationStore store = FileStores.builder()
                 .cached(Duration.ofHours(24))
                 .onLocalFile(Paths.get(getSystemResource("example.yaml").toURI()))
                 .asYaml();
@@ -32,10 +32,10 @@ class FileSystemStoresIntegrationTest {
     }
 
     private static void assertExampleConfiguration(final ConfigurationStore store) {
-        assertConfiguration(store, "ns1", "key-1", 42, "A description");
-        assertConfiguration(store, "ns1", "key-2", asList("1", "2", "3"), "Key description");
-        assertConfiguration(store, "ns2", "key-1", "Some value", "Some description");
-        assertEquals(Optional.empty(), store.getConfiguration("ns-3", "key-1"));
+        assertConfiguration(store, "ns1", "key1", 42, "A description");
+        assertConfiguration(store, "ns1", "key2", asList("1", "2", "3"), "Key description");
+        assertConfiguration(store, "ns2", "key1", "Some value", "Some description");
+        assertEquals(Optional.empty(), store.getConfiguration("ns3", "key1"));
     }
 
     private static void assertConfiguration(final ConfigurationStore store, final String namespace, final String key, final Object value,

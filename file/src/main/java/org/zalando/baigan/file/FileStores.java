@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class FileSystemStores {
+public final class FileStores {
 
     public static StoreBuilder builder() {
         return duration -> supplier -> mapper -> new FileBasedConfigurationStore(
@@ -45,7 +45,7 @@ public final class FileSystemStores {
         }
     }
 
-    private FileSystemStores() {
+    private FileStores() {
         // utility class
     }
 }
