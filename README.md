@@ -57,7 +57,7 @@ class StoreConfiguration {
                     .onLocalFile(Path.of("example.yaml"))
                     .asYaml(),
                 "BackendConfiguration", chain(
-                            FileStores.builder()
+                        FileStores.builder()
                             .cached(ofMinutes(3))
                             .on(s3("my-bucket", "config.json"))
                             .asJson(),
