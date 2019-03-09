@@ -94,6 +94,38 @@ Baigan configuration comes with a set of powerful integrations.
 * The [S3](s3) module allows for fetching configuration files from S3 buckets.
 * The [etcd](etcd) module allows using an etcd cluster as the configuration backend.
 
+## Migration
+
+If you wish to migrate your Spring application from Baigan configuration `0.14.x` and lower there are a few steps to follow.
+
+1. Transform your current Baigan *configuration files* into the new format. 
+
+You may start with the following [jq](https://stedolan.github.io/jq/manual/) script. What's left is "extracting" your namespaces. 
+
+```
+$ jq '.[] | { (.alias): { description: .description, value: .defaultValue } }'
+```
+
+See the [File](file) module for more information about the new format.
+
+2. Remove usage of the old Spring annotations referencing `BaiganSpringContext` and `ConfigurationServiceScan`. 
+Also rename any usage of `@BaiganConfig` to `@BaiganConfiguration`.
+
+3. Replace any definition of a `ConfigurationRepository` bean with a `ConfigurationStore`. 
+
+4. Register Baigan configuration in your Spring context
+    
+    a. Either manually via `@EnableBaigan` of the [Spring](spring) module...
+    
+    b. ... or automatically via the  [Spring Boot](spring-boot-autoconfigure) module.
+    
+**Remarks**:
+
+Currently not yet supported features of Baigan configuration `0.14.x` are:
+
+* context-dependent configuration values via "conditions".
+* serving *configuration files* from Git repositories.
+
 ## Development
 
 To build the project run
