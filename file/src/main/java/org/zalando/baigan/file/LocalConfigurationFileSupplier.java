@@ -8,11 +8,11 @@ import java.util.function.Supplier;
 import static java.lang.String.join;
 import static java.nio.file.Files.readAllLines;
 
-final class LocalFileSupplier implements Supplier<String> {
+final class LocalConfigurationFileSupplier implements Supplier<String> {
 
     private final Path path;
 
-    LocalFileSupplier(final Path path) {
+    LocalConfigurationFileSupplier(final Path path) {
         this.path = path;
     }
 

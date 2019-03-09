@@ -7,13 +7,13 @@ Baigan configuration is an easy to use framework for Java applications allowing 
 
 Its simple but extensible interfaces allow for powerful integrations.
 
-* fetch your configuration from arbitrary sources serving any format (e.g. local files, S3, ...)
+* fetch your configuration from arbitrary sources serving any format (e.g. local files, S3, etcd ...)
 * integrate with the [Spring Framework](https://spring.io/) enabling access to your configuration by simply annotating an interface.
 * integrate with Baigan configuration in seconds, via the provided [Spring Boot](https://spring.io/projects/spring-boot) Auto-configuration library
 
 ## Usage
 
-The following example makes use of the [File](file), [S3](s3) and [Spring Boot](spring-boot-autoconfigure) module.
+The following example makes use of the [File](file), [S3](s3), [etcd](etcd) and [Spring Boot](spring-boot-autoconfigure) module.
 
 Usage of Baigan configuration is as easy as:
 
@@ -56,12 +56,16 @@ class StoreConfiguration {
                     .cached(ofMinutes(2))
                     .onLocalFile(Path.of("example.yaml"))
                     .asYaml(),
-                "OtherConfiguration", chain(
+                "BackendConfiguration", chain(
                             FileStores.builder()
                             .cached(ofMinutes(3))
                             .on(s3("my-bucket", "config.json"))
                             .asJson(),
-                        new CustomInMemoryStore())
+                        new CustomInMemoryStore()),
+                "BusinessConfiguration", FileStores.builder()
+                    .cached(ofMinutes(25))
+                    .on(etcd(URI.create("http://etcd/v2/keys/configuration")))
+                    .asYaml()
         ));
     }
 }
@@ -88,6 +92,7 @@ Baigan configuration comes with a set of powerful integrations.
 * The [Spring Boot](spring-boot-autoconfigure) module simplifies configuration in Spring applications.
 * The [File](file) module provides a `ConfigurationStore` implementation serving from JSON and YAML files.
 * The [S3](s3) module allows for fetching configuration files from S3 buckets.
+* The [etcd](etcd) module allows using an etcd cluster as the configuration backend.
 
 ## Development
 
@@ -96,3 +101,5 @@ To build the project run
 ```bash
 $ ./gradlew clean check
 ```
+
+Be aware that the build requires Docker.

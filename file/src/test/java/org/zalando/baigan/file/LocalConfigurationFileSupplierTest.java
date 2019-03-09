@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static java.lang.ClassLoader.getSystemResource;
 
-class LocalFileSupplierTest {
+class LocalConfigurationFileSupplierTest {
 
-    private final LocalFileSupplier unit = unit();
+    private final LocalConfigurationFileSupplier unit = unit();
 
     @Test
     void keepsNewlines() {
@@ -24,9 +24,9 @@ class LocalFileSupplierTest {
         assertTrue(content.contains("42"));
     }
 
-    private LocalFileSupplier unit() {
+    private LocalConfigurationFileSupplier unit() {
         try {
-            return new LocalFileSupplier(Paths.get(getSystemResource("example.json").toURI()));
+            return new LocalConfigurationFileSupplier(Paths.get(getSystemResource("example.json").toURI()));
         } catch (final URISyntaxException e) {
             throw new RuntimeException(e);
         }

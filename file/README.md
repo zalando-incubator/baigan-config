@@ -59,10 +59,10 @@ Such configuration file must adhere to the following JSON schema:
           "type": "object",
           "properties": {
             "value": {
-              "descrption": "The configuration's value."
+              "description": "The configuration's value."
             },
             "description": {
-              "descrption": "Summary of the configuration.",
+              "description": "Summary of the configuration.",
               "type": "string"
             }
           },

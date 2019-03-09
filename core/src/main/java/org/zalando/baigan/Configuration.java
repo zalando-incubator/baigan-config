@@ -1,5 +1,7 @@
 package org.zalando.baigan;
 
+import java.util.StringJoiner;
+
 import static java.util.Objects.requireNonNull;
 
 public final class Configuration<T> {
@@ -24,5 +26,14 @@ public final class Configuration<T> {
 
     public T getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Configuration.class.getSimpleName() + "[", "]")
+                .add("key='" + key + "'")
+                .add("description='" + description + "'")
+                .add("value=" + value)
+                .toString();
     }
 }

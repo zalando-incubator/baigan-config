@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.function.Function;
 
-class JacksonConfigurationFileMapper implements Function<String, ConfigurationFile> {
+final class ConfigurationFileMapper implements Function<String, ConfigurationFile> {
 
     private final ObjectMapper mapper;
 
-    JacksonConfigurationFileMapper(final ObjectMapper objectMapper) {
+    ConfigurationFileMapper(final ObjectMapper objectMapper) {
         this.mapper = objectMapper;
     }
 

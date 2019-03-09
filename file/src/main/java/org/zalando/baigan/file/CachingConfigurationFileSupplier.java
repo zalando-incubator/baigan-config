@@ -36,6 +36,7 @@ final class CachingConfigurationFileSupplier implements Supplier<ConfigurationFi
 
     private void refreshCache() {
         try {
+            LOG.debug("Refreshing cache...");
             cached.set(delegate.get());
         } catch (final RuntimeException e) {
             LOG.error("Unable to refresh cache, keeping old value.", e);
