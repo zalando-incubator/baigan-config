@@ -22,10 +22,8 @@ application {
 }
 
 dependencies {
-    implementation project(':file')
-    implementation project(':s3')
+    implementation project(':spring-boot-starter')
     implementation project(':etcd')
-    implementation project(':spring-boot-autoconfigure')
 
     implementation("org.springframework.boot:spring-boot-starter")
 }
