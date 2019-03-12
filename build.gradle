@@ -44,7 +44,6 @@ subprojects {
         testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito
 
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
-        testRuntimeOnly group: 'org.slf4j', name: 'slf4j-simple', version: versions.slf4j
     }
 }
 

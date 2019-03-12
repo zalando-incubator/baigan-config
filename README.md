@@ -36,7 +36,7 @@ class Service {
 
 ```
 
-Serving of such runtime configuration is done via a simple configuration YAML:
+Serving of such runtime configuration is done via a simple `configuration.yaml`:
 
 ```
 ServiceConfiguration:
@@ -45,30 +45,15 @@ ServiceConfiguration:
     description: Defining the service's name.
 ```
 
-Ultimately in order to expose this file to your service code above, you need to tell Baigan how to fetch it:
+Ultimately add the following to your `application.yaml`:
 
-```java
-class StoreConfiguration {
-    @Bean
-    ConfigurationStore configurationStore() {
-        return forward(of(
-                "ServiceConfiguration", FileStores.builder()
-                    .cached(ofMinutes(2))
-                    .onLocalFile(Path.of("example.yaml"))
-                    .asYaml(),
-                "BackendConfiguration", chain(
-                        FileStores.builder()
-                            .cached(ofMinutes(3))
-                            .on(s3("my-bucket", "config.json"))
-                            .asJson(),
-                        new CustomInMemoryStore()),
-                "BusinessConfiguration", FileStores.builder()
-                    .cached(ofMinutes(25))
-                    .on(etcd(URI.create("http://etcd/v2/keys/configuration")))
-                    .asYaml()
-        ));
-    }
-}
+```
+baigan:
+  store:
+    type: local-file
+    cache: PT1M
+    path: configuration.yaml
+    format: yaml
 ```
 
 ## Concepts
