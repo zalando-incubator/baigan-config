@@ -52,6 +52,14 @@ class ChainedConfigurationStoreTest {
     }
 
     @Test
+    void delegatesOnErrorsUntilFound() {
+        when(store1.getConfiguration(any(), any())).thenThrow(new RuntimeException("expected"));
+        final Optional<Configuration> config = unit.getConfiguration("", "2");
+        assertEquals("2", config.orElseThrow(AssertionError::new).getValue());
+        verifyNoMoreInteractions(store3);
+    }
+
+    @Test
     void givesUp() {
         final Optional<Configuration> config = unit.getConfiguration("", "4");
         assertEquals(empty(), config);

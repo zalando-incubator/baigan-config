@@ -1,5 +1,7 @@
 package org.zalando.baigan;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,8 @@ public final class ChainedConfigurationStore implements ConfigurationStore {
         return new ChainedConfigurationStore(stores);
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(ChainedConfigurationStore.class);
+
     private final List<ConfigurationStore> stores;
 
     private ChainedConfigurationStore(List<ConfigurationStore> stores) {
@@ -27,13 +31,22 @@ public final class ChainedConfigurationStore implements ConfigurationStore {
     }
 
     @Override
-    public <T> Optional<Configuration> getConfiguration(final String namespace, final String key) {
+    public Optional<Configuration> getConfiguration(final String namespace, final String key) {
         for (ConfigurationStore store : stores) {
-            final Optional<Configuration> configuration = store.getConfiguration(namespace, key);
+            final Optional<Configuration> configuration = getConfiguration(store, namespace, key);
             if (configuration.isPresent()) {
                 return configuration;
             }
         }
         return Optional.empty();
+    }
+
+    private Optional<Configuration> getConfiguration(final ConfigurationStore store, final String namespace, final String key) {
+        try {
+            return store.getConfiguration(namespace, key);
+        } catch (final RuntimeException e) {
+            LOG.error("Exception on fetching configuration [{}.{}], skipping store [{}]", namespace, key, store, e);
+            return Optional.empty();
+        }
     }
 }
