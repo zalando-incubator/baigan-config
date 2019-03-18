@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.zalando.baigan.ConfigurationStore;
+import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.function.Function;
@@ -27,8 +28,12 @@ public final class FileStores {
         interface SupplierBuilder {
             FormatBuilder on(final Supplier<String> supplier);
 
+            default FormatBuilder onUri(final URI uri) {
+                return on(new UriConfigurationFileSupplier(uri));
+            }
+
             default FormatBuilder onLocalFile(final Path path) {
-                return on(new LocalConfigurationFileSupplier(path));
+                return onUri(path.toUri());
             }
 
             interface FormatBuilder {

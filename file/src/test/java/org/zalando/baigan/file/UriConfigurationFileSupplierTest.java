@@ -2,15 +2,14 @@ package org.zalando.baigan.file;
 
 import org.junit.jupiter.api.Test;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static java.lang.ClassLoader.getSystemResource;
 
-class LocalConfigurationFileSupplierTest {
+class UriConfigurationFileSupplierTest {
 
-    private final LocalConfigurationFileSupplier unit = unit();
+    private final UriConfigurationFileSupplier unit = unit();
 
     @Test
     void keepsNewlines() {
@@ -24,9 +23,9 @@ class LocalConfigurationFileSupplierTest {
         assertTrue(content.contains("42"));
     }
 
-    private LocalConfigurationFileSupplier unit() {
+    private UriConfigurationFileSupplier unit() {
         try {
-            return new LocalConfigurationFileSupplier(Paths.get(getSystemResource("example.json").toURI()));
+            return new UriConfigurationFileSupplier(getSystemResource("example.json").toURI());
         } catch (final URISyntaxException e) {
             throw new RuntimeException(e);
         }

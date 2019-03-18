@@ -3,30 +3,31 @@ baigan:
     type: namespaced
     stores:
       Business:
-        type: local-file
+        type: file
         cache: 2m
-        path: src/test/resources/configuration.json
+        location: src/test/resources/configuration.json
         format: json
       ServiceConfiguration:
         type: chained
         stores:
-          - type: s3-file
+          - type: file
             lazy: true
             cache: 5s
-            bucket: my-bucket
-            key: my-key
-            format: yaml
-          - type: etcd-file
-            lazy: true
-            cache: PT15M
-            uri: http://localhost/v2/keys/file
-            format: yaml
-          - type: local-file
-            cache: PT1M
-            path: src/test/resources/configuration.yaml
+            location: s3://my-bucket/my-key
             format: yaml
           - type: etcd
+            style: configuration-file
+            lazy: true
+            cache: PT15M
+            location: http://localhost/v2/keys/file
+            format: yaml
+          - type: file
+            cache: PT1M
+            location: src/test/resources/configuration.yaml
+            format: yaml
+          - type: etcd
+            style: configuration-key
             lazy: true
             cache: PT2M
-            base-uri: http://localhost/v2/
+            location: http://localhost/v2/
             format: yaml

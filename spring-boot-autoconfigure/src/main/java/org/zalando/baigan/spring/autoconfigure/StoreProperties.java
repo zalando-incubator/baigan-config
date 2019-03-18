@@ -16,10 +16,8 @@ final class StoreProperties {
     enum StoreType {
         NAMESPACED(singletonList("stores"), singletonList("lazy")),
         CHAINED(singletonList("stores"), singletonList("lazy")),
-        LOCAL_FILE(singletonList("path"), asList("lazy", "cache", "format")),
-        S3_FILE(asList("bucket", "key"), asList("lazy", "cache", "format")),
-        ETCD_FILE(singletonList("uri"), asList("lazy", "cache", "format")),
-        ETCD(singletonList("baseUri"), asList("lazy", "cache", "format"));
+        FILE(singletonList("location"), asList("lazy", "cache", "format")),
+        ETCD(asList("location", "style"), asList("lazy", "cache", "format"));
 
         private final List<String> requiredFields;
         private final List<String> optionalFields;
@@ -47,15 +45,17 @@ final class StoreProperties {
         YAML
     }
 
+    enum EtcdStyle {
+        CONFIGURATION_FILE,
+        CONFIGURATION_KEY
+    }
+
     StoreType type;
     Boolean lazy;
     Duration cache;
-    String path;
-    String bucket;
-    String key;
+    String location;
+    EtcdStyle style;
     Format format;
-    String uri;
-    String baseUri;
     Map<String, StoreProperties> stores;
 
     public StoreType getType() {
@@ -82,28 +82,20 @@ final class StoreProperties {
         this.cache = cache;
     }
 
-    public String getPath() {
-        return path;
+    public String getLocation() {
+        return location;
     }
 
-    public void setPath(final String path) {
-        this.path = path;
+    public void setLocation(final String location) {
+        this.location = location;
     }
 
-    public String getBucket() {
-        return bucket;
+    public EtcdStyle getStyle() {
+        return style;
     }
 
-    public void setBucket(final String bucket) {
-        this.bucket = bucket;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
+    public void setStyle(final EtcdStyle style) {
+        this.style = style;
     }
 
     public Format getFormat() {
@@ -112,22 +104,6 @@ final class StoreProperties {
 
     public void setFormat(final Format format) {
         this.format = format;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(final String uri) {
-        this.uri = uri;
-    }
-
-    public String getBaseUri() {
-        return baseUri;
-    }
-
-    public void setBaseUri(final String baseUri) {
-        this.baseUri = baseUri;
     }
 
     public Map<String, StoreProperties> getStores() {

@@ -17,27 +17,28 @@ baigan:
     type: namespaced
     stores:
       FeatureAlpha:
-        type: local-file
+        type: file
         cache: 2m
-        path: file.json
+        location: file.json
         format: json
       FeatureBeta:
         type: chained
         stores:
-          - type: s3-file
+          - type: file
             lazy: true
-            bucket: my-bucket
-            key: my-key
+            location: s3://my-bucket/my-key
             format: yaml
-          - type: etcd-file
+          - type: etcd
+            style: configuration-file
             cache: PT15M
-            uri: http://localhost/v2/keys/file
+            location: http://localhost/v2/keys/configuration
             format: yaml
       FeatureGamma:
         type: etcd
+        style: configuration-key
         lazy: true
         cache: PT2M
-        base-uri: http://localhost/v2/keys/
+        location: http://localhost/v2/keys/
         format: yaml
 ```
 
@@ -50,19 +51,18 @@ You can define your `ConfigurationStore` via the `application.yaml` (see example
 | *any*         | lazy     | boolean  | false   | Indicates whether this store should be initialized lazily. |
 | chained       | stores   | List     |         | List of stores to be chained.                              |
 | namespaced    | stores   | Map      |         | Map of namespace to store.                                 |
-| local-file    | cache    | Duration | 2 min   | Duration the configuration file is cached.                 |
-| local-file    | format   | Format   | JSON    | Format of the configuration file (JSON or YAML).           |
-| local-file    | path     | String   |         | Path to the configuration file.                            |
-| s3-file       | cache    | Duration | 2 min   | Duration the configuration file is cached.                 |
-| s3-file       | bucket   | String   |         | S3 bucket name.                                            |
-| s3-file       | key      | String   |         | S3 Object key.                                             |
-| s3-file       | format   | Format   | JSON    | Format of the configuration file (JSON or YAML).           |
-| etcd-file     | cache    | Duration | 2 min   | Duration the configuration file.                           |
-| etcd-file     | uri      | String   |         | URI of the etcd key storing the configuration file.        |
-| etcd-file     | format   | Format   | JSON    | Format of the configuration file (JSON or YAML).           |
-| etcd          | cache    | Duration | 2 min   | Duration individual configurations are cached.             |
-| etcd          | base-uri | String   |         | Base URI of the etcd cluster.                              |
-| etcd          | format   | Format   | JSON    | Format of the configurations.                              |
+| file          | cache    | Duration | 2 min   | Duration the configuration file is cached.                 |
+| file          | format   | Format   | JSON    | Format of the configuration file (JSON or YAML).           |
+| file          | location | String   |         | URI¹ of the configuration file.                            |
+| etcd          | cache    | Duration | 2 min   | Duration the configuration is cached.                      |
+| etcd          | format   | Format   | JSON    | Format of the configuration.                               |
+| etcd          | location | String   |         | URI of the etcd key/etcd cluster.                          |
+| etcd          | style    | Style    |         | Either `configuration-file` or `configuration-key`².       |
+
+(¹) any non absolute URI is interpreted as a local file path.
+
+(²) style `configuration-file` assume a full [*configuration file*](../file) at the given location, 
+style `configuration-key` results in resolving the given location with the individual namespace and key.
 
 ## Dependencies
 

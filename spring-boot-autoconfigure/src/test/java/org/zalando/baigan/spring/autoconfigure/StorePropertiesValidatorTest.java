@@ -22,10 +22,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.zalando.baigan.spring.autoconfigure.StoreProperties.Format.JSON;
 import static org.zalando.baigan.spring.autoconfigure.StoreProperties.StoreType.CHAINED;
 import static org.zalando.baigan.spring.autoconfigure.StoreProperties.StoreType.ETCD;
-import static org.zalando.baigan.spring.autoconfigure.StoreProperties.StoreType.ETCD_FILE;
-import static org.zalando.baigan.spring.autoconfigure.StoreProperties.StoreType.LOCAL_FILE;
+import static org.zalando.baigan.spring.autoconfigure.StoreProperties.StoreType.FILE;
 import static org.zalando.baigan.spring.autoconfigure.StoreProperties.StoreType.NAMESPACED;
-import static org.zalando.baigan.spring.autoconfigure.StoreProperties.StoreType.S3_FILE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -68,67 +66,43 @@ class StorePropertiesValidatorTest {
                 new TestCase(NAMESPACED, emptyList(), emptyList(), props -> {
                     props.setStores(emptyMap());
                 }),
-                new TestCase(NAMESPACED, asList("key", "path"), singletonList("stores"), props -> {
-                    props.setKey("value");
-                    props.setPath("value");
+                new TestCase(NAMESPACED, asList("style", "location"), singletonList("stores"), props -> {
+                    props.setStyle(StoreProperties.EtcdStyle.CONFIGURATION_FILE);
+                    props.setLocation("value");
                 }),
 
                 new TestCase(CHAINED, emptyList(), emptyList(), props -> {
                     props.setStores(emptyMap());
                 }),
-                new TestCase(CHAINED, asList("key", "path"), singletonList("stores"), props -> {
-                    props.setKey("value");
-                    props.setPath("value");
+                new TestCase(CHAINED, asList("style", "location"), singletonList("stores"), props -> {
+                    props.setStyle(StoreProperties.EtcdStyle.CONFIGURATION_FILE);
+                    props.setLocation("value");
                 }),
 
                 new TestCase(ETCD, emptyList(), emptyList(), props -> {
-                    props.setBaseUri("value");
+                    props.setLocation("value");
+                    props.setStyle(StoreProperties.EtcdStyle.CONFIGURATION_FILE);
                 }),
                 new TestCase(ETCD, emptyList(), emptyList(), props -> {
-                    props.setBaseUri("value");
+                    props.setLocation("value");
+                    props.setStyle(StoreProperties.EtcdStyle.CONFIGURATION_FILE);
                     props.setCache(Duration.ZERO);
                     props.setFormat(JSON);
                 }),
-                new TestCase(ETCD, singletonList("uri"), singletonList("baseUri"), props -> {
-                    props.setUri("value");
+                new TestCase(ETCD, singletonList("stores"), asList("location", "style"), props -> {
+                    props.setStores(emptyMap());
                 }),
 
-                new TestCase(ETCD_FILE, emptyList(), emptyList(), props -> {
-                    props.setUri("value");
+                new TestCase(FILE, emptyList(), emptyList(), props -> {
+                    props.setLocation("value");
                 }),
-                new TestCase(ETCD_FILE, emptyList(), emptyList(), props -> {
-                    props.setUri("value");
+                new TestCase(FILE, emptyList(), emptyList(), props -> {
+                    props.setLocation("value");
                     props.setCache(Duration.ZERO);
                     props.setFormat(JSON);
                 }),
-                new TestCase(ETCD_FILE, singletonList("baseUri"), singletonList("uri"), props -> {
-                    props.setBaseUri("value");
-                }),
-
-                new TestCase(LOCAL_FILE, emptyList(), emptyList(), props -> {
-                    props.setPath("value");
-                }),
-                new TestCase(LOCAL_FILE, emptyList(), emptyList(), props -> {
-                    props.setPath("value");
-                    props.setCache(Duration.ZERO);
-                    props.setFormat(JSON);
-                }),
-                new TestCase(LOCAL_FILE, singletonList("baseUri"), singletonList("path"), props -> {
-                    props.setBaseUri("value");
-                }),
-
-                new TestCase(S3_FILE, emptyList(), emptyList(), props -> {
-                    props.setBucket("value");
-                    props.setKey("value");
-                }),
-                new TestCase(S3_FILE, emptyList(), emptyList(), props -> {
-                    props.setBucket("value");
-                    props.setKey("value");
-                    props.setCache(Duration.ZERO);
-                    props.setFormat(JSON);
-                }),
-                new TestCase(S3_FILE, singletonList("baseUri"), asList("bucket", "key"), props -> {
-                    props.setBaseUri("value");
+                new TestCase(FILE, singletonList("style"), singletonList("location"), props -> {
+                    props.setStyle(StoreProperties.EtcdStyle.CONFIGURATION_FILE);
                 })
         );
     }

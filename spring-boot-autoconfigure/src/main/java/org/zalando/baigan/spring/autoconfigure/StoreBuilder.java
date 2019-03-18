@@ -5,8 +5,10 @@ import org.zalando.baigan.NamespacedConfigurationStore;
 import org.zalando.baigan.etcd.EtcdStores;
 import org.zalando.baigan.file.ConfigurationFile;
 import org.zalando.baigan.file.FileStores;
+import org.zalando.baigan.file.FileStores.StoreBuilder.SupplierBuilder;
 import org.zalando.baigan.file.FileStores.StoreBuilder.SupplierBuilder.FormatBuilder;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.AbstractMap;
@@ -29,21 +31,18 @@ final class StoreBuilder {
     private static final StoreProperties.Format DEFAULT_FORMAT = JSON;
 
     ConfigurationStore buildStore(final StoreProperties store) {
-        switch (store.getType()) {
+        final StoreProperties.StoreType type = store.getType();
+        switch (type) {
             case NAMESPACED:
                 return buildLazy(store, () -> buildNamespaced(store));
             case CHAINED:
                 return buildLazy(store, () -> buildChained(store));
-            case LOCAL_FILE:
-                return buildLazy(store, () -> buildLocalFile(store));
-            case S3_FILE:
-                return buildLazy(store, () -> buildS3File(store));
-            case ETCD_FILE:
-                return buildLazy(store, () -> buildEtcdFile(store));
+            case FILE:
+                return buildLazy(store, () -> buildFile(store));
             case ETCD:
                 return buildLazy(store, () -> buildEtcd(store));
             default:
-                throw new IllegalStateException("Unknown store type " + store.getType());
+                throw new IllegalStateException("Unknown store type " + type);
         }
     }
 
@@ -65,24 +64,41 @@ final class StoreBuilder {
         return chain(stores);
     }
 
-    private ConfigurationStore buildLocalFile(final StoreProperties store) {
-        return buildFormat(store, buildFileCached(store).onLocalFile(Paths.get(store.getPath())));
+    private ConfigurationStore buildFile(final StoreProperties store) {
+        return buildFile(store, false);
     }
 
-    private ConfigurationStore buildS3File(final StoreProperties store) {
-        return buildFormat(store, buildFileCached(store).on(s3(store.getBucket(), store.getKey())));
+    private ConfigurationStore buildFile(final StoreProperties store, final boolean servedViaEtcd) {
+        final String location = store.getLocation();
+        return buildFormat(store, buildFileSupplier(location, servedViaEtcd).apply(buildFileCached(store)));
     }
 
-    private ConfigurationStore buildEtcdFile(final StoreProperties store) {
-        return buildFormat(store, buildFileCached(store).on(etcd(URI.create(store.getUri()))));
+    private Function<SupplierBuilder, FormatBuilder> buildFileSupplier(final String location, final boolean servedViaEtcd) {
+        final URI uri = URI.create(location);
+        if (servedViaEtcd) {
+            return builder -> builder.on(etcd(uri));
+        } else if ("s3".equalsIgnoreCase(uri.getScheme())) {
+            final String bucket = uri.getAuthority();
+            final String key = uri.getPath().substring(1);
+            return builder -> builder.on(s3(bucket, key));
+        } else if (!uri.isAbsolute()) {
+            final Path path = Paths.get(location);
+            return builder -> builder.onLocalFile(path);
+        } else {
+            return builder -> builder.onUri(uri);
+        }
+    }
+
+    private SupplierBuilder buildFileCached(final StoreProperties store) {
+        return FileStores.builder().cached(orDefault(store.getCache(), DEFAULT_CACHE));
     }
 
     private ConfigurationStore buildEtcd(final StoreProperties store) {
-        return buildFormat(store, new FormatBuilderAdapter(buildEtcdCache(store).on(URI.create(store.getBaseUri()))));
-    }
-
-    private FileStores.StoreBuilder.SupplierBuilder buildFileCached(final StoreProperties store) {
-        return FileStores.builder().cached(orDefault(store.getCache(), DEFAULT_CACHE));
+        if (StoreProperties.EtcdStyle.CONFIGURATION_FILE == store.getStyle()) {
+            return buildFile(store, true);
+        } else {
+            return buildFormat(store, new FormatBuilderAdapter(buildEtcdCache(store).on(URI.create(store.getLocation()))));
+        }
     }
 
     private EtcdStores.StoreBuilder.UriBuilder buildEtcdCache(final StoreProperties store) {

@@ -22,9 +22,9 @@ class BaiganAutoConfigurationTest {
     @Test
     void buildsLocalFileStore() {
         contextRunner.withPropertyValues(
-                "baigan.store.type=local-file",
+                "baigan.store.type=file",
                 "baigan.store.cache=2s",
-                "baigan.store.path=src/test/resources/configuration.json",
+                "baigan.store.location=src/test/resources/configuration.json",
                 "baigan.store.format=json")
                 .run(context -> assertThat(context).hasSingleBean(ConfigurationStore.class));
     }
@@ -32,7 +32,7 @@ class BaiganAutoConfigurationTest {
     @Test
     void failsOnMissingRequiredParameter() {
         contextRunner.withPropertyValues(
-                "baigan.store.type=local-file",
+                "baigan.store.type=file",
                 "baigan.store.format=json")
                 .run(context -> assertThat(context).hasFailed());
     }
@@ -40,10 +40,10 @@ class BaiganAutoConfigurationTest {
     @Test
     void failsOnJunkParameter() {
         contextRunner.withPropertyValues(
-                "baigan.store.type=local-file",
+                "baigan.store.type=file",
                 "baigan.store.cache=2s",
-                "baigan.store.path=src/test/resources/configuration.json",
-                "baigan.store.key=my-key",
+                "baigan.store.location=src/test/resources/configuration.json",
+                "baigan.store.style=configuration-file",
                 "baigan.store.format=json")
                 .run(context -> assertThat(context).hasFailed());
     }
