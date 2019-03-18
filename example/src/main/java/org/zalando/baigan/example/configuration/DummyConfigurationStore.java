@@ -9,7 +9,7 @@ import java.util.Optional;
 public class DummyConfigurationStore implements ConfigurationStore {
 
     @Override
-    public <T> Optional<Configuration> getConfiguration(final String namespace, final String key) {
+    public Optional<Configuration> getConfiguration(final String namespace, final String key) {
         return Optional.of(new Configuration<>(key, "", "Example-Service"));
     }
 

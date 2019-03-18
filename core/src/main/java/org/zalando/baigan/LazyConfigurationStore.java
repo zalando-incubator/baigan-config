@@ -18,7 +18,7 @@ public class LazyConfigurationStore implements ConfigurationStore {
     }
 
     @Override
-    public <T> Optional<Configuration> getConfiguration(final String namespace, final String key) {
+    public Optional<Configuration> getConfiguration(final String namespace, final String key) {
         final ConfigurationStore store = memoizingSupplier.get();
         return store.getConfiguration(namespace, key);
     }

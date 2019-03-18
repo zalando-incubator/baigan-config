@@ -20,7 +20,7 @@ public final class NamespacedConfigurationStore implements ConfigurationStore {
     }
 
     @Override
-    public <T> Optional<Configuration> getConfiguration(final String namespace, final String key) {
+    public Optional<Configuration> getConfiguration(final String namespace, final String key) {
         final ConfigurationStore store = stores.get(namespace);
         if (store == null) {
             throw new IllegalStateException(String.format("No store registered for namespace [%s]", namespace));

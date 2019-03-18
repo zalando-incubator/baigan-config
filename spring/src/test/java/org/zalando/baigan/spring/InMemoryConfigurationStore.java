@@ -21,7 +21,7 @@ final class InMemoryConfigurationStore implements ConfigurationStore {
     }
 
     @Override
-    public <T> Optional<Configuration> getConfiguration(final String namespace, final String key) {
+    public Optional<Configuration> getConfiguration(final String namespace, final String key) {
         return ofNullable(store.get(namespace + "." + key));
     }
 }

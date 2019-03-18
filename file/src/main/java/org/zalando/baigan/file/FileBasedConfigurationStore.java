@@ -16,14 +16,13 @@ final class FileBasedConfigurationStore implements ConfigurationStore {
     }
 
     @Override
-    public <T> Optional<Configuration> getConfiguration(final String namespace, final String key) {
+    public Optional<Configuration> getConfiguration(final String namespace, final String key) {
         return ofNullable(configurationSupplier.get().getNamespaces().get(namespace))
                 .flatMap(ns -> ofNullable(ns.getHolders().get(key)))
                 .map(configuration -> buildConfiguration(namespace + "." + key, configuration));
     }
 
-    @SuppressWarnings("unchecked")
     private static Configuration buildConfiguration(final String key, final ConfigurationFile.ConfigurationHolder holder) {
-        return new Configuration(key, holder.getDescription(), holder.getValue());
+        return new Configuration<>(key, holder.getDescription(), holder.getValue());
     }
 }

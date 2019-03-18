@@ -16,5 +16,5 @@ public interface ConfigurationStore extends BiFunction<String, String, Optional<
         return getConfiguration(namespace, key).map(a -> (Configuration<T>) a);
     }
 
-    <T> Optional<Configuration> getConfiguration(final String namespace, final String key);
+    Optional<Configuration> getConfiguration(final String namespace, final String key);
 }
