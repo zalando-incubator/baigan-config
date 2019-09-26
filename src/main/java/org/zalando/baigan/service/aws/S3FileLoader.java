@@ -10,12 +10,13 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.io.BaseEncoding;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
-
-import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Arrays.asList;
 
 /* Provides transparent content decryption of encrypted configuration content using AWS KMS. All configuration values
  * starting with {@value #KMS_START_TAG} are decrypted automatically. The content must be Base64 encoded and
@@ -28,10 +29,10 @@ public class S3FileLoader {
     private static final int MAX_RETRIES = 5;
     private static final int RETRY_SECONDS_WAIT = 10;
 
-    private final RetryPolicy retryPolicy = new RetryPolicy()
-            .retryOn(KMSInternalException.class)
-            .retryOn(DependencyTimeoutException.class)
-            .withBackoff(1, RETRY_SECONDS_WAIT, TimeUnit.SECONDS)
+    private final RetryPolicy<ByteBuffer> retryPolicy = new RetryPolicy<ByteBuffer>()
+            .handle(KMSInternalException.class)
+            .handle(DependencyTimeoutException.class)
+            .withBackoff(1, RETRY_SECONDS_WAIT, SECONDS)
             .withMaxRetries(MAX_RETRIES);
 
     private final AmazonS3 s3Client;
