@@ -12,11 +12,10 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.Lifecycle;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.service.aws.S3FileLoader;
 
-public class S3ConfigurationRepository extends AbstractConfigurationRepository implements Lifecycle {
+public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
 
     /**
@@ -50,12 +49,27 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository i
      * @see #S3ConfigurationRepository(String, String)
      */
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key, final long refreshInterval) {
+        this(bucketName, key, refreshInterval, new ScheduledThreadPoolExecutor(1));
+    }
+
+    /**
+     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
+     *
+     * @param bucketName      The name of the bucket
+     * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
+     * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
+     * @param executor        The executor to refresh the configurations in the specified interval
+     *                        <p>
+     * @see #S3ConfigurationRepository(String, String)
+     */
+    public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
+          final long refreshInterval, final ScheduledThreadPoolExecutor executor) {
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
 
         this.refreshInterval = refreshInterval;
-        this.executor =  new ScheduledThreadPoolExecutor(1);
+        this.executor =  executor;
         this.s3Loader = new S3FileLoader(bucketName, key);
 
         loadConfigurations();
@@ -94,18 +108,5 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository i
     @Override
     public void put(@Nonnull String key, @Nonnull String value) {
         throw new UnsupportedOperationException("The S3ConfigurationRepository doesn't allow any changes.");
-    }
-
-    @Override
-    public void start() { }
-
-    @Override
-    public void stop() {
-        executor.shutdown();
-    }
-
-    @Override
-    public boolean isRunning() {
-        return !executor.isShutdown() && !executor.isTerminated();
     }
 }
