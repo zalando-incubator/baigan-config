@@ -3,7 +3,7 @@
 
     <groupId>org.zalando</groupId>
     <artifactId>baigan-config</artifactId>
-    <version>0.17.0-SNAPSHOT</version>
+    <version>0.17.0</version>
     <packaging>jar</packaging>
 
     <name>baigan-config</name>
