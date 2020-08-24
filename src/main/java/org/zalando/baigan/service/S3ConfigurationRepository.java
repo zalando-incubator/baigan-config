@@ -1,30 +1,22 @@
 package org.zalando.baigan.service;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.AWSKMSClient;
-import com.amazonaws.services.kms.model.DecryptRequest;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.google.common.collect.ImmutableMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.service.aws.S3FileLoader;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nonnull;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.Lifecycle;
+import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.service.aws.S3FileLoader;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-public class S3ConfigurationRepository extends AbstractConfigurationRepository {
+public class S3ConfigurationRepository extends AbstractConfigurationRepository implements Lifecycle {
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
 
     /**
@@ -34,6 +26,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
 
     private final S3FileLoader s3Loader;
     private long refreshInterval = DEFAULT_REFRESH_INTERVAL;
+    private final ScheduledThreadPoolExecutor executor;
     private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
 
     /**
@@ -62,10 +55,10 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
 
         this.refreshInterval = refreshInterval;
+        this.executor =  new ScheduledThreadPoolExecutor(1);
+        this.s3Loader = new S3FileLoader(bucketName, key);
 
-        s3Loader = new S3FileLoader(bucketName, key);
         loadConfigurations();
-
         if (refreshInterval > 0) {
             setupRefresh();
         }
@@ -82,15 +75,14 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     }
 
     private void setupRefresh() {
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
         executor.scheduleAtFixedRate(() -> {
-                    try {
-                        loadConfigurations();
-                    } catch (RuntimeException e) {
-                        LOG.warn("Failed to refresh S3 configuration", e);
-                    }
-                }, this.refreshInterval, this.refreshInterval,
-                TimeUnit.SECONDS);
+                  try {
+                      loadConfigurations();
+                  } catch (RuntimeException e) {
+                      LOG.warn("Failed to refresh S3 configuration", e);
+                  }
+              }, this.refreshInterval, this.refreshInterval,
+              TimeUnit.SECONDS);
     }
 
     @Nonnull
@@ -102,5 +94,18 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     @Override
     public void put(@Nonnull String key, @Nonnull String value) {
         throw new UnsupportedOperationException("The S3ConfigurationRepository doesn't allow any changes.");
+    }
+
+    @Override
+    public void start() { }
+
+    @Override
+    public void stop() {
+        executor.shutdown();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return !executor.isShutdown() && !executor.isTerminated();
     }
 }
