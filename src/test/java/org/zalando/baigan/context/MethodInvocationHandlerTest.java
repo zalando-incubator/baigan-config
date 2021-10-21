@@ -11,6 +11,7 @@ import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRepository;
 
 import java.lang.reflect.InvocationHandler;
+import java.time.Duration;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
@@ -37,6 +38,8 @@ interface Express extends Base {
     State stateDefault();
 
     int maxDeliveryDays();
+
+    Duration notificationDelay();
 }
 
 /**
@@ -84,6 +87,19 @@ public class MethodInvocationHandlerTest {
 
         Object object = invokeHandler(handler, Express.class, "maxDeliveryDays");
         assertThat(object, Matchers.equalTo(3));
+    }
+
+    @Test
+    public void testDurationType() throws Throwable {
+
+        final ConfigurationRepository repo = mock(ConfigurationRepository.class);
+        final Configuration<String> configuration = new Configuration<>("express.notification.delay", DESCRIPTION, of(), "PT5m");
+        when(repo.get(anyString())).thenReturn(Optional.of(configuration));
+
+        final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
+
+        Object object = invokeHandler(handler, Express.class, "notificationDelay");
+        assertThat(object, Matchers.equalTo(Duration.ofMinutes(5)));
     }
 
     @Test

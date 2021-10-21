@@ -18,6 +18,7 @@ import org.zalando.baigan.service.ConfigurationRepository;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -92,6 +93,8 @@ public class ContextAwareConfigurationMethodInvocationHandler
                 }
                 LOG.warn("Unable to map [{}] to enum type [{}].", result, declaredReturnType.getName());
                 return null;
+            } else if (declaredReturnType.equals(Duration.class) && result instanceof String) {
+                return Duration.parse((String)result);
             } else {
                 constructor = declaredReturnType
                         .getDeclaredConstructor(result.getClass());
