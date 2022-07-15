@@ -45,7 +45,7 @@
         <slf4j.version>1.7.12</slf4j.version>
         <mockito.version>1.10.19</mockito.version>
         <hamcrest.version>1.3</hamcrest.version>
-        <awssdk.version>1.11.25</awssdk.version>
+        <awssdk.version>1.12.261</awssdk.version>
     </properties>
 
     <dependencyManagement>
