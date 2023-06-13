@@ -16,14 +16,11 @@
 
 package org.zalando.baigan.model;
 
-import static org.junit.Assert.assertThat;
+import org.junit.jupiter.api.Test;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-@RunWith(JUnit4.class)
 public class TestEquals {
 
     @Test
@@ -33,10 +30,10 @@ public class TestEquals {
         final String other = "baz@bar.com";
         final ConditionType conditionType = new Equals(email);
 
-        assertThat(conditionType.eval(other), Matchers.equalTo(false));
-        assertThat(conditionType.eval(email), Matchers.equalTo(true));
+        assertThat(conditionType.eval(other), equalTo(false));
+        assertThat(conditionType.eval(email), equalTo(true));
 
-        assertThat(conditionType.eval(otherCase), Matchers.equalTo(true));
+        assertThat(conditionType.eval(otherCase), equalTo(true));
 
     }
 }

@@ -16,16 +16,12 @@
 
 package org.zalando.baigan.model;
 
-import static org.junit.Assert.assertThat;
-
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
 import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class TestIn {
 
     @Test
@@ -38,10 +34,10 @@ public class TestIn {
         final ConditionType conditionType = new In(
                 ImmutableSet.of("1", "3", "7"));
 
-        assertThat(conditionType.eval(one), Matchers.equalTo(true));
-        assertThat(conditionType.eval(three), Matchers.equalTo(true));
+        assertThat(conditionType.eval(one), equalTo(true));
+        assertThat(conditionType.eval(three), equalTo(true));
 
-        assertThat(conditionType.eval(eight), Matchers.equalTo(false));
+        assertThat(conditionType.eval(eight), equalTo(false));
 
     }
 }

@@ -1,18 +1,15 @@
 package org.zalando.baigan.service;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-@RunWith(BlockJUnit4ClassRunner.class)
 public class FileSystemConfigurationRepositoryTest {
 
     @Test
     public void testReadConfigurationsFromFile() {
         final ConfigurationRepository repo = new FileSystemConfigurationRepository(3, "src/test/resources/example.json");
-        assertThat(repo.get("express.feature.toggle").get().getDefaultValue(), Matchers.equalTo(false));
+        assertThat(repo.get("express.feature.toggle").get().getDefaultValue(), equalTo(false));
     }
 }

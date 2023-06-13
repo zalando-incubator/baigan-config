@@ -16,14 +16,15 @@
 
 package org.zalando.baigan.context;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.zalando.baigan.provider.ContextProvider;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author mchand
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TestConfigurationContextProviderBeanPostProcessor {
 
     private final ContextProvider provider = mock(ContextProvider.class);
@@ -48,7 +49,7 @@ public class TestConfigurationContextProviderBeanPostProcessor {
                 .forClass(ContextProvider.class);
 
         verify(registry, times(1))
-                .register(org.mockito.Matchers.any(ContextProvider.class));
+                .register(any(ContextProvider.class));
 
         verify(registry).register(contextProviderCaptor.capture());
         assertThat(contextProviderCaptor.getValue(), equalTo(provider));

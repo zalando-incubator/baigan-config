@@ -16,12 +16,8 @@
 
 package org.zalando.baigan.context;
 
-import static org.junit.Assert.assertThat;
-
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -32,14 +28,15 @@ import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.proxy.ConfigurationBeanDefinitionRegistrar;
 
-import com.google.common.collect.ImmutableMap;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  *
  * @author mchand
  *
  */
-@RunWith(JUnit4.class)
 public class ConfigurationBeanDefinitionRegistrarTest {
 
     @Test
@@ -67,11 +64,10 @@ public class ConfigurationBeanDefinitionRegistrarTest {
         Mockito.verify(registry).registerBeanDefinition(beanName.capture(),
                 beanDefinition.capture());
 
-        assertThat(beanName.getValue(), Matchers.equalTo(
+        assertThat(beanName.getValue(), equalTo(
                 "org.zalando.baigan.context.SuperSonicBaiganProxyConfigurationFactoryBean"));
 
-        assertThat(beanDefinition.getValue(),
-                Matchers.instanceOf(GenericBeanDefinition.class));
+        assertThat(beanDefinition.getValue(), instanceOf(GenericBeanDefinition.class));
 
     }
 

@@ -1,7 +1,7 @@
 package org.zalando.baigan.proxy;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
@@ -21,12 +21,12 @@ import org.zalando.baigan.service.ConfigurationRepository;
 import org.zalando.baigan.service.github.GitConfig;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ConfigurationServiceBeanFactoryIT.TestContext.class})
 public class ConfigurationServiceBeanFactoryIT {
 
