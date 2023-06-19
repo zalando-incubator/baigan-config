@@ -26,6 +26,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
 
     private final S3FileLoader s3Loader;
     private long refreshInterval;
+    private final ScheduledThreadPoolExecutor executor;
     private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
 
     /**
@@ -49,15 +50,30 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
      * @see #S3ConfigurationRepository(String, String)
      */
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key, final long refreshInterval) {
+        this(bucketName, key, refreshInterval, new ScheduledThreadPoolExecutor(1));
+    }
+
+    /**
+     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
+     *
+     * @param bucketName      The name of the bucket
+     * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
+     * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
+     * @param executor        The executor to refresh the configurations in the specified interval
+     *                        <p>
+     * @see #S3ConfigurationRepository(String, String)
+     */
+    public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
+                                     final long refreshInterval, final ScheduledThreadPoolExecutor executor) {
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
 
         this.refreshInterval = refreshInterval;
+        this.executor = executor;
+        this.s3Loader = new S3FileLoader(bucketName, key);
 
-        s3Loader = new S3FileLoader(bucketName, key);
         loadConfigurations();
-
         if (refreshInterval > 0) {
             setupRefresh();
         }
@@ -74,15 +90,18 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     }
 
     private void setupRefresh() {
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(() -> {
-                    try {
-                        loadConfigurations();
-                    } catch (RuntimeException e) {
-                        LOG.error("Failed to refresh S3 configuration, keeping old state.", e);
-                    }
-                }, this.refreshInterval, this.refreshInterval,
-                TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(
+            () -> {
+                try {
+                    loadConfigurations();
+                } catch (RuntimeException e) {
+                    LOG.error("Failed to refresh S3 configuration, keeping old state.", e);
+                }
+            },
+            this.refreshInterval,
+            this.refreshInterval,
+            TimeUnit.SECONDS
+        );
     }
 
     @Nonnull

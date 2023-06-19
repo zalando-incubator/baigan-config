@@ -16,24 +16,20 @@
 
 package org.zalando.baigan.service;
 
-import static org.junit.Assert.assertThat;
-
-import java.util.Map;
-import java.util.Set;
-
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.model.EndsWith;
 import org.zalando.baigan.model.In;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import java.util.Map;
+import java.util.Set;
 
-@RunWith(JUnit4.class)
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class TestConditionsProcessor {
 
     private static final String NONE = "NONE";
@@ -52,17 +48,17 @@ public class TestConditionsProcessor {
         final Map<String, String> context1 = ImmutableMap.of(APPDOMAIN, "1",
                 CUSTOMER_NUMBER, "1239");
         assertThat(processor.process(configuration, context1),
-                Matchers.equalTo(true));
+                equalTo(true));
 
         final Map<String, String> context2 = ImmutableMap.of(APPDOMAIN, "4",
                 CUSTOMER_NUMBER, "5712");
         assertThat(processor.process(configuration, context2),
-                Matchers.equalTo(true));
+                equalTo(true));
 
         final Map<String, String> context3 = ImmutableMap.of(APPDOMAIN, "6",
                 CUSTOMER_NUMBER, "5718");
         assertThat(processor.process(configuration, context3),
-                Matchers.equalTo(false));
+                equalTo(false));
 
     }
 
@@ -76,11 +72,11 @@ public class TestConditionsProcessor {
 
         final Map<String, String> context1 = ImmutableMap.of(APPDOMAIN, "1");
         assertThat(processor.process(configuration, context1),
-                Matchers.equalTo(DHL));
+                equalTo(DHL));
 
         final Map<String, String> context2 = ImmutableMap.of(APPDOMAIN, "4");
         assertThat(processor.process(configuration, context2),
-                Matchers.equalTo(NONE));
+                equalTo(NONE));
 
     }
 

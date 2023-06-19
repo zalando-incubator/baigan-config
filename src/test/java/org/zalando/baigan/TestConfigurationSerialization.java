@@ -16,31 +16,22 @@
 
 package org.zalando.baigan;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.Set;
-
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.model.Equals;
 import org.zalando.baigan.service.ConditionsProcessor;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 
-@RunWith(JUnit4.class)
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class TestConfigurationSerialization {
 
     private ObjectMapper mapper;
@@ -50,9 +41,8 @@ public class TestConfigurationSerialization {
     private final String stringy = "{\"alias\":\"express.feature.toggle\",\"description\":\"Feature toggle\",\"conditions\":"
             + "[{\"paramName\":\"appdomain\",\"conditionType\":{\"type\":\"Equals\",\"onValue\":\"1\"},\"value\":true}],\"defaultValue\":false}";
 
-    @Before
-    public void init()
-            throws JsonMappingException, JsonGenerationException, IOException {
+    @BeforeEach
+    public void init() {
         mapper = new ObjectMapper().registerModule(new GuavaModule());
         conditionsProcessor = new ConditionsProcessor();
 
@@ -70,11 +60,11 @@ public class TestConfigurationSerialization {
 
     private void testConfigurationTrueOnlyForAppdomain1(
             final Configuration<Boolean> paramConfiguration) {
-        assertTrue(conditionsProcessor.process(paramConfiguration,
-                ImmutableMap.of("appdomain", "1")));
+        assertThat(conditionsProcessor.process(paramConfiguration,
+                ImmutableMap.of("appdomain", "1")), equalTo(true));
 
-        assertFalse(conditionsProcessor.process(paramConfiguration,
-                ImmutableMap.of("appdomain", "2")));
+        assertThat(conditionsProcessor.process(paramConfiguration,
+                ImmutableMap.of("appdomain", "2")), equalTo(false));
     }
 
     @Test
@@ -96,7 +86,7 @@ public class TestConfigurationSerialization {
     public void testSerialize() throws Exception {
         final Configuration config = createConfigurationForAppdomain1();
         final String serialized = mapper.writeValueAsString(config);
-        assertThat(serialized, Matchers.equalTo(stringy));
+        assertThat(serialized, equalTo(stringy));
     }
 
 }

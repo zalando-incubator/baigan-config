@@ -16,33 +16,27 @@
 
 package org.zalando.baigan.context;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.zalando.baigan.context.ConfigurationContextProvisionIT.StaticAppdomainProvider;
+import org.zalando.baigan.provider.ContextProvider;
 
 import java.util.Collection;
 import java.util.Set;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.zalando.baigan.context.ConfigurationContext;
-import org.zalando.baigan.context.ConfigurationContextProviderBeanPostprocessor;
-import org.zalando.baigan.context.ConfigurationContextProviderRegistryImpl;
-import org.zalando.baigan.context.ContextProviderRetriever;
-import org.zalando.baigan.context.ConfigurationContextProvisionIT.StaticAppdomainProvider;
-import org.zalando.baigan.provider.ContextProvider;
-
-import com.google.common.collect.ImmutableSet;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  *
  * @author Mohammed Amjed
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { StaticAppdomainProvider.class,
         ConfigurationContextProviderRegistryImpl.class,
         ConfigurationContextProviderBeanPostprocessor.class })
@@ -62,7 +56,7 @@ public class ConfigurationContextProvisionIT {
 
         final String contextValue = contextProviders.iterator().next()
                 .getContextParam(contextParam);
-        assertThat(contextValue, Matchers.equalTo("1"));
+        assertThat(contextValue, equalTo("1"));
     }
 
     static class StaticAppdomainProvider implements ContextProvider {
