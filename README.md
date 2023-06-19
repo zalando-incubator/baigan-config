@@ -3,8 +3,6 @@
 ![Build Status](https://github.com/zalando-stups/baigan-config/workflows/build/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/org.zalando/baigan-config.svg)](https://maven-badges.herokuapp.com/maven-central/org.zalando/baigan-config)
 
-# https://img.shields.io/maven-central/v/org.zalando/baigan-config.svg
-
 Baigan configuration is an easy to use configuration framework for [Spring](https://spring.io/) based applications.
 
 What makes Baigan a rockstar configuration framework ?
