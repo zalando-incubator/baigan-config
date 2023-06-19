@@ -1,9 +1,6 @@
 package org.zalando.baigan.context;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.handler.ContextAwareConfigurationMethodInvocationHandler;
@@ -15,10 +12,11 @@ import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.reflect.Reflection.newProxy;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +40,6 @@ interface Express extends Base {
 /**
  * @author mchand
  */
-@RunWith(JUnit4.class)
 public class MethodInvocationHandlerTest {
 
     private static final String DESCRIPTION = "This is a test configuration object.";
@@ -57,7 +54,7 @@ public class MethodInvocationHandlerTest {
         final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
 
         Object object = invokeHandler(handler, Express.class, "stateDefault");
-        assertThat(object, Matchers.equalTo(State.SHIPPING));
+        assertThat(object, equalTo(State.SHIPPING));
     }
 
     @Test
@@ -83,7 +80,7 @@ public class MethodInvocationHandlerTest {
         final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
 
         Object object = invokeHandler(handler, Express.class, "maxDeliveryDays");
-        assertThat(object, Matchers.equalTo(3));
+        assertThat(object, equalTo(3));
     }
 
     @Test

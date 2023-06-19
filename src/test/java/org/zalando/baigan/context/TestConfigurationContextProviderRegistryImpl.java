@@ -16,26 +16,24 @@
 
 package org.zalando.baigan.context;
 
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.zalando.baigan.provider.ContextProvider;
 
 import java.util.Collection;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.zalando.baigan.context.ConfigurationContext;
-import org.zalando.baigan.context.ConfigurationContextProviderRegistryImpl;
-import org.zalando.baigan.provider.ContextProvider;
-
-import com.google.common.collect.ImmutableSet;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  *
  * @author mchand
  *
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TestConfigurationContextProviderRegistryImpl {
 
     final String TEST_CONTEXT_PARAM_VALUE = "99";
@@ -56,12 +54,12 @@ public class TestConfigurationContextProviderRegistryImpl {
 
         final Collection<ContextProvider> providers = registry
                 .getProvidersFor(ConfigurationContext.APPDOMAIN.name());
-        assertEquals(1, providers.size());
+        assertThat(providers.size(), equalTo(1));
         final ContextProvider provider = providers.iterator().next();
 
         final String contextParamValue = provider
                 .getContextParam(ConfigurationContext.APPDOMAIN.name());
-        assertEquals(TEST_CONTEXT_PARAM_VALUE, contextParamValue);
+        assertThat(contextParamValue, equalTo(TEST_CONTEXT_PARAM_VALUE));
 
     }
 }

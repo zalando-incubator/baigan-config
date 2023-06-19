@@ -16,30 +16,24 @@
 
 package org.zalando.baigan;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.model.Equals;
 import org.zalando.baigan.service.ConditionsProcessor;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Set;
 
-@RunWith(JUnit4.class)
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
 public class TestEtcdConfigService {
 
     private final static ObjectMapper mapper = new ObjectMapper()
@@ -49,9 +43,8 @@ public class TestEtcdConfigService {
 
     private String buffer = null;
 
-    @Before
-    public void init()
-            throws JsonMappingException, JsonGenerationException, IOException {
+    @BeforeEach
+    public void init() throws IOException {
 
         final Condition<Boolean> condition = new Condition<Boolean>("appdomain",
                 new Equals("1"), true);
@@ -69,11 +62,11 @@ public class TestEtcdConfigService {
 
         final ConditionsProcessor conditionsProcessor = new ConditionsProcessor();
 
-        assertTrue(conditionsProcessor.process(configuration,
-                ImmutableMap.of("appdomain", "1")));
+        assertThat(conditionsProcessor.process(configuration,
+                ImmutableMap.of("appdomain", "1")), equalTo(true));
 
-        assertFalse(conditionsProcessor.process(configuration,
-                ImmutableMap.of("appdomain", "2")));
+        assertThat(conditionsProcessor.process(configuration,
+                ImmutableMap.of("appdomain", "2")), equalTo(false));
     }
 
     @Test

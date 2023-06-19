@@ -5,24 +5,22 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.egit.github.core.RepositoryContents;
 import org.eclipse.egit.github.core.service.ContentsService;
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.zalando.baigan.model.Configuration;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GitCacheLoaderTest {
 
     private String testConfiguration1 = "[{ \"alias\": \"express.feature.toggle\", \"description\": \"Feature toggle\", \"defaultValue\": false, \"conditions\": [   {   "
@@ -44,7 +42,7 @@ public class GitCacheLoaderTest {
         final GitCacheLoader loader = new GitCacheLoader(config,
                 contentService);
 
-        when(contentService.getContents(anyObject(),
+        when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
@@ -66,7 +64,7 @@ public class GitCacheLoaderTest {
         final GitCacheLoader loader = new GitCacheLoader(config,
                 contentService);
 
-        when(contentService.getContents(anyObject(),
+        when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
@@ -76,7 +74,7 @@ public class GitCacheLoaderTest {
         assertThat(configurations.size(), equalTo(1));
         assertThat(configurations.get("express.feature.toggle"), notNullValue());
 
-        when(contentService.getContents(anyObject(),
+        when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
@@ -87,7 +85,7 @@ public class GitCacheLoaderTest {
 
         final Map<String, Configuration> configurations2 = configurations2Future
                 .get();
-        assertThat(configurations2, Matchers.not(configurations));
+        assertThat(configurations2, not(configurations));
 
         assertThat(configurations2.size(), equalTo(2));
         assertThat(configurations.get("express.feature.toggle"), notNullValue());
@@ -104,7 +102,7 @@ public class GitCacheLoaderTest {
 
         final GitCacheLoader loader = new GitCacheLoader(config, contentService);
 
-        when(contentService.getContents(anyObject(),
+        when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
@@ -112,7 +110,7 @@ public class GitCacheLoaderTest {
 
         final Map<String, Configuration> configurations1 = loader.load("staging.json");
 
-        when(contentService.getContents(anyObject(),
+        when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
@@ -135,7 +133,7 @@ public class GitCacheLoaderTest {
         final GitCacheLoader loader = new GitCacheLoader(config, contentService);
 
         when(
-                contentService.getContents(anyObject(),
+                contentService.getContents(any(),
                         eq("staging.json"),
                         eq("master")))
                 .thenReturn(ImmutableList
@@ -149,7 +147,7 @@ public class GitCacheLoaderTest {
 
         //throw exception on retrieval
         doThrow(new IOException())
-                .when(contentService).getContents(anyObject(),
+                .when(contentService).getContents(any(),
                 eq("staging.json"),
                 eq("master"));
 
