@@ -1,6 +1,9 @@
 # Baigan configuration
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.zalando/baigan-config.svg)](https://maven-badges.herokuapp.com/maven-central/org.zalando/baigan-config)[![CircleCI](https://circleci.com/gh/zalando-incubator/baigan-config.svg?style=shield&circle-token=d3cb5dad51c94e1064d9d41c7b9d454535055d6d)](https://circleci.com/gh/zalando-incubator/baigan-config)
+![Build Status](https://github.com/zalando-stups/baigan-config/workflows/build/badge.svg)
+[![Maven Central](https://img.shields.io/maven-central/v/org.zalando/baigan-config.svg)](https://maven-badges.herokuapp.com/maven-central/org.zalando/baigan-config)
+
+# https://img.shields.io/maven-central/v/org.zalando/baigan-config.svg
 
 Baigan configuration is an easy to use configuration framework for [Spring](https://spring.io/) based applications.
 
