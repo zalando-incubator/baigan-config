@@ -3,6 +3,7 @@
 set -euxo pipefail
 
 : "${1?"Usage: $0 <[pre]major|[pre]minor|[pre]patch|prerelease>"}"
+: "${CHANGELOG_GITHUB_TOKEN?"Needs CHANGELOG_GITHUB_TOKEN env var (access token with repo scopes)"}"
 
 ./mvnw scm:check-local-modification
 
@@ -19,6 +20,9 @@ git commit -am "Release ${release}"
 ./mvnw versions:set -D newVersion="${next}-SNAPSHOT"
 
 git push --atomic origin main "${release}"
+
+docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v "$(pwd)":/usr/local/src/your-app \
+    githubchangeloggenerator/github-changelog-generator -u zalando-stups -p baigan-config
 
 git commit -am "Development ${next}-SNAPSHOT"
 
