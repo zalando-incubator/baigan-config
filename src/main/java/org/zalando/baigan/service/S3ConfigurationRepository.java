@@ -1,19 +1,20 @@
 package org.zalando.baigan.service;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.service.aws.S3FileLoader;
+
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.service.aws.S3FileLoader;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
@@ -24,7 +25,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     private static final long DEFAULT_REFRESH_INTERVAL = 60;
 
     private final S3FileLoader s3Loader;
-    private long refreshInterval = DEFAULT_REFRESH_INTERVAL;
+    private long refreshInterval;
     private final ScheduledThreadPoolExecutor executor;
     private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
 
@@ -63,13 +64,13 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
      * @see #S3ConfigurationRepository(String, String)
      */
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
-          final long refreshInterval, final ScheduledThreadPoolExecutor executor) {
+                                     final long refreshInterval, final ScheduledThreadPoolExecutor executor) {
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
 
         this.refreshInterval = refreshInterval;
-        this.executor =  executor;
+        this.executor = executor;
         this.s3Loader = new S3FileLoader(bucketName, key);
 
         loadConfigurations();
@@ -89,14 +90,18 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     }
 
     private void setupRefresh() {
-        executor.scheduleAtFixedRate(() -> {
-                  try {
-                      loadConfigurations();
-                  } catch (RuntimeException e) {
-                      LOG.warn("Failed to refresh S3 configuration", e);
-                  }
-              }, this.refreshInterval, this.refreshInterval,
-              TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(
+            () -> {
+                try {
+                    loadConfigurations();
+                } catch (RuntimeException e) {
+                    LOG.error("Failed to refresh S3 configuration, keeping old state.", e);
+                }
+            },
+            this.refreshInterval,
+            this.refreshInterval,
+            TimeUnit.SECONDS
+        );
     }
 
     @Nonnull
