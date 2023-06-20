@@ -1,0 +1,19 @@
+name: test-release-notes
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Extract Release Notes
+        uses: ffurrer2/extract-release-notes@v1.16.0
+        id: notes
+      - name: Debug
+        run: |
+          echo "[${{steps.notes.outputs.release_notes}}]"
