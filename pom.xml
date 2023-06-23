@@ -99,12 +99,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
@@ -132,12 +126,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-core</artifactId>
-            <version>${awssdk.version}</version>
         </dependency>
 
         <dependency>
@@ -299,9 +287,6 @@
                                 <configuration>
                                     <systemPropertyVariables>
                                         <spring.profiles.active>integration-test</spring.profiles.active>
-                                        <cassandra.listenAddress>${cassandra.listenAddress}</cassandra.listenAddress>
-                                        <cassandra.rpcPort>${cassandra.rpcPort}</cassandra.rpcPort>
-                                        <cassandra.nativeTransportPort>${cassandra.nativeTransportPort}</cassandra.nativeTransportPort>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>
