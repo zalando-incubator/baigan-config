@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.19.0](https://github.com/zalando-stups/baigan-config/tree/0.19.0) (2023-06-23)
+
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.18.0...0.19.0)
+
+**Merged pull requests:**
+
+- Streamline Dependencies [\#69](https://github.com/zalando-stups/baigan-config/pull/69) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+
 ## [0.18.0](https://github.com/zalando-stups/baigan-config/tree/0.18.0) (2023-06-20)
 
 [Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.17.0...0.18.0)
