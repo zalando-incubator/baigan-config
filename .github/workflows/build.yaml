@@ -30,4 +30,4 @@ jobs:
       - name: Compile
         run: ./mvnw clean package -DskipTests
       - name: Test
-        run: ./mvnw verify -B
+        run: ./mvnw verify -P integration-test -B
