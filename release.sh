@@ -13,17 +13,16 @@ release=$(semver "${current}" -i "$1" --preid RC)
 next=$(semver "${release}" -i minor)
 
 ./mvnw versions:set -D newVersion="${release}"
+
+docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v "$(pwd)":/usr/local/src/your-app \
+    githubchangeloggenerator/github-changelog-generator -u zalando-stups -p baigan-config
+
 git commit -am "Release ${release}"
 
 ./mvnw clean deploy scm:tag -P release -D tag="${release}" -D pushChanges=false
 
 ./mvnw versions:set -D newVersion="${next}-SNAPSHOT"
 
-git push --atomic origin main "${release}"
-
-docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v "$(pwd)":/usr/local/src/your-app \
-    githubchangeloggenerator/github-changelog-generator -u zalando-stups -p baigan-config
-
 git commit -am "Development ${next}-SNAPSHOT"
 
-git push
+git push --atomic origin main "${release}"
