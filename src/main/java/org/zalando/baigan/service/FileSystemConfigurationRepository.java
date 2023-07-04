@@ -29,32 +29,33 @@ import java.util.concurrent.TimeUnit;
  */
 public class FileSystemConfigurationRepository extends AbstractConfigurationRepository {
 
+    private static final Logger LOG = LoggerFactory.getLogger(FileSystemConfigurationRepository.class);
+
     private final LoadingCache<String, Map<String, Configuration>> cachedConfigurations;
     private final String fileName;
-    private Logger LOG = LoggerFactory
-            .getLogger(FileSystemConfigurationRepository.class);
+
 
     public FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
         this.fileName = fileName;
 
         cachedConfigurations = CacheBuilder.newBuilder()
                 .refreshAfterWrite(refreshIntervalInSeconds, TimeUnit.SECONDS)
-                .build(new CacheLoader<String, Map<String, Configuration>>() {
+                .build(new CacheLoader<>() {
                     @Override
                     public Map<String, Configuration> load(String filename) {
                         try {
                             return loadConfigurations(filename);
                         } catch (final Exception e) {
-                            LOG.error("Failed to refresh file configuration, keeping old state.", e);
+                            LOG.error("Failed to refresh configuration, keeping old state.", e);
                             throw e;
                         }
                     }
 
                     @Override
                     public ListenableFuture<Map<String, Configuration>> reload(
-                            String key, Map<String, Configuration> oldValue)
-                            throws Exception {
-                        LOG.info("Reloading the configuration from file {}", key);
+                        String key, Map<String, Configuration> oldValue)
+                        throws Exception {
+                        LOG.info("Reloading the configuration from file [{}]", key);
                         return super.reload(key, oldValue);
                     }
                 });
