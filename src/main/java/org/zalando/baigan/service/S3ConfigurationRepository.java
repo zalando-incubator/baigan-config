@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class S3ConfigurationRepository extends AbstractConfigurationRepository {
+
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
 
     /**
@@ -25,7 +26,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     private static final long DEFAULT_REFRESH_INTERVAL = 60;
 
     private final S3FileLoader s3Loader;
-    private long refreshInterval;
+    private final long refreshInterval;
     private final ScheduledThreadPoolExecutor executor;
     private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
 
@@ -95,7 +96,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
                 try {
                     loadConfigurations();
                 } catch (RuntimeException e) {
-                    LOG.error("Failed to refresh S3 configuration, keeping old state.", e);
+                    LOG.error("Failed to refresh configuration, keeping old state.", e);
                 }
             },
             this.refreshInterval,
