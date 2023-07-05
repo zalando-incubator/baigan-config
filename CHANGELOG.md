@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/zalando-stups/baigan-config/tree/HEAD)
+## [0.19.2](https://github.com/zalando-stups/baigan-config/tree/0.19.2)
 
-[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.19.1...HEAD)
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.19.1...0.19.2)
 
 **Merged pull requests:**
 
