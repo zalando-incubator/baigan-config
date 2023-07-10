@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.20.0](https://github.com/zalando-stups/baigan-config/tree/0.20.0) (2023-07-10)
+
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.19.3...0.20.0)
+
+**Merged pull requests:**
+
+- use spring facilities for interface scanning [\#72](https://github.com/zalando-stups/baigan-config/pull/72) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+
 ## [0.19.3](https://github.com/zalando-stups/baigan-config/tree/0.19.3) (2023-07-05)
 
 [Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.19.2...0.19.3)
