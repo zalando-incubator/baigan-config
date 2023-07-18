@@ -10,13 +10,14 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.io.BaseEncoding;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
+
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.util.Arrays.asList;
 
 /* Provides transparent content decryption of encrypted configuration content using AWS KMS. All configuration values
  * starting with {@value #KMS_START_TAG} are decrypted automatically. The content must be Base64 encoded and
@@ -40,10 +41,34 @@ public class S3FileLoader {
     private final String bucketName;
     private final String key;
 
+    /**
+     * Creates an S3FileLoader with a default AmazonS3 client and a default AWSKMS client.
+     *
+     * @deprecated Use {@link S3FileLoader#S3FileLoader(String, String, AmazonS3, AWSKMS)} instead
+     *
+     * @param bucketName Name of the bucket from which to load the S3 file
+     * @param key Key of the file to load
+     */
+    @Deprecated
     public S3FileLoader(@Nonnull String bucketName, @Nonnull String key) {
-        // Necessary to use *ClientBuilder for correct defaults (especially region selection).
-        s3Client = AmazonS3ClientBuilder.defaultClient();
-        kmsClient = AWSKMSClientBuilder.defaultClient();
+        this(bucketName, key, AmazonS3ClientBuilder.defaultClient(), AWSKMSClientBuilder.defaultClient());
+    }
+
+    /**
+     * Creates an S3FileLoader.
+     *
+     * @param bucketName Name of the bucket from which to load the S3 file
+     * @param key Key of the file to load
+     * @param s3Client The client used to access S3
+     * @param kmsClient The client used to decrypt the file content
+     */
+    public S3FileLoader(@Nonnull String bucketName, @Nonnull String key, AmazonS3 s3Client, AWSKMS kmsClient) {
+        checkNotNull(bucketName, "bucketName is required");
+        checkNotNull(key, "key is required");
+        checkNotNull(s3Client, "s3 client is required");
+
+        this.s3Client = s3Client;
+        this.kmsClient = kmsClient;
         this.bucketName = bucketName;
         this.key = key;
     }
