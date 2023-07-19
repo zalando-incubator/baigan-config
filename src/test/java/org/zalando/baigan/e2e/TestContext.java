@@ -8,6 +8,7 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -73,7 +74,14 @@ class TestContext {
                         new BasicAWSCredentials(localstack.getAccessKey(), localstack.getSecretKey())
                 )
         ).build();
-        s3.createBucket(new CreateBucketRequest(S3_CONFIG_BUCKET, localstack.getRegion()));
+
+        try {
+            s3.createBucket(new CreateBucketRequest(S3_CONFIG_BUCKET, localstack.getRegion()));
+        } catch (AmazonS3Exception e) {
+            if (!e.getErrorCode().equals("BucketAlreadyOwnedByYou")) {
+                throw e;
+            }
+        }
 
         return s3;
     }

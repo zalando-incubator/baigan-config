@@ -20,7 +20,7 @@ import static org.zalando.baigan.e2e.TestContext.S3_CONFIG_KEY;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestContext.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class End2EndTest {
+public class End2EndIT {
 
     @Autowired
     private AmazonS3 s3;

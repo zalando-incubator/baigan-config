@@ -30,6 +30,4 @@ jobs:
       - name: Compile
         run: ./mvnw clean package -DskipTests
       - name: Test
-        env:
-          TESTCONTAINERS_CLIENT_PING_TIMEOUT: 60
         run: ./mvnw verify -P integration-test -B
