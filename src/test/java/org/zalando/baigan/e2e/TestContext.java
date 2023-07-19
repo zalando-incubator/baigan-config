@@ -55,6 +55,7 @@ class TestContext {
 
     @Bean
     AWSKMS kms() {
+        localstack.start();
         return AWSKMSClientBuilder.standard().withEndpointConfiguration(
                 new AwsClientBuilder.EndpointConfiguration(
                         localstack.getEndpointOverride(KMS).toString(), localstack.getRegion()
