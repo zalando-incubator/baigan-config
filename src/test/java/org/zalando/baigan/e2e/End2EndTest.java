@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.zalando.baigan.fixture.SomeConfiguration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,7 +18,6 @@ import static org.zalando.baigan.e2e.TestContext.S3_CONFIG_BUCKET;
 import static org.zalando.baigan.e2e.TestContext.S3_CONFIG_KEY;
 
 @ExtendWith(SpringExtension.class)
-@Testcontainers
 @ContextConfiguration(classes = {TestContext.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class End2EndTest {
@@ -39,7 +37,7 @@ public class End2EndTest {
     }
 
     @Test
-    public void shouldRegisterAnnotatedConfigurationAsBean() throws InterruptedException {
+    public void givenS3Configuration_whenConfigurationIsChangedOnS3_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException {
         assertThat(someConfiguration.someValue(), nullValue());
         s3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"a value\"}]");
         Thread.sleep(1100);
