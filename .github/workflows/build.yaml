@@ -29,7 +29,7 @@ jobs:
           cache: 'maven'
       - name: Compile
         run: ./mvnw clean package -DskipTests
-      - name: Check if docker is installed
-        run: docker --version
       - name: Test
+        env:
+          TESTCONTAINERS_CLIENT_PING_TIMEOUT: 60
         run: ./mvnw verify -P integration-test -B
