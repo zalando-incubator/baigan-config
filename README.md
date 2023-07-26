@@ -176,6 +176,9 @@ With curl:
 curl -v -XPUT http://127.0.0.1:2379/v2/keys/express.feature.enabled -d value="$(cat express-feature.json)"
 ```
 
+## 0.18.0 + 0.19.0 + 0.19.1 releases
+With certain JDK/JRE versions used, annotated configuration interfaces were not registered as beans. Be aware, that this issue does not occur when application code is being executed by a test runner or alike, only in production setups. Therefore we recommend using a higher version to avoid this.
+
 ## License
 
 Copyright 2016 Zalando SE
