@@ -11,9 +11,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class S3ConfigurationRepositoryBuilder {
 
-    private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-    private AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
-    private AWSKMS kmsClient = AWSKMSClientBuilder.defaultClient();
+    private ScheduledThreadPoolExecutor executor;
+    private AmazonS3 s3Client;
+    private AWSKMS kmsClient;
     private long refreshIntervalInSeconds = 60;
     private String bucketName;
     private String key;
