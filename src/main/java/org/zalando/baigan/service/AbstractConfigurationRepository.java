@@ -15,7 +15,7 @@ public abstract class AbstractConfigurationRepository implements ConfigurationRe
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
 
     @Nonnull
-    List<Configuration> getConfigurations(final String text) {
+    protected List<Configuration> getConfigurations(final String text) {
         try {
             return objectMapper.readValue(text, new TypeReference<List<Configuration>>() {
             });

@@ -1,10 +1,7 @@
 package org.zalando.baigan.e2e;
 
 import com.amazonaws.services.s3.AmazonS3;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,7 +16,6 @@ import static org.zalando.baigan.e2e.TestContext.S3_CONFIG_KEY;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestContext.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class End2EndIT {
 
     @Autowired
@@ -27,14 +23,6 @@ public class End2EndIT {
 
     @Autowired
     private SomeConfiguration someConfiguration;
-
-    @BeforeAll
-    public void setup() {
-    }
-
-    @BeforeEach
-    public void setupTest() {
-    }
 
     @Test
     public void givenS3Configuration_whenConfigurationIsChangedOnS3_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException {

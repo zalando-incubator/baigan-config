@@ -1,10 +1,15 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.service.aws;
 
+import com.amazonaws.services.kms.AWSKMS;
+import com.amazonaws.services.kms.AWSKMSClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.service.aws.S3FileLoader;
+import org.zalando.baigan.service.AbstractConfigurationRepository;
+import org.zalando.baigan.service.ConfigurationRepository;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -14,6 +19,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class S3ConfigurationRepository extends AbstractConfigurationRepository {
 
@@ -30,13 +36,13 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
 
     /**
-     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
-     * It refreshes configurations using the default refresh interval (60 seconds)
-     *
-     * @deprecated use {@link S3ConfigurationRepository#S3ConfigurationRepository(S3FileLoader)} instead
-     *
      * @param bucketName The name of the bucket
      * @param key        The object key, usually, the "full path" to the JSON file stored in the bucket
+     *
+     * @deprecated Use {@link S3ConfigurationRepositoryBuilder instead}
+     * <p>
+     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
+     * It refreshes configurations using the default refresh interval (60 seconds)
      */
     @Deprecated
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key) {
@@ -44,86 +50,57 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
     }
 
     /**
-     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
-     *
-     * @deprecated use {@link S3ConfigurationRepository#S3ConfigurationRepository(S3FileLoader, long)} instead
-     *
      * @param bucketName      The name of the bucket
      * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
      * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
      *                        <p>
      * @see #S3ConfigurationRepository(String, String)
+     *
+     * @deprecated Use {@link S3ConfigurationRepositoryBuilder instead}
+     * <p>
+     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
      */
     @Deprecated
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key, final long refreshInterval) {
-        this(new S3FileLoader(bucketName, key), refreshInterval, new ScheduledThreadPoolExecutor(1));
+        this(bucketName, key, refreshInterval, new ScheduledThreadPoolExecutor(1));
     }
 
     /**
-     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
-     *
-     * @deprecated Use {@link S3ConfigurationRepository#S3ConfigurationRepository(S3FileLoader, long, ScheduledThreadPoolExecutor)} instead
-     *
      * @param bucketName      The name of the bucket
      * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
      * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
      * @param executor        The executor to refresh the configurations in the specified interval
      *                        <p>
      * @see #S3ConfigurationRepository(String, String)
+     *
+     * @deprecated Use {@link S3ConfigurationRepositoryBuilder instead}
+     * <p>
+     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
      */
     @Deprecated
     public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
                                      final long refreshInterval, final ScheduledThreadPoolExecutor executor) {
-        this(new S3FileLoader(bucketName, key), refreshInterval, executor);
+        this(bucketName, key, refreshInterval, executor, AmazonS3ClientBuilder.defaultClient(), AWSKMSClientBuilder.defaultClient());
     }
 
-    /**
-     * Provides a {@link ConfigurationRepository} that uses the passed {@link S3FileLoader} to get the configuration data.
-     *
-     * @param s3Loader        The S3FileLoader that provides the configuration data.
-     * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
-     * @param executor        The executor to refresh the configurations in the specified interval
-     *                        <p>
-     * @see #S3ConfigurationRepository(String, String)
-     */
-    public S3ConfigurationRepository(@Nonnull S3FileLoader s3Loader,
-                                     final long refreshInterval, final ScheduledThreadPoolExecutor executor) {
+    S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
+                              final long refreshInterval, final ScheduledThreadPoolExecutor executor,
+                              final AmazonS3 s3Client, final AWSKMS kmsClient) {
+        checkNotNull(bucketName, "bucketName is required");
+        checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
+        checkNotNull(executor, "executor is required");
+        checkNotNull(s3Client, "s3Client is required");
+        checkNotNull(kmsClient, "kmsClient is required");
 
         this.refreshInterval = refreshInterval;
         this.executor = executor;
-        this.s3Loader = s3Loader;
+        this.s3Loader = new S3FileLoader(bucketName, key, s3Client, kmsClient);
 
         loadConfigurations();
         if (refreshInterval > 0) {
             setupRefresh();
         }
-    }
-
-    /**
-     * Provides a {@link ConfigurationRepository} that uses the passed {@link S3FileLoader} to get the configuration data.
-     * It uses a new {@link ScheduledThreadPoolExecutor} with corePoolSize = 1 to schedule the configuration update.
-     *
-     * @param s3Loader        The S3FileLoader that provides the configuration data.
-     * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
-     *
-     * @see #S3ConfigurationRepository(String, String)
-     */
-    public S3ConfigurationRepository(@Nonnull S3FileLoader s3Loader, final long refreshInterval) {
-        this(s3Loader, refreshInterval, new ScheduledThreadPoolExecutor(1));
-    }
-
-    /**
-     * Provides a {@link ConfigurationRepository} that uses the passed {@link S3FileLoader} to get the configuration data.
-     * It uses a new {@link ScheduledThreadPoolExecutor} with corePoolSize = 1 to schedule the configuration update. The
-     * default refresh interval is 60 seconds.
-     *
-     * @param s3Loader        The S3FileLoader that provides the configuration data.
-     *
-     * @see #S3ConfigurationRepository(String, String)
-     */
-    public S3ConfigurationRepository(@Nonnull S3FileLoader s3Loader) {
-        this(s3Loader, DEFAULT_REFRESH_INTERVAL, new ScheduledThreadPoolExecutor(1));
     }
 
     protected void loadConfigurations() {

@@ -20,10 +20,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.service.ConfigurationRepository;
-import org.zalando.baigan.service.S3ConfigurationRepository;
-import org.zalando.baigan.service.aws.S3FileLoader;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KMS;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
@@ -46,11 +43,13 @@ class TestContext {
     ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms) {
         amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
 
-        return new S3ConfigurationRepository(
-                new S3FileLoader(S3_CONFIG_BUCKET, S3_CONFIG_KEY, amazonS3, kms),
-                1,
-                new ScheduledThreadPoolExecutor(1)
-        );
+        return new S3ConfigurationRepositoryBuilder()
+                .bucketName(S3_CONFIG_BUCKET)
+                .key(S3_CONFIG_KEY)
+                .s3Client(amazonS3)
+                .kmsClient(kms)
+                .refreshIntervalInSeconds(1)
+                .build();
     }
 
     @Bean
