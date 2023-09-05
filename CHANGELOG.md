@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.21.0](https://github.com/zalando-stups/baigan-config/tree/0.21.0) (2023-09-05)
+
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.20.0...0.21.0)
+
+**Merged pull requests:**
+
+- Add note about 0.18.0 + 0.19.0 + 0.19.1 releases [\#76](https://github.com/zalando-stups/baigan-config/pull/76) ([e101011](https://github.com/e101011))
+- Provide S3 repository builder and add E2E test [\#74](https://github.com/zalando-stups/baigan-config/pull/74) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+
 ## [0.20.0](https://github.com/zalando-stups/baigan-config/tree/0.20.0) (2023-07-10)
 
 [Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.19.3...0.20.0)
