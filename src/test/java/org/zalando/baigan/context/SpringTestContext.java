@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.zalando.baigan.model.Condition;
-import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRepository;
 
 import javax.annotation.Nonnull;
@@ -16,11 +15,6 @@ import java.util.Set;
  */
 @Configuration
 public class SpringTestContext {
-
-    @Bean
-    public ConditionsProcessor ConditionsProcessor() {
-        return new ConditionsProcessor();
-    }
 
     @Bean
     public ConfigurationRepository configurationRepository() {

@@ -1,22 +1,20 @@
 package org.zalando.baigan.service.aws;
 
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.kms.model.DecryptRequest;
 import com.amazonaws.services.kms.model.DependencyTimeoutException;
 import com.amazonaws.services.kms.model.KMSInternalException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.io.BaseEncoding;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
+
+import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.util.Arrays.asList;
 
 /* Provides transparent content decryption of encrypted configuration content using AWS KMS. All configuration values
  * starting with {@value #KMS_START_TAG} are decrypted automatically. The content must be Base64 encoded and
@@ -40,10 +38,9 @@ public class S3FileLoader {
     private final String bucketName;
     private final String key;
 
-    public S3FileLoader(@Nonnull String bucketName, @Nonnull String key) {
-        // Necessary to use *ClientBuilder for correct defaults (especially region selection).
-        s3Client = AmazonS3ClientBuilder.defaultClient();
-        kmsClient = AWSKMSClientBuilder.defaultClient();
+    S3FileLoader(@Nonnull String bucketName, @Nonnull String key, @Nonnull AmazonS3 s3Client, @Nonnull AWSKMS kmsClient) {
+        this.s3Client = s3Client;
+        this.kmsClient = kmsClient;
         this.bucketName = bucketName;
         this.key = key;
     }
