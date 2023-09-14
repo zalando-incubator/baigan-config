@@ -1,15 +1,14 @@
 package org.zalando.baigan.service.aws;
 
 import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.proxy.BaiganConfigClasses;
 import org.zalando.baigan.service.AbstractConfigurationRepository;
-import org.zalando.baigan.service.ConfigurationRepository;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -25,67 +24,16 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
 
-    /**
-     * The default refresh interval which is 60 seconds
-     */
-    private static final long DEFAULT_REFRESH_INTERVAL = 60;
-
     private final S3FileLoader s3Loader;
     private final long refreshInterval;
     private final ScheduledThreadPoolExecutor executor;
-    private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
-
-    /**
-     * @param bucketName The name of the bucket
-     * @param key        The object key, usually, the "full path" to the JSON file stored in the bucket
-     *
-     * @deprecated Use {@link S3ConfigurationRepositoryBuilder instead}
-     * <p>
-     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
-     * It refreshes configurations using the default refresh interval (60 seconds)
-     */
-    @Deprecated
-    public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key) {
-        this(bucketName, key, DEFAULT_REFRESH_INTERVAL);
-    }
-
-    /**
-     * @param bucketName      The name of the bucket
-     * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
-     * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
-     *                        <p>
-     * @see #S3ConfigurationRepository(String, String)
-     *
-     * @deprecated Use {@link S3ConfigurationRepositoryBuilder instead}
-     * <p>
-     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
-     */
-    @Deprecated
-    public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key, final long refreshInterval) {
-        this(bucketName, key, refreshInterval, new ScheduledThreadPoolExecutor(1));
-    }
-
-    /**
-     * @param bucketName      The name of the bucket
-     * @param key             The object key, usually, the "full path" to the JSON file stored in the bucket
-     * @param refreshInterval The interval, in seconds, to refresh the configurations. A value of 0 disables refreshing
-     * @param executor        The executor to refresh the configurations in the specified interval
-     *                        <p>
-     * @see #S3ConfigurationRepository(String, String)
-     *
-     * @deprecated Use {@link S3ConfigurationRepositoryBuilder instead}
-     * <p>
-     * Provides a {@link ConfigurationRepository} that reads configurations from a JSON file stored in a S3 bucket.
-     */
-    @Deprecated
-    public S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
-                                     final long refreshInterval, final ScheduledThreadPoolExecutor executor) {
-        this(bucketName, key, refreshInterval, executor, AmazonS3ClientBuilder.defaultClient(), AWSKMSClientBuilder.defaultClient());
-    }
+    private volatile Map<String, Configuration<?>> configurationsMap = ImmutableMap.of();
 
     S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
                               final long refreshInterval, final ScheduledThreadPoolExecutor executor,
-                              final AmazonS3 s3Client, final AWSKMS kmsClient) {
+                              final AmazonS3 s3Client, final AWSKMS kmsClient, final BaiganConfigClasses baiganConfigClasses,
+                              final ObjectMapper objectMapper) {
+        super(baiganConfigClasses, objectMapper);
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
@@ -105,9 +53,9 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
 
     protected void loadConfigurations() {
         final String configurationText = s3Loader.loadContent();
-        final List<Configuration> configurations = getConfigurations(configurationText);
-        final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();
-        for (final Configuration configuration : configurations) {
+        final List<Configuration<?>> configurations = getConfigurations(configurationText);
+        final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
+        for (final Configuration<?> configuration : configurations) {
             builder.put(configuration.getAlias(), configuration);
         }
         configurationsMap = builder.build();

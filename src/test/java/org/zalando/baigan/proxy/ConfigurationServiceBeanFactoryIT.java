@@ -9,14 +9,11 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
-import org.zalando.baigan.context.SpringTestContext;
 import org.zalando.baigan.service.ConfigurationRepository;
 import org.zalando.baigan.service.github.GitConfig;
 
@@ -28,14 +25,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ConfigurationServiceBeanFactoryIT.TestContext.class})
+/*
+ * The purpose of this test is to prove that BeanPostProcessor and BeanFactoryPostProcessor are actually executed.
+ * This is to ensure that Baigan does not silently break annotations like @Cachable or @Traced,
+ * which had happened before.
+ */
 public class ConfigurationServiceBeanFactoryIT {
 
-    @Configuration
-    @ComponentScan(
-            basePackageClasses = {BaiganSpringContext.class},
-            excludeFilters = @ComponentScan.Filter(
-                    classes = SpringTestContext.class,
-                    type = FilterType.ASSIGNABLE_TYPE))
+    @ComponentScan(basePackageClasses = {BaiganSpringContext.class})
     @ConfigurationServiceScan(basePackages = "org.zalando.baigan.proxy")
     static class TestContext {
 
@@ -108,12 +105,14 @@ public class ConfigurationServiceBeanFactoryIT {
     private MyDependency myDependency;
 
     @Test
-    public void allowsPostProcessingOfBeans() throws Exception {
+    public void allowsPostProcessingOfBeans() {
         assertThat(gitConfig.getGitHost(), is("post-processed.com"));
     }
 
     @Test
-    public void allowsPostProcessingOfFactoryBeans() throws Exception {
+    public void allowsPostProcessingOfFactoryBeans() {
+        // A bean of type MyDependency exists only because it is registered in TestBeanFactoryPostProcessor.
+        // It's existence proves that the post processor is running.
         assertThat(myDependency, is(notNullValue()));
     }
 }

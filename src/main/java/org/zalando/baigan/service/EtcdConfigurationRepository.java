@@ -1,11 +1,14 @@
 package org.zalando.baigan.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.etcd.service.EtcdClient;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -16,22 +19,25 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * @author mchand
  */
-
+// TODO E2E test
 public class EtcdConfigurationRepository extends AbstractConfigurationRepository {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
     private static final String ETCD_URL_ENV_NAME = "ETCD_URL";
     private static final String CONFIG_PATH_PREFIX = "/v2/keys/";
     private Logger LOG = LoggerFactory.getLogger(EtcdConfigurationRepository.class);
     private EtcdClient etcdClient;
 
     @VisibleForTesting
-    public EtcdConfigurationRepository(final EtcdClient etcdClient) {
+    public EtcdConfigurationRepository(final EtcdClient etcdClient, final BaiganConfigClasses baiganConfigClasses) {
+        super(baiganConfigClasses, objectMapper);
         checkArgument(etcdClient != null);
         this.etcdClient = etcdClient;
 
     }
 
-    public EtcdConfigurationRepository() {
+    public EtcdConfigurationRepository(final BaiganConfigClasses baiganConfigClasses) {
+        super(baiganConfigClasses, objectMapper);
         etcdClient = new EtcdClient(getUrl());
     }
 

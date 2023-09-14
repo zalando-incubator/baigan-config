@@ -1,5 +1,8 @@
 package org.zalando.baigan.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -8,6 +11,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -27,15 +31,18 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mchand
  */
+// TODO E2E test
 public class FileSystemConfigurationRepository extends AbstractConfigurationRepository {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemConfigurationRepository.class);
 
     private final LoadingCache<String, Map<String, Configuration>> cachedConfigurations;
     private final String fileName;
 
-
-    public FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
+    @VisibleForTesting
+    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final BaiganConfigClasses baiganConfigClasses) {
+        super(baiganConfigClasses, objectMapper);
         this.fileName = fileName;
 
         cachedConfigurations = CacheBuilder.newBuilder()
@@ -80,7 +87,7 @@ public class FileSystemConfigurationRepository extends AbstractConfigurationRepo
 
     protected Map<String, Configuration> loadConfigurations(String filename) {
         final String configurationText = loadResource(filename);
-        final Collection<Configuration> configurations = getConfigurations(
+        final Collection<Configuration<?>> configurations = getConfigurations(
                 configurationText);
 
         final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();

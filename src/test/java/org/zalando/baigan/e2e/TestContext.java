@@ -18,18 +18,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.zalando.baigan.BaiganSpringContext;
-import org.zalando.baigan.annotation.ConfigurationServiceScan;
-import org.zalando.baigan.service.ConfigurationRepository;
-import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
 
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KMS;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
-@Configuration
-@ComponentScan(basePackageClasses = BaiganSpringContext.class)
-@ConfigurationServiceScan(basePackages = "org.zalando.baigan.fixture")
+@ComponentScan(basePackageClasses = {BaiganSpringContext.class})
 @Testcontainers
-class TestContext {
+public class TestContext {
 
     public static final String S3_CONFIG_BUCKET = "some-bucket";
     public static final String S3_CONFIG_KEY = "some-key";
@@ -38,19 +33,6 @@ class TestContext {
     private static final LocalStackContainer localstack = new LocalStackContainer(
             DockerImageName.parse("localstack/localstack:2.1.0")
         ).withServices(S3, KMS).withEnv("DEFAULT_REGION", Regions.EU_CENTRAL_1.getName());
-
-    @Bean
-    ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms) {
-        amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
-
-        return new S3ConfigurationRepositoryBuilder()
-                .bucketName(S3_CONFIG_BUCKET)
-                .key(S3_CONFIG_KEY)
-                .s3Client(amazonS3)
-                .kmsClient(kms)
-                .refreshIntervalInSeconds(1)
-                .build();
-    }
 
     @Bean
     AWSKMS kms() {

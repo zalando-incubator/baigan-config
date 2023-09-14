@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
+import static org.zalando.baigan.proxy.ProxyUtils.createKey;
 
 /**
  * This class provides a concrete implementation for the Method invocation
@@ -60,12 +61,8 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     @Override
     protected Object handleInvocation(Object proxy, Method method,
-            Object[] args) throws Throwable {
-        final String methodName = method.getName();
-        final String nameSpace = getNamespace(proxy);
-
-        final String key = ProxyUtils.dottify(nameSpace) + "."
-                + ProxyUtils.dottify(methodName);
+                                      Object[] args) throws Throwable {
+        final String key = createKey(getClass(proxy), method);
         final Object result = getConfig(key);
         if (result == null) {
             LOG.warn("Configuration not found for key: {}", key);
@@ -107,10 +104,10 @@ public class ContextAwareConfigurationMethodInvocationHandler
         return null;
     }
 
-    private String getNamespace(final Object proxy) {
+    private Class<?> getClass(final Object proxy) {
         final Class<?>[] interfaces = proxy.getClass().getInterfaces();
         checkState(interfaces.length == 1, "Expected exactly one interface on proxy object.");
-        return interfaces[0].getSimpleName();
+        return interfaces[0];
     }
 
     private Object getConfig(final String key) {
