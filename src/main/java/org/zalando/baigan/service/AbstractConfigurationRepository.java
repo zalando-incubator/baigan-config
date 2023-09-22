@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
@@ -60,7 +59,9 @@ public abstract class AbstractConfigurationRepository implements ConfigurationRe
     }
 
     private Class<?> findClass(String alias) {
-        List<Class<?>> matchingClasses = baiganConfigClasses.getConfigTypesByKey().entrySet().stream().filter(entry -> alias.startsWith(entry.getKey())).map(Map.Entry::getValue).collect(toList());
+        List<Class<?>> matchingClasses = baiganConfigClasses.getConfigTypesByKey().entrySet().stream()
+                .filter(entry -> alias.equals(entry.getKey()))
+                .map(Map.Entry::getValue).collect(toList());
 
         if (matchingClasses.size() == 1) {
             return matchingClasses.get(0);

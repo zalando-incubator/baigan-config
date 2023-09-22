@@ -1,7 +1,6 @@
 package org.zalando.baigan.proxy.handler;
 
 import com.google.common.base.Supplier;
-import com.google.common.primitives.Primitives;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -12,13 +11,10 @@ import org.springframework.util.CollectionUtils;
 import org.zalando.baigan.context.ContextProviderRetriever;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.provider.ContextProvider;
-import org.zalando.baigan.proxy.ProxyUtils;
 import org.zalando.baigan.service.ConditionsProcessor;
 import org.zalando.baigan.service.ConfigurationRepository;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,48 +56,19 @@ public class ContextAwareConfigurationMethodInvocationHandler
     }
 
     @Override
-    protected Object handleInvocation(Object proxy, Method method,
-                                      Object[] args) throws Throwable {
+    protected Object handleInvocation(Object proxy, Method method, Object[] args) {
         final String key = createKey(getClass(proxy), method);
         final Object result = getConfig(key);
         if (result == null) {
             LOG.warn("Configuration not found for key: {}", key);
             return null;
         }
-
-        final Class<?> declaredReturnType = method.getReturnType();
-
-        try {
-
-            Constructor<?> constructor;
-            if (declaredReturnType.isInstance(result)) {
-                return result;
-            } else if (declaredReturnType.isPrimitive()) {
-                final Class<?> resultClass = result.getClass();
-                constructor = Primitives.wrap(declaredReturnType)
-                        .getDeclaredConstructor(resultClass);
-            } else if (declaredReturnType.isEnum()) {
-                for (Object t : Arrays
-                        .asList(declaredReturnType.getEnumConstants())) {
-                    if (result.toString().equalsIgnoreCase(t.toString())) {
-                        return t;
-                    }
-                }
-                LOG.warn("Unable to map [{}] to enum type [{}].", result, declaredReturnType.getName());
-                return null;
-            } else {
-                constructor = declaredReturnType
-                        .getDeclaredConstructor(result.getClass());
-            }
-            return constructor.newInstance(result);
-        } catch (Exception exception) {
-            LOG.warn(
-                    "Wrong or Incompatible configuration. Cannot find a constructor to create object of type "
-                            + declaredReturnType
-                            + " for value of the configuration key " + key,
-                    exception);
+        if (!method.getReturnType().isInstance(result)) {
+            LOG.error("Configuration repository returned object of wrong type. Expected: {}, actual: {}", method.getReturnType(), result.getClass());
+            return null;
         }
-        return null;
+
+        return result;
     }
 
     private Class<?> getClass(final Object proxy) {

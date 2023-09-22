@@ -59,6 +59,8 @@ And the _@ConfigurationServiceScan_ annotation hints the Baigan registrar to loo
 	}
 ```
 
+**Note**: Primitives are not supported as return types.
+
 The above example code enables the application to inject _ExpressFeature_ spring bean into any other Spring bean:
 
 ```Java
@@ -118,7 +120,7 @@ A configuration object should conform to the following JSON Schema:
                     },
             		"conditionType": {
                         "description": "Type of condition to evaluate. This can be custom defined, with custom defined properties.",
-                        "type": "object",
+                        "type": "object"
                     }
                 }
             }

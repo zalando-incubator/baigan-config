@@ -26,7 +26,7 @@ enum State {
 
 interface Base {
 
-    boolean isActive();
+    Boolean isActive();
 
 }
 
@@ -34,7 +34,7 @@ interface Express extends Base {
 
     State stateDefault();
 
-    int maxDeliveryDays();
+    Integer maxDeliveryDays();
 }
 
 /**
@@ -48,7 +48,7 @@ public class MethodInvocationHandlerTest {
     public void testEnumValue() throws Throwable {
 
         final ConfigurationRepository repo = mock(ConfigurationRepository.class);
-        final Configuration<String> configuration = new Configuration<>("express.state.default", DESCRIPTION, of(), "SHIPPING");
+        final Configuration<State> configuration = new Configuration<>("express.state.default", DESCRIPTION, of(), State.SHIPPING);
         when(repo.get(anyString())).thenReturn(Optional.of(configuration));
 
         final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
@@ -58,7 +58,7 @@ public class MethodInvocationHandlerTest {
     }
 
     @Test
-    public void testIllegalEnumValue() throws Throwable {
+    public void testConfigHasWrongType() throws Throwable {
 
         final ConfigurationRepository repo = mock(ConfigurationRepository.class);
         final Configuration<String> configuration = new Configuration<>("express.state.default", DESCRIPTION, of(), "42");
@@ -74,7 +74,7 @@ public class MethodInvocationHandlerTest {
     public void testPrimitiveType() throws Throwable {
 
         final ConfigurationRepository repo = mock(ConfigurationRepository.class);
-        final Configuration<String> configuration = new Configuration<>("express.max.delivery.days", DESCRIPTION, of(), "3");
+        final Configuration<Integer> configuration = new Configuration<>("express.max.delivery.days", DESCRIPTION, of(), 3);
         when(repo.get(anyString())).thenReturn(Optional.of(configuration));
 
         final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
@@ -87,7 +87,7 @@ public class MethodInvocationHandlerTest {
     public void testInheritedToggle() throws Throwable {
 
         final ConfigurationRepository repo = mock(ConfigurationRepository.class);
-        final Configuration<String> configuration = new Configuration<>("express.is.active", DESCRIPTION, of(), Boolean.TRUE.toString());
+        final Configuration<Boolean> configuration = new Configuration<>("express.is.active", DESCRIPTION, of(), true);
         when(repo.get(anyString())).thenReturn(Optional.of(configuration));
 
         final ContextAwareConfigurationMethodInvocationHandler handler = createHandler(repo);
