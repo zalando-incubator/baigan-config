@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
@@ -22,6 +24,8 @@ import static java.util.stream.Collectors.toSet;
 
 public abstract class AbstractConfigurationRepository implements ConfigurationRepository {
 
+    private final Logger LOG = LoggerFactory
+            .getLogger(AbstractConfigurationRepository.class);
     final ObjectMapper objectMapper;
     final BaiganConfigClasses baiganConfigClasses;
 
@@ -35,7 +39,17 @@ public abstract class AbstractConfigurationRepository implements ConfigurationRe
         try {
             List<Configuration<JsonNode>> rawConfigs = objectMapper.readValue(text, new TypeReference<>() {
             });
-            return rawConfigs.stream().map(config -> deserializeConfig(config, findClass(config.getAlias()))).collect(toList());
+            return rawConfigs.stream()
+                    .map(config -> {
+                        final Optional<Configuration<?>> typedConfig = findClass(config.getAlias()).map(targetClass -> deserializeConfig(config, targetClass));
+                        if (typedConfig.isEmpty()) {
+                            LOG.info("Alias {} does not match any method in a class annotated with @BaiganConfig.", config.getAlias());
+                        }
+                        return typedConfig;
+                    })
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(toList());
         } catch (
                 IOException e) {
             throw new UncheckedIOException("Unable to deserialize the Configuration.", e);
@@ -58,13 +72,15 @@ public abstract class AbstractConfigurationRepository implements ConfigurationRe
         }
     }
 
-    private Class<?> findClass(String alias) {
+    private Optional<Class<?>> findClass(String alias) {
         List<Class<?>> matchingClasses = baiganConfigClasses.getConfigTypesByKey().entrySet().stream()
                 .filter(entry -> alias.equals(entry.getKey()))
                 .map(Map.Entry::getValue).collect(toList());
 
         if (matchingClasses.size() == 1) {
-            return matchingClasses.get(0);
+            return Optional.of(matchingClasses.get(0));
+        } else if (matchingClasses.isEmpty()) {
+            return Optional.empty();
         } else {
             throw new RuntimeException("Did not find exactly one matching BaiganConfig for alias " + alias + " in " + baiganConfigClasses.getConfigTypesByKey() + ": matching classes " + matchingClasses);
         }

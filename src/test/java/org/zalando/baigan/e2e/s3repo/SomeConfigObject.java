@@ -1,4 +1,4 @@
-package org.zalando.baigan.e2e.structureds3repo;
+package org.zalando.baigan.e2e.s3repo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
