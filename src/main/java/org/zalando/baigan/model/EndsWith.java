@@ -16,7 +16,9 @@
 
 package org.zalando.baigan.model;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.util.StringUtils;
 
@@ -52,4 +54,23 @@ public class EndsWith extends ConditionType {
         return false;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EndsWith endsWith = (EndsWith) o;
+        return Objects.equals(endsWithValue, endsWith.endsWithValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(endsWithValue);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", EndsWith.class.getSimpleName() + "[", "]")
+                .add("endsWithValue=" + endsWithValue)
+                .toString();
+    }
 }

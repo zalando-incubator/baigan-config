@@ -25,6 +25,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
+import org.zalando.baigan.e2e.configs.SomeConfigObject;
+import org.zalando.baigan.e2e.configs.SomeConfiguration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
 import org.zalando.baigan.service.aws.S3ConfigurationRepository;
 import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
@@ -89,7 +91,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         executor.shutdownNow();
     }
 
-    @ConfigurationServiceScan(basePackages = "org.zalando.baigan.e2e.s3repo")
+    @ConfigurationServiceScan(basePackages = "org.zalando.baigan.e2e.configs")
     @Testcontainers
     @ComponentScan(basePackageClasses = {BaiganSpringContext.class})
     static class RepoConfig {

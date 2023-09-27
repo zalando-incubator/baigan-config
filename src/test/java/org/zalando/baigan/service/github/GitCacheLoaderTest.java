@@ -5,32 +5,45 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.egit.github.core.RepositoryContents;
 import org.eclipse.egit.github.core.service.ContentsService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.zalando.baigan.model.Configuration;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.service.ConfigurationParser;
 
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class GitCacheLoaderTest {
 
-    private String testConfiguration1 = "[{ \"alias\": \"express.feature.toggle\", \"description\": \"Feature toggle\", \"defaultValue\": false, \"conditions\": [   {   "
-            + "  \"value\": true,     \"conditionType\": {       \"onValue\": \"3\",       \"type\": \"Equals\"     },     \"paramName\": \"appdomain\"   } ] }]";
+    private static final String config1Json = "[{ \"alias\": \"express.feature.toggle\", \"description\": \"Feature toggle\", \"defaultValue\": false}]";
+    private static final String config2Json = "[{ \"alias\": \"express.feature.toggle\", \"description\": \"Feature toggle\", \"defaultValue\": false}," +
+            "{ \"alias\": \"some.other.config\", \"description\": \"Other config\", \"defaultValue\": \"a value\"}]";
+    private static final Configuration<Boolean> expressFeatureToggle = new Configuration<>("express.feature.toggle", "Feature toggle", Set.of(), false);
+    private static final Configuration<String> someOtherConfig = new Configuration<>("some.other.config", "Other config", Set.of(), "a value");
 
-    private String testConfiguration2 = "[{  \"alias\": \"express.feature.toggle\",  \"description\": \"Feature toggle\",  \"defaultValue\": false,  \"conditions\": [    {   "
-            + "   \"value\": true,      \"conditionType\": {        \"onValue\": \"3\",        \"type\": \"Equals\"      },      \"paramName\": \"appdomain\"    }  ] },"
-            + "{  \"alias\": \"express.feature.serviceUrl\",  \"description\": \"Feature Service Url\",  \"defaultValue\": \"\",  \"conditions\": [    {     "
-            + " \"value\": \"http://express.trucks.zalan.do\",      \"conditionType\": {        \"onValue\": \"1\",        \"type\": \"Equals\"      }, "
-            + "     \"paramName\": \"appdomain\"    }  ]   }]";
+    private final ConfigurationParser configurationParser = mock(ConfigurationParser.class);
+
+
+    @BeforeEach
+    public void setup() {
+        when(configurationParser.getConfigurations(config1Json)).thenReturn(List.of(expressFeatureToggle));
+        when(configurationParser.getConfigurations(config2Json)).thenReturn(List.of(expressFeatureToggle, someOtherConfig));
+    }
 
     @Test
     public void testLoad() throws Exception {
@@ -39,19 +52,18 @@ public class GitCacheLoaderTest {
                 "somerepo", "master", "somefile", "aoth_token");
         final ContentsService contentService = mock(ContentsService.class);
 
-        final GitCacheLoader loader = new GitCacheLoader(config,
-                contentService);
+        final GitCacheLoader loader = new GitCacheLoader(config, contentService, configurationParser);
+
+        final RepositoryContents repositoryContents = createRepositoryContents(config1Json);
 
         when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
-                        .of(createRepositoryContents(testConfiguration1)));
+                        .of(repositoryContents));
 
-        final Map<String, Configuration> configurations = loader.load("staging.json");
-        assertThat(configurations.size(), equalTo(1));
-        assertThat(configurations.get("express.feature.toggle"), notNullValue());
-
+        final Map<String, Configuration<?>> configurations = loader.load("staging.json");
+        assertThat(configurations, equalTo(Map.of("express.feature.toggle", expressFeatureToggle)));
     }
 
     @Test
@@ -61,36 +73,29 @@ public class GitCacheLoaderTest {
                 "somerepo", "master", "somefile", "aoth_token");
         final ContentsService contentService = mock(ContentsService.class);
 
-        final GitCacheLoader loader = new GitCacheLoader(config,
-                contentService);
+        final GitCacheLoader loader = new GitCacheLoader(config, contentService, configurationParser);
 
         when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
-                        .of(createRepositoryContents(testConfiguration1)));
+                        .of(createRepositoryContents(config1Json)));
 
-        Map<String, Configuration> configurations = loader.load("staging.json");
-        assertThat(configurations.size(), equalTo(1));
-        assertThat(configurations.get("express.feature.toggle"), notNullValue());
+        Map<String, Configuration<?>> configurations = loader.load("staging.json");
+        assertThat(configurations, equalTo(Map.of("express.feature.toggle", expressFeatureToggle)));
 
         when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
-                        .of(createRepositoryContents(testConfiguration2)));
+                        .of(createRepositoryContents(config2Json)));
 
-        final ListenableFuture<Map<String, Configuration>> configurations2Future = loader
+        final ListenableFuture<Map<String, Configuration<?>>> configurations2Future = loader
                 .reload("staging.json", configurations);
 
-        final Map<String, Configuration> configurations2 = configurations2Future
+        final Map<String, Configuration<?>> configurations2 = configurations2Future
                 .get();
-        assertThat(configurations2, not(configurations));
-
-        assertThat(configurations2.size(), equalTo(2));
-        assertThat(configurations.get("express.feature.toggle"), notNullValue());
-
-        assertThat(configurations2.get("express.feature.serviceUrl"), notNullValue());
+        assertThat(configurations2, equalTo(Map.of("express.feature.toggle", expressFeatureToggle, "some.other.config", someOtherConfig)));
     }
 
     @Test
@@ -100,47 +105,47 @@ public class GitCacheLoaderTest {
                 "somerepo", "master", "somefile", "aoth_token");
         final ContentsService contentService = mock(ContentsService.class);
 
-        final GitCacheLoader loader = new GitCacheLoader(config, contentService);
+        final GitCacheLoader loader = new GitCacheLoader(config, contentService, configurationParser);
 
         when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
-                        .of(createRepositoryContents(testConfiguration2)));
+                        .of(createRepositoryContents(config2Json)));
 
-        final Map<String, Configuration> configurations1 = loader.load("staging.json");
+        final Map<String, Configuration<?>> configurations1 = loader.load("staging.json");
 
         when(contentService.getContents(any(),
                 eq("staging.json"),
                 eq("master")))
                 .thenReturn(ImmutableList
-                        .of(createRepositoryContents(testConfiguration2)));
+                        .of(createRepositoryContents(config2Json)));
 
-        final ListenableFuture<Map<String, Configuration>> configurations2Future = loader
+        final ListenableFuture<Map<String, Configuration<?>>> configurations2Future = loader
                 .reload("staging.json", configurations1);
 
-        final Map<String, Configuration> configurations2 = configurations2Future.get();
+        final Map<String, Configuration<?>> configurations2 = configurations2Future.get();
 
         assertThat(configurations2, equalTo(configurations1));
     }
 
     @Test
-    public void testReloadWithIOExceptionInConcentService() throws Exception {
+    public void testReloadWithIOExceptionInContentService() throws Exception {
 
         final GitConfig config = new GitConfig("somehost", "someowner",
                 "somerepo", "master", "somefile", "aoth_token");
         final ContentsService contentService = mock(ContentsService.class);
-        final GitCacheLoader loader = new GitCacheLoader(config, contentService);
+        final GitCacheLoader loader = new GitCacheLoader(config, contentService, configurationParser);
 
         when(
                 contentService.getContents(any(),
                         eq("staging.json"),
                         eq("master")))
                 .thenReturn(ImmutableList
-                        .of(createRepositoryContents(testConfiguration1)));
+                        .of(createRepositoryContents(config1Json)));
 
 
-        Map<String, Configuration> configurations = loader.load("staging.json");
+        Map<String, Configuration<?>> configurations = loader.load("staging.json");
         assertThat(configurations.size(), equalTo(1));
         assertThat(configurations.get("express.feature.toggle"),
                 notNullValue());
@@ -151,12 +156,28 @@ public class GitCacheLoaderTest {
                 eq("staging.json"),
                 eq("master"));
 
-        final ListenableFuture<Map<String, Configuration>> configurations2Future = loader
+        final ListenableFuture<Map<String, Configuration<?>>> configurations2Future = loader
                 .reload("staging.json", configurations);
 
-        final Map<String, Configuration> configurations2 = configurations2Future.get();
+        final Map<String, Configuration<?>> configurations2 = configurations2Future.get();
         assertThat(configurations2, equalTo(configurations));
 
+    }
+
+    @Test
+    public void whenContentServiceFailsOnInitialLoad_shouldInitializeWithEmptyMap() throws Exception {
+        final GitConfig config = new GitConfig("somehost", "someowner",
+                "somerepo", "master", "somefile", "aoth_token");
+        final ContentsService contentService = mock(ContentsService.class);
+
+        final GitCacheLoader loader = new GitCacheLoader(config, contentService, configurationParser);
+
+        doThrow(new IOException()).when(contentService).getContents(any(),
+                eq("staging.json"),
+                eq("master"));
+
+        final Map<String, Configuration<?>> configurations = loader.load("staging.json");
+        assertThat(configurations, equalTo(Map.of()));
     }
 
     private RepositoryContents createRepositoryContents(final String text) throws Exception {

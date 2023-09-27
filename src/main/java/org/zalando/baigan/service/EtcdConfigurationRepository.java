@@ -19,8 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * @author mchand
  */
-// TODO E2E test
-public class EtcdConfigurationRepository extends AbstractConfigurationRepository {
+// TODO Upgrade to v3 and add E2E test
+public class EtcdConfigurationRepository {
 
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
     private static final String ETCD_URL_ENV_NAME = "ETCD_URL";
@@ -30,14 +30,12 @@ public class EtcdConfigurationRepository extends AbstractConfigurationRepository
 
     @VisibleForTesting
     public EtcdConfigurationRepository(final EtcdClient etcdClient, final BaiganConfigClasses baiganConfigClasses) {
-        super(baiganConfigClasses, objectMapper);
         checkArgument(etcdClient != null);
         this.etcdClient = etcdClient;
 
     }
 
     public EtcdConfigurationRepository(final BaiganConfigClasses baiganConfigClasses) {
-        super(baiganConfigClasses, objectMapper);
         etcdClient = new EtcdClient(getUrl());
     }
 

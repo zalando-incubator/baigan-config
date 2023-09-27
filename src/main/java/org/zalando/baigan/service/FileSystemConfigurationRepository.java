@@ -2,7 +2,6 @@ package org.zalando.baigan.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -32,24 +31,24 @@ import java.util.concurrent.TimeUnit;
  * @author mchand
  */
 // TODO E2E test
-public class FileSystemConfigurationRepository extends AbstractConfigurationRepository {
+public class FileSystemConfigurationRepository implements ConfigurationRepository {
 
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemConfigurationRepository.class);
 
-    private final LoadingCache<String, Map<String, Configuration>> cachedConfigurations;
+    private final ConfigurationParser configurationParser;
+    private final LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
     private final String fileName;
 
-    @VisibleForTesting
-    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final BaiganConfigClasses baiganConfigClasses) {
-        super(baiganConfigClasses, objectMapper);
+    public FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final BaiganConfigClasses baiganConfigClasses) {
+        this.configurationParser = new ConfigurationParser(baiganConfigClasses, objectMapper);
         this.fileName = fileName;
 
         cachedConfigurations = CacheBuilder.newBuilder()
                 .refreshAfterWrite(refreshIntervalInSeconds, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
-                    public Map<String, Configuration> load(String filename) {
+                    public Map<String, Configuration<?>> load(String filename) {
                         try {
                             return loadConfigurations(filename);
                         } catch (final Exception e) {
@@ -59,8 +58,8 @@ public class FileSystemConfigurationRepository extends AbstractConfigurationRepo
                     }
 
                     @Override
-                    public ListenableFuture<Map<String, Configuration>> reload(
-                        String key, Map<String, Configuration> oldValue)
+                    public ListenableFuture<Map<String, Configuration<?>>> reload(
+                        String key, Map<String, Configuration<?>> oldValue)
                         throws Exception {
                         LOG.info("Reloading the configuration from file [{}]", key);
                         return super.reload(key, oldValue);
@@ -85,13 +84,13 @@ public class FileSystemConfigurationRepository extends AbstractConfigurationRepo
     }
 
 
-    protected Map<String, Configuration> loadConfigurations(String filename) {
+    protected Map<String, Configuration<?>> loadConfigurations(String filename) {
         final String configurationText = loadResource(filename);
-        final Collection<Configuration<?>> configurations = getConfigurations(
+        final Collection<Configuration<?>> configurations = configurationParser.getConfigurations(
                 configurationText);
 
-        final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();
-        for (Configuration each : configurations) {
+        final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
+        for (Configuration<?> each : configurations) {
             builder.put(each.getAlias(), each);
         }
 

@@ -1,4 +1,4 @@
-package org.zalando.baigan.e2e.s3repo;
+package org.zalando.baigan.e2e.configs;
 
 import org.zalando.baigan.annotation.BaiganConfig;
 

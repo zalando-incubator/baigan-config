@@ -8,7 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
-import org.zalando.baigan.service.AbstractConfigurationRepository;
+import org.zalando.baigan.service.ConfigurationParser;
+import org.zalando.baigan.service.ConfigurationRepository;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -26,19 +27,18 @@ import java.util.concurrent.TimeUnit;
  */
 // TODO remove or add E2E test
 @Deprecated
-public class GitConfigurationRepository extends AbstractConfigurationRepository {
+public class GitConfigurationRepository implements ConfigurationRepository {
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
     private static final Logger LOG = LoggerFactory.getLogger(GitConfigurationRepository.class);
 
-    private final LoadingCache<String, Map<String, Configuration>> cachedConfigurations;
+    private final LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
     private final GitConfig gitConfig;
 
     public GitConfigurationRepository(long refreshIntervalInMinutes, GitConfig gitConfig, BaiganConfigClasses baiganConfigClasses) {
-        super(baiganConfigClasses, objectMapper);
         this.gitConfig = gitConfig;
         cachedConfigurations = CacheBuilder.newBuilder()
                 .refreshAfterWrite(refreshIntervalInMinutes, TimeUnit.MINUTES)
-                .build(new GitCacheLoader(gitConfig));
+                .build(new GitCacheLoader(gitConfig, new ConfigurationParser(baiganConfigClasses, objectMapper)));
     }
 
     @Nonnull

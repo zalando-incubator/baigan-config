@@ -14,7 +14,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,26 +21,32 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public abstract class AbstractConfigurationRepository implements ConfigurationRepository {
+public class ConfigurationParser {
 
     private final Logger LOG = LoggerFactory
-            .getLogger(AbstractConfigurationRepository.class);
+            .getLogger(ConfigurationParser.class);
     final ObjectMapper objectMapper;
     final BaiganConfigClasses baiganConfigClasses;
 
-    protected AbstractConfigurationRepository(final BaiganConfigClasses baiganConfigClasses, final ObjectMapper objectMapper) {
+    // TODO define package structure so this is not public
+    public ConfigurationParser(final BaiganConfigClasses baiganConfigClasses, final ObjectMapper objectMapper) {
         this.baiganConfigClasses = requireNonNull(baiganConfigClasses, "baiganConfigClasses has to be not null. Get them from the bean of the same name.");
         this.objectMapper = requireNonNull(objectMapper, "objectMapper has to be not null.");
     }
 
     @Nonnull
-    protected List<Configuration<?>> getConfigurations(final String text) {
+    public List<Configuration<?>> getConfigurations(final String text) {
+        if (text == null || text.isEmpty()) {
+            LOG.warn("Input to parse is empty: {}",  text);
+            return List.of();
+        }
         try {
             List<Configuration<JsonNode>> rawConfigs = objectMapper.readValue(text, new TypeReference<>() {
             });
             return rawConfigs.stream()
                     .map(config -> {
-                        final Optional<Configuration<?>> typedConfig = findClass(config.getAlias()).map(targetClass -> deserializeConfig(config, targetClass));
+                        final Optional<Configuration<?>> typedConfig = Optional.ofNullable(baiganConfigClasses.getConfigTypesByKey().get(config.getAlias()))
+                                .map(targetClass -> deserializeConfig(config, targetClass));
                         if (typedConfig.isEmpty()) {
                             LOG.info("Alias {} does not match any method in a class annotated with @BaiganConfig.", config.getAlias());
                         }
@@ -69,20 +74,6 @@ public abstract class AbstractConfigurationRepository implements ConfigurationRe
             return new Configuration<>(config.getAlias(), config.getDescription(), typedConditions, typedDefaultValue);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private Optional<Class<?>> findClass(String alias) {
-        List<Class<?>> matchingClasses = baiganConfigClasses.getConfigTypesByKey().entrySet().stream()
-                .filter(entry -> alias.equals(entry.getKey()))
-                .map(Map.Entry::getValue).collect(toList());
-
-        if (matchingClasses.size() == 1) {
-            return Optional.of(matchingClasses.get(0));
-        } else if (matchingClasses.isEmpty()) {
-            return Optional.empty();
-        } else {
-            throw new RuntimeException("Did not find exactly one matching BaiganConfig for alias " + alias + " in " + baiganConfigClasses.getConfigTypesByKey() + ": matching classes " + matchingClasses);
         }
     }
 }

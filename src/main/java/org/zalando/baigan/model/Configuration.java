@@ -17,7 +17,9 @@
 package org.zalando.baigan.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -67,4 +69,26 @@ public class Configuration<Type> implements Serializable {
         return defaultValue;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Configuration<?> that = (Configuration<?>) o;
+        return Objects.equals(alias, that.alias) && Objects.equals(description, that.description) && Objects.equals(conditions, that.conditions) && Objects.equals(defaultValue, that.defaultValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(alias, description, conditions, defaultValue);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Configuration.class.getSimpleName() + "[", "]")
+                .add("alias='" + alias + "'")
+                .add("description='" + description + "'")
+                .add("conditions=" + conditions)
+                .add("defaultValue=" + defaultValue)
+                .toString();
+    }
 }
