@@ -34,6 +34,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -42,21 +43,18 @@ import static org.mockito.Mockito.verify;
  */
 public class ConfigurationBeanDefinitionRegistrarTest {
 
+    private final AnnotationMetadata metaData = Mockito.mock(AnnotationMetadata.class);
+    private final BeanDefinitionRegistry registry = Mockito.mock(BeanDefinitionRegistry.class);
+    private final ConfigurationBeanDefinitionRegistrar registrar = new ConfigurationBeanDefinitionRegistrar();
+
     @Test
     public void testRegistration() {
 
-        final ConfigurationBeanDefinitionRegistrar registrar = new ConfigurationBeanDefinitionRegistrar();
-
-        final AnnotationMetadata metaData = Mockito
-                .mock(AnnotationMetadata.class);
         Mockito.when(metaData.getAnnotationAttributes(
                         ConfigurationServiceScan.class.getName()))
                 .thenReturn(ImmutableMap.of("value",
                         new String[]{"org.zalando.baigan.context"},
                         "basePackages", new String[]{}));
-
-        final BeanDefinitionRegistry registry = Mockito
-                .mock(BeanDefinitionRegistry.class);
 
         final ArgumentCaptor<AbstractBeanDefinition> beanDefinition = ArgumentCaptor
                 .forClass(AbstractBeanDefinition.class);
@@ -75,6 +73,22 @@ public class ConfigurationBeanDefinitionRegistrarTest {
         assertThat(beanDefinition.getAllValues().get(0), instanceOf(GenericBeanDefinition.class));
         assertThat(beanDefinition.getAllValues().get(1).getPropertyValues().get("configTypesByKey"),
                 equalTo(Map.of("super.sonic.speed", String.class)));
+
+    }
+
+    @Test
+    public void whenNothingAnnotatedWithConfigurationServiceScan_shouldThrowException() {
+        Mockito.when(metaData.getAnnotationAttributes(
+                        ConfigurationServiceScan.class.getName()))
+                .thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () -> registrar.registerBeanDefinitions(metaData, registry));
+
+        Mockito.when(metaData.getAnnotationAttributes(
+                        ConfigurationServiceScan.class.getName()))
+                .thenReturn(ImmutableMap.of());
+
+        assertThrows(IllegalArgumentException.class, () -> registrar.registerBeanDefinitions(metaData, registry));
 
     }
 
