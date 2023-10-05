@@ -9,6 +9,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A builder to construct a {@link S3ConfigurationRepository}.
+ * <p>
+ * Requires that at least {@link S3ConfigurationRepositoryBuilder::bucketName} and
+ * {@link S3ConfigurationRepositoryBuilder::key} are specified.
+ */
 public class S3ConfigurationRepositoryBuilder {
 
     private ScheduledThreadPoolExecutor executor;
@@ -55,7 +61,8 @@ public class S3ConfigurationRepositoryBuilder {
     }
 
     /**
-     * @param refreshIntervalInSeconds The number of seconds between the start of a run to refresh the configuration.
+     * @param refreshIntervalInSeconds The number of seconds between the starts of subsequent runs to refresh
+     *                                 the configuration
      */
     public S3ConfigurationRepositoryBuilder refreshIntervalInSeconds(final long refreshIntervalInSeconds) {
         this.refreshIntervalInSeconds = refreshIntervalInSeconds;

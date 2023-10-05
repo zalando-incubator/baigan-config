@@ -35,7 +35,7 @@ public class FileSystemConfigurationRepository extends AbstractConfigurationRepo
     private final String fileName;
 
 
-    public FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
+    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
         this.fileName = fileName;
 
         cachedConfigurations = CacheBuilder.newBuilder()
