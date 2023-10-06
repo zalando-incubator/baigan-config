@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mchand
  */
-// TODO E2E test
 public class FileSystemConfigurationRepository implements ConfigurationRepository {
 
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
@@ -41,7 +40,7 @@ public class FileSystemConfigurationRepository implements ConfigurationRepositor
     private final String fileName;
 
     public FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final BaiganConfigClasses baiganConfigClasses) {
-        this.configurationParser = new ConfigurationParser(baiganConfigClasses, objectMapper);
+        this.configurationParser =  new ConfigurationParser(baiganConfigClasses, objectMapper);
         this.fileName = fileName;
 
         cachedConfigurations = CacheBuilder.newBuilder()

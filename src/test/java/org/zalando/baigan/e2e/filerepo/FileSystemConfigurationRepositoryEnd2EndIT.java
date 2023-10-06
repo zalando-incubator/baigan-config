@@ -19,6 +19,9 @@ import org.zalando.baigan.service.FileSystemConfigurationRepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -56,6 +59,24 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
         assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
+    }
+
+    @Test
+    public void givenS3Configuration_whenInvalidConfigurationIsProvided_thenTheConfigurationIsNotUpdated() {
+        // TODO
+    }
+
+    @Test
+    public void givenS3Configuration_whenConfigurationTypeIsGeneric_thenDeserializesProperly() throws IOException, InterruptedException {
+        Files.writeString(configFile, "[{\"alias\": \"some.configuration.top.level.generics\",\"defaultValue\": {" +
+                "\"a8a23682-1623-450b-8817-50c98827ea4e\": [{\"config_key\":\"A\"}]," +
+                "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"config_key\":\"B\"}]}" +
+                "}]");
+        Thread.sleep(1100);
+        assertThat(someConfiguration.topLevelGenerics(), equalTo(Map.of(
+                UUID.fromString("a8a23682-1623-450b-8817-50c98827ea4e"), List.of(new SomeConfigObject("A")),
+                UUID.fromString("76ced443-6555-4748-a22e-8700f3864e59"), List.of(new SomeConfigObject("B"))
+        )));
     }
 
     @ConfigurationServiceScan(basePackages = "org.zalando.baigan.e2e.configs")

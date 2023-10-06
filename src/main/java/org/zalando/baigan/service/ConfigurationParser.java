@@ -13,6 +13,7 @@ import org.zalando.baigan.proxy.BaiganConfigClasses;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -61,16 +62,16 @@ public class ConfigurationParser {
         }
     }
 
-    private <T> Configuration<T> deserializeConfig(Configuration<JsonNode> config, Class<T> targetClass) {
+    private <T> Configuration<?> deserializeConfig(Configuration<JsonNode> config, Type targetClass) {
         Set<Condition<T>> typedConditions = Optional.ofNullable(config.getConditions()).orElse(Set.of()).stream().map(c -> {
             try {
-                return new Condition<>(c.getParamName(), c.getConditionType(), objectMapper.treeToValue(c.getValue(), targetClass));
+                return new Condition<>(c.getParamName(), c.getConditionType(), objectMapper.<T>treeToValue(c.getValue(), objectMapper.constructType(targetClass)));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         }).collect(toSet());
         try {
-            T typedDefaultValue = objectMapper.treeToValue(config.getDefaultValue(), targetClass);
+             T typedDefaultValue = objectMapper.treeToValue(config.getDefaultValue(), objectMapper.constructType(targetClass));
             return new Configuration<>(config.getAlias(), config.getDescription(), typedConditions, typedDefaultValue);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

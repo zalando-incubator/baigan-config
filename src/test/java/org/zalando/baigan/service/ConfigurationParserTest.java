@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -127,7 +128,27 @@ public class ConfigurationParserTest {
         assertThrows(RuntimeException.class, () -> parser.getConfigurations(input));
     }
 
-    private static class StructuredConfig {
+    @Test
+    public void whenConfigurationTypeHasGenericsWithAnnotatedType_shouldParseCorrectly() throws NoSuchMethodException {
+        final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":{" +
+                "\"a8a23682-1623-450b-8817-50c98827ea4e\": [{\"someConfig\":\"A\",\"someOtherConfig\":1}]," +
+                "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"someConfig\":\"B\"}]}" +
+                "}]";
+
+        final BaiganConfigClasses stringConfigClasses = new BaiganConfigClasses(Map.of("some.config.some.key", ParameterizedConfig.class.getMethod("getConfig").getAnnotatedReturnType().getType()));
+        final ConfigurationParser parser = new ConfigurationParser(stringConfigClasses, objectMapper);
+
+        assertThat(parser.getConfigurations(input).get(0).getDefaultValue(), equalTo(Map.of(
+                UUID.fromString("a8a23682-1623-450b-8817-50c98827ea4e"), List.of(new StructuredConfig("A", 1)),
+                UUID.fromString("76ced443-6555-4748-a22e-8700f3864e59"), List.of(new StructuredConfig("B", 0))
+        )));
+    }
+
+    interface ParameterizedConfig {
+        Map<UUID, List<StructuredConfig>> getConfig();
+    }
+
+    static class StructuredConfig {
         private final String someConfig;
         private final int someOtherConfig;
 

@@ -3,6 +3,7 @@ package org.zalando.baigan.service;
 import org.junit.jupiter.api.Test;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -12,7 +13,7 @@ public class FileSystemConfigurationRepositoryTest {
 
     @Test
     public void testReadConfigurationsFromFile() {
-        final Map<String, Class<?>> configTypesByKey = Map.of(
+        final Map<String, Type> configTypesByKey = Map.of(
                 "express.feature.toggle", Boolean.class,
                 "express.feature.service.url", String.class,
                 "pession.sync.feature.toggle", Boolean.class

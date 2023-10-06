@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -106,8 +106,8 @@ public class ConfigurationBeanDefinitionRegistrar
                 }
             }
         }
-        Map<String, Class<?>> configTypesByKey = baiganConfigClasses.stream().flatMap(clazz ->
-                Arrays.stream(clazz.getMethods()).map(method -> new ConfigType(createKey(clazz, method), method.getReturnType()))
+        Map<String, Type> configTypesByKey = baiganConfigClasses.stream().flatMap(clazz ->
+                Arrays.stream(clazz.getMethods()).map(method -> new ConfigType(createKey(clazz, method), method.getAnnotatedReturnType().getType()))
         ).collect(toMap(c -> c.key, c -> c.type));
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(BaiganConfigClasses.class);
@@ -153,9 +153,9 @@ public class ConfigurationBeanDefinitionRegistrar
 
     private static class ConfigType {
         private final String key;
-        private final Class<?> type;
+        private final Type type;
 
-        public ConfigType(String key, Class<?> type) {
+        public ConfigType(String key, Type type) {
             this.key = key;
             this.type = type;
         }
