@@ -107,7 +107,7 @@ public class ConfigurationBeanDefinitionRegistrar
             }
         }
         Map<String, Type> configTypesByKey = baiganConfigClasses.stream().flatMap(clazz ->
-                Arrays.stream(clazz.getMethods()).map(method -> new ConfigType(createKey(clazz, method), method.getAnnotatedReturnType().getType()))
+                Arrays.stream(clazz.getMethods()).map(method -> new ConfigType(createKey(clazz, method), method.getGenericReturnType()))
         ).collect(toMap(c -> c.key, c -> c.type));
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(BaiganConfigClasses.class);

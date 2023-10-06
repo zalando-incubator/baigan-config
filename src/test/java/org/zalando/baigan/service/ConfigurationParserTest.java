@@ -129,13 +129,13 @@ public class ConfigurationParserTest {
     }
 
     @Test
-    public void whenConfigurationTypeHasGenericsWithAnnotatedType_shouldParseCorrectly() throws NoSuchMethodException {
+    public void whenConfigurationTypeHasGenerics_shouldParseCorrectly() throws NoSuchMethodException {
         final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":{" +
                 "\"a8a23682-1623-450b-8817-50c98827ea4e\": [{\"someConfig\":\"A\",\"someOtherConfig\":1}]," +
                 "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"someConfig\":\"B\"}]}" +
                 "}]";
 
-        final BaiganConfigClasses stringConfigClasses = new BaiganConfigClasses(Map.of("some.config.some.key", ParameterizedConfig.class.getMethod("getConfig").getAnnotatedReturnType().getType()));
+        final BaiganConfigClasses stringConfigClasses = new BaiganConfigClasses(Map.of("some.config.some.key", ParameterizedConfig.class.getMethod("getConfig").getGenericReturnType()));
         final ConfigurationParser parser = new ConfigurationParser(stringConfigClasses, objectMapper);
 
         assertThat(parser.getConfigurations(input).get(0).getDefaultValue(), equalTo(Map.of(
