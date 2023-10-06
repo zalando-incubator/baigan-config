@@ -51,6 +51,6 @@ public class ChainedConfigurationRepository implements ConfigurationRepository {
 
     @Override
     public void put(@Nonnull String key, @Nonnull String value) {
-
+        throw new UnsupportedOperationException("The ChainedConfigurationRepository doesn't allow any changes.");
     }
 }
