@@ -24,6 +24,11 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ConfigurationServiceBeanFactoryIT.TestContext.class})
+/*
+ * The purpose of this test is to prove that BeanPostProcessor and BeanFactoryPostProcessor are actually executed.
+ * This is to ensure that Baigan does not silently break annotations like @Cachable or @Traced,
+ * which had happened before.
+ */
 public class ConfigurationServiceBeanFactoryIT {
 
     @ComponentScan(basePackageClasses = {BaiganSpringContext.class})
@@ -99,6 +104,8 @@ public class ConfigurationServiceBeanFactoryIT {
 
     @Test
     public void allowsPostProcessingOfFactoryBeans() {
+        // A bean of type MyDependency exists only because it is registered in TestBeanFactoryPostProcessor.
+        // It's existence proves that the post processor is running.
         assertThat(myDependency, is(notNullValue()));
     }
 }

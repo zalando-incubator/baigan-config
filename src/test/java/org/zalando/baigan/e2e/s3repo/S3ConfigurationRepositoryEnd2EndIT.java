@@ -1,4 +1,4 @@
-package org.zalando.baigan.e2e;
+package org.zalando.baigan.e2e.s3repo;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -10,7 +10,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,21 +25,26 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
-import org.zalando.baigan.fixture.SomeConfiguration;
-import org.zalando.baigan.service.ConfigurationRepository;
+import org.zalando.baigan.e2e.configs.SomeConfiguration;
+import org.zalando.baigan.service.aws.S3ConfigurationRepository;
 import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
+
+import java.io.IOException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.KMS;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
-import static org.zalando.baigan.e2e.End2EndIT.RepoConfig.S3_CONFIG_BUCKET;
-import static org.zalando.baigan.e2e.End2EndIT.RepoConfig.S3_CONFIG_KEY;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {End2EndIT.RepoConfig.class})
-public class End2EndIT {
+@ContextConfiguration(classes = {S3ConfigurationRepositoryEnd2EndIT.RepoConfig.class})
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class S3ConfigurationRepositoryEnd2EndIT {
+
+    public static final String S3_CONFIG_BUCKET = "some-bucket";
+    public static final String S3_CONFIG_KEY = "some-key";
 
     @Autowired
     private AmazonS3 s3;
@@ -45,39 +52,89 @@ public class End2EndIT {
     @Autowired
     private SomeConfiguration someConfiguration;
 
+    @Autowired
+    private ScheduledThreadPoolExecutor executor;
+
     @Test
     public void givenS3Configuration_whenConfigurationIsChangedOnS3_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException {
+        assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
-        s3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"a value\"}]");
+
+        s3.putObject(
+                S3_CONFIG_BUCKET,
+                S3_CONFIG_KEY,
+                "[{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
+        );
         Thread.sleep(1100);
-        assertThat(someConfiguration.someValue(), equalTo("a value"));
+        assertThat(someConfiguration.isThisTrue(), nullValue());
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
+
+        s3.putObject(
+                S3_CONFIG_BUCKET,
+                S3_CONFIG_KEY,
+                "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"some irrelevant value\"}," +
+                        "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
+                        "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
+        );
+        Thread.sleep(1100);
+        assertThat(someConfiguration.isThisTrue(), equalTo(true));
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
     }
 
-    @ComponentScan(basePackageClasses = BaiganSpringContext.class)
-    @ConfigurationServiceScan(basePackages = "org.zalando.baigan.fixture")
+    @Test
+    public void givenS3Configuration_whenTheS3FileIsUpdatedWithInvalidConfig_thenTheConfigurationIsNotUpdated() throws InterruptedException, IOException {
+        s3.putObject(
+                S3_CONFIG_BUCKET,
+                S3_CONFIG_KEY,
+                "[{\"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
+                    "{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
+        );
+        Thread.sleep(1100);
+        assertThat(someConfiguration.isThisTrue(), equalTo(true));
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
+
+        s3.putObject(
+                S3_CONFIG_BUCKET,
+                S3_CONFIG_KEY,
+                "an: invalid\"} config"
+        );
+        Thread.sleep(1100);
+        assertThat(someConfiguration.isThisTrue(), equalTo(true));
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
+    }
+
+    @AfterAll
+    public void cleanup() {
+        executor.shutdownNow();
+    }
+
+    @ConfigurationServiceScan(basePackages = "org.zalando.baigan.e2e.configs")
     @Testcontainers
+    @ComponentScan(basePackageClasses = {BaiganSpringContext.class})
     static class RepoConfig {
 
-        public static final String S3_CONFIG_BUCKET = "some-bucket";
-        public static final String S3_CONFIG_KEY = "some-key";
-
-        @Container
-        private static final LocalStackContainer localstack = new LocalStackContainer(
-                DockerImageName.parse("localstack/localstack:2.1.0")
-        ).withServices(S3, KMS).withEnv("DEFAULT_REGION", Regions.EU_CENTRAL_1.getName());
+        @Bean(destroyMethod = "shutdownNow")
+        ScheduledThreadPoolExecutor baiganRefresherPoolExecutor(){
+            return new ScheduledThreadPoolExecutor(1);
+        }
 
         @Bean
-        ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms) {
+        S3ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms, ScheduledThreadPoolExecutor executorService) {
             amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
-
             return new S3ConfigurationRepositoryBuilder()
                     .bucketName(S3_CONFIG_BUCKET)
                     .key(S3_CONFIG_KEY)
                     .s3Client(amazonS3)
                     .kmsClient(kms)
                     .refreshIntervalInSeconds(1)
+                    .executor(executorService)
                     .build();
         }
+
+        @Container
+        private static final LocalStackContainer localstack = new LocalStackContainer(
+                DockerImageName.parse("localstack/localstack:2.1.0")
+        ).withServices(S3, KMS).withEnv("DEFAULT_REGION", Regions.EU_CENTRAL_1.getName());
 
         @Bean
         AWSKMS kms() {

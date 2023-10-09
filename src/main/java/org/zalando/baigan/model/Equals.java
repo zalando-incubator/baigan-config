@@ -19,6 +19,9 @@ package org.zalando.baigan.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+import java.util.StringJoiner;
+
 /**
  * Implementation of ConditionType that evaluates to true if the context param
  * matches the configured value..
@@ -43,4 +46,23 @@ public class Equals extends ConditionType {
         return onValue.equalsIgnoreCase(forValue);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Equals equals = (Equals) o;
+        return Objects.equals(onValue, equals.onValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(onValue);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Equals.class.getSimpleName() + "[", "]")
+                .add("onValue='" + onValue + "'")
+                .toString();
+    }
 }

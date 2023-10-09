@@ -17,6 +17,8 @@
 package org.zalando.baigan.model;
 
 import java.io.Serializable;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -63,4 +65,25 @@ public class Condition<T> implements Serializable {
         return conditionType;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Condition<?> condition = (Condition<?>) o;
+        return Objects.equals(paramName, condition.paramName) && Objects.equals(conditionType, condition.conditionType) && Objects.equals(value, condition.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paramName, conditionType, value);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Condition.class.getSimpleName() + "[", "]")
+                .add("paramName='" + paramName + "'")
+                .add("conditionType=" + conditionType)
+                .add("value=" + value)
+                .toString();
+    }
 }
