@@ -1,7 +1,5 @@
 package org.zalando.baigan.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -9,8 +7,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -30,18 +30,23 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mchand
  */
-public class FileSystemConfigurationRepository implements ConfigurationRepository {
+public class FileSystemConfigurationRepository implements ConfigurationRepository, ApplicationContextAware {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemConfigurationRepository.class);
 
-    private final ConfigurationParser configurationParser;
-    private final LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
+    private ConfigurationParser configurationParser;
+    private LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
     private final String fileName;
+    private final long refreshIntervalInSeconds;
 
-     FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final BaiganConfigClasses baiganConfigClasses) {
-        this.configurationParser =  new ConfigurationParser(baiganConfigClasses, objectMapper);
+     FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
         this.fileName = fileName;
+        this.refreshIntervalInSeconds = refreshIntervalInSeconds;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.configurationParser = applicationContext.getBean(ConfigurationParser.class);
 
         cachedConfigurations = CacheBuilder.newBuilder()
                 .refreshAfterWrite(refreshIntervalInSeconds, TimeUnit.SECONDS)
@@ -58,8 +63,8 @@ public class FileSystemConfigurationRepository implements ConfigurationRepositor
 
                     @Override
                     public ListenableFuture<Map<String, Configuration<?>>> reload(
-                        String key, Map<String, Configuration<?>> oldValue)
-                        throws Exception {
+                            String key, Map<String, Configuration<?>> oldValue)
+                            throws Exception {
                         LOG.info("Reloading the configuration from file [{}]", key);
                         return super.reload(key, oldValue);
                     }

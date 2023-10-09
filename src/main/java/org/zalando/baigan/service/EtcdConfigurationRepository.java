@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.etcd.service.EtcdClient;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -29,13 +28,13 @@ public class EtcdConfigurationRepository {
     private EtcdClient etcdClient;
 
     @VisibleForTesting
-    public EtcdConfigurationRepository(final EtcdClient etcdClient, final BaiganConfigClasses baiganConfigClasses) {
+    public EtcdConfigurationRepository(final EtcdClient etcdClient) {
         checkArgument(etcdClient != null);
         this.etcdClient = etcdClient;
 
     }
 
-    public EtcdConfigurationRepository(final BaiganConfigClasses baiganConfigClasses) {
+    public EtcdConfigurationRepository() {
         etcdClient = new EtcdClient(getUrl());
     }
 

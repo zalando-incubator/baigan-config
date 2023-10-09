@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.proxy.BaiganConfigClasses;
+import org.zalando.baigan.proxy.ConfigTypeProvider;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -18,21 +20,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+@Component
 public class ConfigurationParser {
 
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationParser.class);
     final ObjectMapper objectMapper;
-    final BaiganConfigClasses baiganConfigClasses;
+    final ConfigTypeProvider configTypeProvider;
 
-    // TODO define package structure so this is not public
-    public ConfigurationParser(final BaiganConfigClasses baiganConfigClasses, final ObjectMapper objectMapper) {
-        this.baiganConfigClasses = requireNonNull(baiganConfigClasses, "baiganConfigClasses has to be not null. Get them from the bean of the same name.");
-        this.objectMapper = requireNonNull(objectMapper, "objectMapper has to be not null.");
+    @Autowired
+    public ConfigurationParser(final ConfigTypeProvider configTypeProvider, final Optional<ObjectMapper> objectMapper) {
+        this.configTypeProvider = configTypeProvider;
+        this.objectMapper = objectMapper.orElseGet(ObjectMapper::new);
     }
 
     @Nonnull
@@ -46,7 +48,7 @@ public class ConfigurationParser {
             });
             return rawConfigs.stream()
                     .map(config -> {
-                        final Optional<Configuration<?>> typedConfig = Optional.ofNullable(baiganConfigClasses.getConfigTypesByKey().get(config.getAlias()))
+                        final Optional<Configuration<?>> typedConfig = Optional.ofNullable(configTypeProvider.getType(config.getAlias()))
                                 .map(targetClass -> deserializeConfig(config, targetClass));
                         if (typedConfig.isEmpty()) {
                             LOG.info("Alias {} does not match any method in a class annotated with @BaiganConfig.", config.getAlias());

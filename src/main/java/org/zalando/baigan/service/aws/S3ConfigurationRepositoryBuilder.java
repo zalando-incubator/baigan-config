@@ -4,8 +4,6 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -18,7 +16,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Must specify non-null values for
  * - {@link S3ConfigurationRepositoryBuilder#bucketName}
  * - {@link S3ConfigurationRepositoryBuilder#key}
- * - {@link S3ConfigurationRepositoryBuilder#baiganConfigClasses}
  * <p>
  * The latter is typically set as the Spring bean named "baiganConfigClasses" provided by the library.
  */
@@ -30,8 +27,6 @@ public class S3ConfigurationRepositoryBuilder {
     private long refreshIntervalInSeconds = 60;
     private String bucketName;
     private String key;
-    private BaiganConfigClasses baiganConfigClasses;
-    private ObjectMapper objectMapper;
 
     /**
      * @param s3Client The S3 client to be used to fetch the configuration file.
@@ -87,20 +82,6 @@ public class S3ConfigurationRepositoryBuilder {
         return this;
     }
 
-    /**
-     * @param baiganConfigClasses Contains the list of classes annotated with {@link org.zalando.baigan.annotation.BaiganConfig}.
-     *                            This is typically set as the Spring bean named "baiganConfigClasses" provided by the library.
-     */
-    public S3ConfigurationRepositoryBuilder baiganConfigClasses(@Nonnull BaiganConfigClasses baiganConfigClasses) {
-        this.baiganConfigClasses = checkNotNull(baiganConfigClasses);
-        return this;
-    }
-
-    public S3ConfigurationRepositoryBuilder objectMapper(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-        return this;
-    }
-
     public S3ConfigurationRepository build() {
         if (executor == null) {
             executor = new ScheduledThreadPoolExecutor(1);
@@ -111,10 +92,7 @@ public class S3ConfigurationRepositoryBuilder {
         if (kmsClient == null) {
             kmsClient = AWSKMSClientBuilder.defaultClient();
         }
-        if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-        }
 
-        return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient, baiganConfigClasses, objectMapper);
+        return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient);
     }
 }

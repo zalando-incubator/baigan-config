@@ -1,19 +1,12 @@
 package org.zalando.baigan.proxy;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Type;
 import java.util.Map;
 
-@Component
-public class BaiganConfigClasses {
+class BaiganConfigClasses {
     private Map<String, Type> configTypesByKey;
 
     public BaiganConfigClasses() {}
-
-    public BaiganConfigClasses(Map<String, Type> configTypesByKey) {
-        this.configTypesByKey = configTypesByKey;
-    }
 
     public void setConfigTypesByKey(Map<String, Type> configTypesByKey) {
         configTypesByKey.forEach((key, value) -> {

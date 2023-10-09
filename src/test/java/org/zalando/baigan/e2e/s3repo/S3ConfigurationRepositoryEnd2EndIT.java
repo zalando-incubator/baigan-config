@@ -27,7 +27,6 @@ import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfigObject;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
-import org.zalando.baigan.proxy.BaiganConfigClasses;
 import org.zalando.baigan.service.aws.S3ConfigurationRepository;
 import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
 
@@ -124,7 +123,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         }
 
         @Bean
-        S3ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms, BaiganConfigClasses baiganConfigClasses, ScheduledThreadPoolExecutor executorService) {
+        S3ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms, ScheduledThreadPoolExecutor executorService) {
             amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
             return new S3ConfigurationRepositoryBuilder()
                     .bucketName(S3_CONFIG_BUCKET)
@@ -133,7 +132,6 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                     .kmsClient(kms)
                     .refreshIntervalInSeconds(1)
                     .executor(executorService)
-                    .baiganConfigClasses(baiganConfigClasses)
                     .build();
         }
 

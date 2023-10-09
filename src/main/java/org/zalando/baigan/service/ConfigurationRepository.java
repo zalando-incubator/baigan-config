@@ -1,6 +1,9 @@
 package org.zalando.baigan.service;
 
 import com.google.common.base.Optional;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.model.Configuration;
 
 import javax.annotation.Nonnull;
@@ -9,7 +12,7 @@ import javax.annotation.Nonnull;
  * @author mchand
  */
 
-public interface ConfigurationRepository {
+public interface ConfigurationRepository extends ApplicationContextAware {
 
     /**
      * This method required Guava's Optional which will be deprecated in favor of Java's Optional
@@ -28,4 +31,7 @@ public interface ConfigurationRepository {
 
     void put(@Nonnull final String key, @Nonnull final String value);
 
+    @Override
+    default void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    }
 }

@@ -1,5 +1,6 @@
 package org.zalando.baigan.e2e.filerepo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfigObject;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
-import org.zalando.baigan.proxy.BaiganConfigClasses;
 import org.zalando.baigan.service.FileSystemConfigurationRepository;
 import org.zalando.baigan.service.FileSystemConfigurationRepositoryBuilder;
 
@@ -79,7 +79,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     }
 
     @Test
-    public void givenS3Configuration_whenConfigurationTypeIsGeneric_thenDeserializesProperly() throws IOException, InterruptedException {
+    public void givenAConfigurationFile_whenConfigurationTypeIsGeneric_thenDeserializesProperly() throws IOException, InterruptedException {
         Files.writeString(configFile, "[{\"alias\": \"some.configuration.top.level.generics\",\"defaultValue\": {" +
                 "\"a8a23682-1623-450b-8817-50c98827ea4e\": [{\"config_key\":\"A\"}]," +
                 "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"config_key\":\"B\"}]}" +
@@ -97,11 +97,10 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     static class RepoConfig {
 
         @Bean
-        FileSystemConfigurationRepository configurationRepository(Path configFile, BaiganConfigClasses baiganConfigClasses) {
+        FileSystemConfigurationRepository configurationRepository(Path configFile) {
             return new FileSystemConfigurationRepositoryBuilder()
                     .fileName(configFile.toString())
                     .refreshIntervalInSeconds(1)
-                    .baiganConfigClasses(baiganConfigClasses)
                     .build();
         }
 
@@ -114,6 +113,11 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        @Bean
+        ObjectMapper objectMapper() {
+            return new ObjectMapper();
         }
     }
 }
