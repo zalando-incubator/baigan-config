@@ -70,7 +70,8 @@ public class S3ConfigurationRepositoryBuilder {
     }
 
     /**
-     * @param refreshIntervalInSeconds The number of seconds between the start of a run to refresh the configuration.
+     * @param refreshIntervalInSeconds The number of seconds between the starts of subsequent runs to refresh
+     *                                 the configuration
      */
     public S3ConfigurationRepositoryBuilder refreshIntervalInSeconds(final long refreshIntervalInSeconds) {
         this.refreshIntervalInSeconds = refreshIntervalInSeconds;

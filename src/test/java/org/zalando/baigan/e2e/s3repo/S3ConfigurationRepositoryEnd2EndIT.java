@@ -58,9 +58,9 @@ public class S3ConfigurationRepositoryEnd2EndIT {
 
     @Test
     public void givenS3Configuration_whenConfigurationIsChangedOnS3_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException {
-        assertThat(someConfiguration.someConfig(), nullValue());
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
+        assertThat(someConfiguration.someConfig(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
@@ -68,9 +68,9 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                 "[{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
         );
         Thread.sleep(1100);
-        assertThat(someConfiguration.someConfig(), nullValue());
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), equalTo("some value"));
+        assertThat(someConfiguration.someConfig(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
@@ -82,6 +82,28 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         );
         Thread.sleep(1100);
         assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
+        assertThat(someConfiguration.isThisTrue(), equalTo(true));
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
+    }
+
+    @Test
+    public void givenS3Configuration_whenTheS3FileIsUpdatedWithInvalidConfig_thenTheConfigurationIsNotUpdated() throws InterruptedException {
+        s3.putObject(
+                S3_CONFIG_BUCKET,
+                S3_CONFIG_KEY,
+                "[{\"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
+                    "{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
+        );
+        Thread.sleep(1100);
+        assertThat(someConfiguration.isThisTrue(), equalTo(true));
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
+
+        s3.putObject(
+                S3_CONFIG_BUCKET,
+                S3_CONFIG_KEY,
+                "an: invalid\"} config"
+        );
+        Thread.sleep(1100);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
     }

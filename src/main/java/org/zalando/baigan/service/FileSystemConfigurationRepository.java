@@ -39,7 +39,7 @@ public class FileSystemConfigurationRepository implements ConfigurationRepositor
     private final LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
     private final String fileName;
 
-    public FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final BaiganConfigClasses baiganConfigClasses) {
+     FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final BaiganConfigClasses baiganConfigClasses) {
         this.configurationParser =  new ConfigurationParser(baiganConfigClasses, objectMapper);
         this.fileName = fileName;
 

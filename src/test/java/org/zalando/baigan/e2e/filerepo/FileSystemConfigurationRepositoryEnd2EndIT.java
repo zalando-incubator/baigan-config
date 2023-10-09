@@ -15,6 +15,7 @@ import org.zalando.baigan.e2e.configs.SomeConfigObject;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
 import org.zalando.baigan.service.FileSystemConfigurationRepository;
+import org.zalando.baigan.service.FileSystemConfigurationRepositoryBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,31 +40,42 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     private Path configFile;
 
     @Test
-    public void givenS3Configuration_whenConfigurationIsChangedOnS3_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException, IOException {
-        assertThat(someConfiguration.someConfig(), nullValue());
+    public void givenAConfiguraionFile_whenConfigurationIsChanged_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException, IOException {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
+        assertThat(someConfiguration.someConfig(), nullValue());
 
         Files.writeString(configFile, "[{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]");
         Thread.sleep(1100);
-        assertThat(someConfiguration.someConfig(), nullValue());
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), equalTo("some value"));
+        assertThat(someConfiguration.someConfig(), nullValue());
 
-        Files.writeString(configFile, "[{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}," +
-                "{ \"alias\": \"some.non.existing.config\", \"defaultValue\": {\"other_config_key\":\"other value\"}}," +
+        Files.writeString(configFile, "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"an irrelevant value\"}," +
+                "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
+                "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}, " +
+                "{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}]"
+        );
+        Thread.sleep(1100);
+        assertThat(someConfiguration.isThisTrue(), equalTo(true));
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
+        assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
+    }
+
+    @Test
+    public void givenAConfigurationFile_whenTheFileIsUpdatedWithInvalidConfig_thenTheConfigurationIsNotUpdated() throws InterruptedException, IOException {
+        Files.writeString(configFile, "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"an irrelevant value\"}," +
                 "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
                 "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
         );
         Thread.sleep(1100);
-        assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
-    }
 
-    @Test
-    public void givenS3Configuration_whenInvalidConfigurationIsProvided_thenTheConfigurationIsNotUpdated() {
-        // TODO
+        Files.writeString(configFile, "{invalid: \"configuration]");
+        Thread.sleep(1100);
+        assertThat(someConfiguration.isThisTrue(), equalTo(true));
+        assertThat(someConfiguration.someValue(), equalTo("some value"));
     }
 
     @Test
@@ -86,13 +98,19 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
 
         @Bean
         FileSystemConfigurationRepository configurationRepository(Path configFile, BaiganConfigClasses baiganConfigClasses) {
-            return new FileSystemConfigurationRepository(configFile.toString(), 1, baiganConfigClasses);
+            return new FileSystemConfigurationRepositoryBuilder()
+                    .fileName(configFile.toString())
+                    .refreshIntervalInSeconds(1)
+                    .baiganConfigClasses(baiganConfigClasses)
+                    .build();
         }
 
         @Bean("configFile")
         Path configFile() {
             try {
-                return Files.createTempFile("config", "json");
+                final Path configFile = Files.createTempFile("config", "json");
+                Files.writeString(configFile, "[]");
+                return configFile;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
