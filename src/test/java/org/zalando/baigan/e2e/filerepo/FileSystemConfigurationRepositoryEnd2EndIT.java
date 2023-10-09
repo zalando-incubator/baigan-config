@@ -13,6 +13,7 @@ import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
 import org.zalando.baigan.service.FileSystemConfigurationRepository;
+import org.zalando.baigan.service.FileSystemConfigurationRepositoryBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -75,7 +76,10 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
 
         @Bean
         FileSystemConfigurationRepository configurationRepository(Path configFile) {
-            return new FileSystemConfigurationRepository(configFile.toString(), 1);
+            return new FileSystemConfigurationRepositoryBuilder()
+                    .fileName(configFile.toString())
+                    .refreshIntervalInSeconds(1)
+                    .build();
         }
 
         @Bean("configFile")

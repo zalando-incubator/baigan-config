@@ -12,10 +12,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.zalando.baigan.BaiganSpringContext;
-import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
+import org.zalando.baigan.fixture.SomeConfiguration;
 import org.zalando.baigan.service.ConfigurationRepository;
-import org.zalando.baigan.service.github.GitConfig;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,14 +36,14 @@ public class ConfigurationServiceBeanFactoryIT {
     static class TestContext {
 
         @Bean
-        ConfigurationRepository configurationRepository(final GitConfig configuration) {
+        ConfigurationRepository configurationRepository(final SomeConfiguration someConfiguration) {
             return mock(ConfigurationRepository.class);
         }
 
-        @Bean(name = "gitConfiguration")
-        GitConfig gitConfiguration() {
-            final GitConfig config = mock(GitConfig.class);
-            when(config.getGitHost()).thenReturn("raw.com");
+        @Bean(name = "someConfiguration")
+        SomeConfiguration someConfiguration() {
+            final SomeConfiguration config = mock(SomeConfiguration.class);
+            when(config.someValue()).thenReturn("a value");
             return config;
         }
 
@@ -69,8 +68,8 @@ public class ConfigurationServiceBeanFactoryIT {
 
         @Override
         public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
-            if ("gitConfiguration".equals(beanName)) {
-                when(((GitConfig) bean).getGitHost()).thenReturn("post-processed.com");
+            if ("someConfiguration".equals(beanName)) {
+                when(((SomeConfiguration) bean).someValue()).thenReturn("a post-processed value");
             }
             return bean;
         }
@@ -92,21 +91,15 @@ public class ConfigurationServiceBeanFactoryIT {
         }
     }
 
-    @BaiganConfig
-    public interface TestFeature {
-
-        Boolean enabled();
-    }
-
     @Autowired
-    private GitConfig gitConfig;
+    private SomeConfiguration someConfig;
 
     @Autowired
     private MyDependency myDependency;
 
     @Test
     public void allowsPostProcessingOfBeans() {
-        assertThat(gitConfig.getGitHost(), is("post-processed.com"));
+        assertThat(someConfig.someValue(), is("a post-processed value"));
     }
 
     @Test
