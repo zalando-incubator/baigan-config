@@ -115,7 +115,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
             }
         }
 
-        @Bean
+        @Bean(name = "baiganObjectMapper")
         ObjectMapper objectMapper() {
             return new ObjectMapper();
         }

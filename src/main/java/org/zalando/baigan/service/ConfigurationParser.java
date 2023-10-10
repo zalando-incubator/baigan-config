@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
@@ -32,7 +33,7 @@ public class ConfigurationParser {
     final ConfigTypeProvider configTypeProvider;
 
     @Autowired
-    public ConfigurationParser(final ConfigTypeProvider configTypeProvider, final Optional<ObjectMapper> objectMapper) {
+    public ConfigurationParser(final ConfigTypeProvider configTypeProvider, @Qualifier("baiganObjectMapper") final Optional<ObjectMapper> objectMapper) {
         this.configTypeProvider = configTypeProvider;
         this.objectMapper = objectMapper.orElseGet(ObjectMapper::new);
     }
