@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
  * @author mchand
  */
 
-public interface ConfigurationRepository extends ApplicationContextAware {
+public interface ConfigurationRepository {
 
     /**
      * This method required Guava's Optional which will be deprecated in favor of Java's Optional
@@ -30,8 +30,4 @@ public interface ConfigurationRepository extends ApplicationContextAware {
     java.util.Optional<Configuration> get(@Nonnull final String key);
 
     void put(@Nonnull final String key, @Nonnull final String value);
-
-    @Override
-    default void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    }
 }
