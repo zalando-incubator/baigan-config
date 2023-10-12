@@ -30,6 +30,7 @@ import org.zalando.baigan.service.aws.S3ConfigurationRepository;
 import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -74,15 +75,17 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                 S3_CONFIG_KEY,
                 "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"some irrelevant value\"}," +
                         "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
-                        "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
+                        "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}, " +
+                        "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
         Thread.sleep(1100);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
+        assertThat(someConfiguration.configList(), equalTo(List.of("A", "B")));
     }
 
     @Test
-    public void givenS3Configuration_whenTheS3FileIsUpdatedWithInvalidConfig_thenTheConfigurationIsNotUpdated() throws InterruptedException, IOException {
+    public void givenS3Configuration_whenTheS3FileIsUpdatedWithInvalidConfig_thenTheConfigurationIsNotUpdated() throws InterruptedException {
         s3.putObject(
                 S3_CONFIG_BUCKET,
                 S3_CONFIG_KEY,

@@ -18,6 +18,7 @@ import org.zalando.baigan.service.FileSystemConfigurationRepositoryBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -46,11 +47,13 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
 
         Files.writeString(configFile, "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"an irrelevant value\"}," +
                 "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
-                "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
+                "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}," +
+                "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
         Thread.sleep(1100);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
+        assertThat(someConfiguration.configList(), equalTo(List.of("A", "B")));
     }
 
     @Test
