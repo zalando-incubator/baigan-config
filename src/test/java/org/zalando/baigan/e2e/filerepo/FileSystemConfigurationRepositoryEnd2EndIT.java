@@ -54,12 +54,14 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
         Files.writeString(configFile, "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"an irrelevant value\"}," +
                 "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
                 "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}, " +
-                "{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}]"
+                "{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}], " +
+                "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
         Thread.sleep(1100);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
         assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
+        assertThat(someConfiguration.configList(), equalTo(List.of("A", "B")));
     }
 
     @Test

@@ -12,4 +12,5 @@ public interface SomeConfiguration {
     String someValue();
     Boolean isThisTrue();
     Map<UUID, List<SomeConfigObject>> topLevelGenerics();
+    List<String> configList();
 }
