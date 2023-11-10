@@ -5,9 +5,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.service.ConfigurationParser;
 import org.zalando.baigan.service.ConfigurationRepository;
@@ -16,25 +13,25 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class S3ConfigurationRepository implements ConfigurationRepository, ApplicationContextAware {
+public class S3ConfigurationRepository implements ConfigurationRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
 
-    private ConfigurationParser configurationParser;
+    private final ConfigurationParser configurationParser;
     private final S3FileLoader s3Loader;
     private final long refreshInterval;
-    private final ScheduledThreadPoolExecutor executor;
+    private final ScheduledExecutorService executor;
     private volatile Map<String, Configuration<?>> configurationsMap = ImmutableMap.of();
 
     S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
-                              final long refreshInterval, final ScheduledThreadPoolExecutor executor,
-                              final AmazonS3 s3Client, final AWSKMS kmsClient) {
+                              final long refreshInterval, final ScheduledExecutorService executor,
+                              final AmazonS3 s3Client, final AWSKMS kmsClient, ConfigurationParser configurationParser) {
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
@@ -45,11 +42,8 @@ public class S3ConfigurationRepository implements ConfigurationRepository, Appli
         this.refreshInterval = refreshInterval;
         this.executor = executor;
         this.s3Loader = new S3FileLoader(bucketName, key, s3Client, kmsClient);
-    }
+        this.configurationParser = configurationParser;
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.configurationParser = applicationContext.getBean(ConfigurationParser.class);
         loadConfigurations();
         if (refreshInterval > 0) {
             setupRefresh();
@@ -68,13 +62,15 @@ public class S3ConfigurationRepository implements ConfigurationRepository, Appli
     }
 
     private void loadConfigurations() {
+        LOG.info("Loading configurations from S3 file");
         final String configurationText = s3Loader.loadContent();
-        final List<Configuration<?>> configurations = configurationParser.getConfigurations(configurationText);
+        final List<Configuration<?>> configurations = configurationParser.parseConfigurations(configurationText);
         final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
         for (final Configuration<?> configuration : configurations) {
             builder.put(configuration.getAlias(), configuration);
         }
         configurationsMap = builder.build();
+        LOG.info("Configuration now: {}", configurationsMap);
     }
 
     private void setupRefresh() {

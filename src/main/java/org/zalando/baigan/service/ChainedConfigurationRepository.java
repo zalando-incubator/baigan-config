@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ChainedConfigurationRepository implements ConfigurationRepository {
     private final List<ConfigurationRepository> configurationRepositories;
 
-    public ChainedConfigurationRepository(@Nonnull final ConfigurationRepository firstRepository,
+    ChainedConfigurationRepository(@Nonnull final ConfigurationRepository firstRepository,
                                           @Nonnull final ConfigurationRepository secondRepository,
                                           final ConfigurationRepository... moreRepositories) {
         checkNotNull(firstRepository, "firstRepository is required");

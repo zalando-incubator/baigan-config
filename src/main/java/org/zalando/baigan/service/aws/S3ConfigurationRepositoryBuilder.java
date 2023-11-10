@@ -4,29 +4,35 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import org.zalando.baigan.service.ConfigurationParser;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Builder class for an S3ConfigurationRepository.
+ * Builder class for an S3ConfigurationRepository. // TODO can only be created via RepositoryFactory, not backwards compatible. All ConfigRepository docs require updates
  * <p>
  * Must specify non-null values for
  * - {@link S3ConfigurationRepositoryBuilder#bucketName}
  * - {@link S3ConfigurationRepositoryBuilder#key}
  * <p>
- * The latter is typically set as the Spring bean named "baiganConfigClasses" provided by the library.
  */
 public class S3ConfigurationRepositoryBuilder {
 
-    private ScheduledThreadPoolExecutor executor;
+    private ScheduledExecutorService executor;
     private AmazonS3 s3Client;
     private AWSKMS kmsClient;
     private long refreshIntervalInSeconds = 60;
     private String bucketName;
     private String key;
+    private final ConfigurationParser configurationParser;
+
+    public S3ConfigurationRepositoryBuilder(final ConfigurationParser configurationParser) {
+        this.configurationParser = configurationParser;
+    }
 
     /**
      * @param s3Client The S3 client to be used to fetch the configuration file.
@@ -77,7 +83,7 @@ public class S3ConfigurationRepositoryBuilder {
      * @param executor The {@link ScheduledThreadPoolExecutor} used to run the configuration refresh. If this is not
      *                 specified, a new {@link ScheduledThreadPoolExecutor} with a single thread is used.
      */
-    public S3ConfigurationRepositoryBuilder executor(ScheduledThreadPoolExecutor executor) {
+    public S3ConfigurationRepositoryBuilder executor(ScheduledExecutorService executor) {
         this.executor = executor;
         return this;
     }
@@ -93,6 +99,6 @@ public class S3ConfigurationRepositoryBuilder {
             kmsClient = AWSKMSClientBuilder.defaultClient();
         }
 
-        return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient);
+        return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient, configurationParser);
     }
 }

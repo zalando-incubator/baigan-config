@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.model.Equals;
-import org.zalando.baigan.proxy.ConfigTypeProvider;
+import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import java.io.UncheckedIOException;
 import java.util.List;
@@ -26,16 +26,16 @@ import static org.mockito.Mockito.when;
 
 public class ConfigurationParserTest {
 
-    private final ConfigTypeProvider configTypeProvider = mock(ConfigTypeProvider.class);
-    private final ConfigurationParser parser = new ConfigurationParser(configTypeProvider, empty());
+    private final BaiganConfigClasses baiganConfigClasses = mock(BaiganConfigClasses.class);
+    private final ConfigurationParser parser = new ConfigurationParser(baiganConfigClasses, empty());
 
     @Test
     public void whenInputContainsKeyForKnownType_shouldParseConfiguration() {
         final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":\"someValue\"}]";
 
-        when(configTypeProvider.getType("some.config.some.key")).thenReturn(String.class);
+        when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of("some.config.some.key", String.class));
 
-        final List<Configuration<?>> parsedConfigs = parser.getConfigurations(input);
+        final List<Configuration<?>> parsedConfigs = parser.parseConfigurations(input);
 
         final List<Configuration<String>> expectedConfigs = List.of(
                 new Configuration<>("some.config.some.key", null, Set.of(), "someValue")
@@ -49,10 +49,12 @@ public class ConfigurationParserTest {
         final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":\"someValue\"}," +
                 "{\"alias\":\"some.struct.config\",\"defaultValue\":{\"someConfig\":\"some value\",\"someOtherConfig\":1}}]";
 
-        when(configTypeProvider.getType("some.config.some.key")).thenReturn(String.class);
-        when(configTypeProvider.getType("some.struct.config")).thenReturn(StructuredConfig.class);
+        when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of(
+                "some.config.some.key", String.class,
+                "some.struct.config", StructuredConfig.class
+        ));
 
-        final List<Configuration<?>> parsedConfigs = parser.getConfigurations(input);
+        final List<Configuration<?>> parsedConfigs = parser.parseConfigurations(input);
 
         final List<Configuration<?>> expectedConfigs = List.of(
                 new Configuration<>("some.config.some.key", null, Set.of(), "someValue"),
@@ -64,13 +66,13 @@ public class ConfigurationParserTest {
 
     @Test
     public void whenInputIsNullOrEmpty_shouldReturnEmptyList() {
-        assertThat(parser.getConfigurations(null), equalTo(List.of()));
-        assertThat(parser.getConfigurations(""), equalTo(List.of()));
+        assertThat(parser.parseConfigurations(null), equalTo(List.of()));
+        assertThat(parser.parseConfigurations(""), equalTo(List.of()));
     }
 
     @Test
     public void whenInputIsEmptyArray_shouldReturnEmptyList() {
-        assertThat(parser.getConfigurations("[]"), equalTo(List.of()));
+        assertThat(parser.parseConfigurations("[]"), equalTo(List.of()));
     }
 
     @Test
@@ -78,9 +80,9 @@ public class ConfigurationParserTest {
         final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":\"someValue\"}," +
                 "{\"alias\":\"some.missing.config.key\",\"defaultValue\":\"some other value\"}]";
 
-        when(configTypeProvider.getType("some.config.some.key")).thenReturn(String.class);
+        when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of("some.config.some.key", String.class));
 
-        final List<Configuration<?>> parsedConfigs = parser.getConfigurations(input);
+        final List<Configuration<?>> parsedConfigs = parser.parseConfigurations(input);
 
         assertThat(parsedConfigs.stream().map(config -> (String) config.getDefaultValue()).collect(toList()), equalTo(List.of("someValue")));
     }
@@ -89,7 +91,7 @@ public class ConfigurationParserTest {
     public void whenInputCannotBeParsedToJson_shouldThrowException() {
         final String input = "some invalid input";
 
-        assertThrows(UncheckedIOException.class, () -> parser.getConfigurations(input));
+        assertThrows(UncheckedIOException.class, () -> parser.parseConfigurations(input));
     }
 
     @Test
@@ -99,9 +101,9 @@ public class ConfigurationParserTest {
                 "\"conditions\":[{\"paramName\":\"some param name\",\"conditionType\":{\"type\":\"Equals\",\"onValue\":\"some value\"}," +
                 "\"value\":{\"someConfig\":\"some conditional value\",\"someOtherConfig\":-1}}]}]";
 
-        when(configTypeProvider.getType("some.config.some.key")).thenReturn(StructuredConfig.class);
+        when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of("some.config.some.key", StructuredConfig.class));
 
-        final List<Configuration<?>> parsedConfigs = parser.getConfigurations(input);
+        final List<Configuration<?>> parsedConfigs = parser.parseConfigurations(input);
 
         final Configuration<StructuredConfig> expectedConfig = new Configuration<>(
                 "some.config.some.key",
@@ -117,9 +119,9 @@ public class ConfigurationParserTest {
     public void whenDefaultValueCannotBeParsed_shouldThrowException() {
         final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":{}}]";
 
-        when(configTypeProvider.getType("some.config.some.key")).thenReturn(String.class);
+        when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of("some.config.some.key", String.class));
 
-        assertThrows(RuntimeException.class, () -> parser.getConfigurations(input));
+        assertThrows(RuntimeException.class, () -> parser.parseConfigurations(input));
     }
 
     @Test
@@ -127,9 +129,9 @@ public class ConfigurationParserTest {
         final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":\"some value\"," +
                 "\"conditions\":[{\"paramName\":\"some param name\",\"conditionType\":{\"type\":\"Equals\",\"onValue\":\"some value\"},\"value\":{}}]}]";
 
-        when(configTypeProvider.getType("some.config.some.key")).thenReturn(StructuredConfig.class);
+        when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of("some.config.some.key", StructuredConfig.class));
 
-        assertThrows(RuntimeException.class, () -> parser.getConfigurations(input));
+        assertThrows(RuntimeException.class, () -> parser.parseConfigurations(input));
     }
 
     @Test
@@ -139,9 +141,9 @@ public class ConfigurationParserTest {
                 "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"someConfig\":\"B\"}]}" +
                 "}]";
 
-        when(configTypeProvider.getType("some.config.some.key")).thenReturn(ParameterizedConfig.class.getMethod("getConfig").getGenericReturnType());
+        when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of("some.config.some.key", ParameterizedConfig.class.getMethod("getConfig").getGenericReturnType()));
 
-        assertThat(parser.getConfigurations(input).get(0).getDefaultValue(), equalTo(Map.of(
+        assertThat(parser.parseConfigurations(input).get(0).getDefaultValue(), equalTo(Map.of(
                 UUID.fromString("a8a23682-1623-450b-8817-50c98827ea4e"), List.of(new StructuredConfig("A", 1)),
                 UUID.fromString("76ced443-6555-4748-a22e-8700f3864e59"), List.of(new StructuredConfig("B", 0))
         )));

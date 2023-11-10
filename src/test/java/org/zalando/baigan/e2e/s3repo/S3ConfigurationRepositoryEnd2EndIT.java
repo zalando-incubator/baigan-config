@@ -27,8 +27,8 @@ import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfigObject;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
+import org.zalando.baigan.service.RepositoryFactory;
 import org.zalando.baigan.service.aws.S3ConfigurationRepository;
-import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
 
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -61,6 +61,8 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
         assertThat(someConfiguration.someConfig(), nullValue());
+        assertThat(someConfiguration.configList(), nullValue());
+        assertThat(someConfiguration.topLevelGenerics(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
@@ -71,6 +73,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), equalTo("some value"));
         assertThat(someConfiguration.someConfig(), nullValue());
+        assertThat(someConfiguration.configList(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
@@ -126,9 +129,9 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         }
 
         @Bean
-        S3ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms, ScheduledThreadPoolExecutor executorService) {
+        S3ConfigurationRepository configurationRepository(RepositoryFactory repositoryFactory, AmazonS3 amazonS3, AWSKMS kms, ScheduledThreadPoolExecutor executorService) {
             amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
-            return new S3ConfigurationRepositoryBuilder()
+            return repositoryFactory.s3ConfigurationRepository()
                     .bucketName(S3_CONFIG_BUCKET)
                     .key(S3_CONFIG_KEY)
                     .s3Client(amazonS3)

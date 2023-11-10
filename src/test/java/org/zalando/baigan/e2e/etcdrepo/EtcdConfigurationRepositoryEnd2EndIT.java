@@ -15,8 +15,8 @@ import org.testcontainers.utility.DockerImageName;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
-import org.zalando.baigan.etcd.service.EtcdClient;
 import org.zalando.baigan.service.EtcdConfigurationRepository;
+import org.zalando.baigan.service.RepositoryFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -73,8 +73,8 @@ public class EtcdConfigurationRepositoryEnd2EndIT {
     static class RepoConfig {
 
         @Bean
-        EtcdConfigurationRepository configurationRepository(GenericContainer<?> etcd) {
-            return new EtcdConfigurationRepository(new EtcdClient("http://localhost:" + etcd.getMappedPort(2379)));
+        EtcdConfigurationRepository configurationRepository(GenericContainer<?> etcd, RepositoryFactory repositoryFactory) {
+            return repositoryFactory.etcdConfigurationRepository("http://localhost:" + etcd.getMappedPort(2379));
         }
 
         @Container

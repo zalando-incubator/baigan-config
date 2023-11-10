@@ -7,9 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.model.Configuration;
 
 import javax.annotation.Nonnull;
@@ -30,23 +27,17 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mchand
  */
-public class FileSystemConfigurationRepository implements ConfigurationRepository, ApplicationContextAware {
+public class FileSystemConfigurationRepository implements ConfigurationRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemConfigurationRepository.class);
 
-    private ConfigurationParser configurationParser;
-    private LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
+    private final ConfigurationParser configurationParser;
+    private final LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
     private final String fileName;
-    private final long refreshIntervalInSeconds;
 
-     FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
+    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final ConfigurationParser configurationParser) {
         this.fileName = fileName;
-        this.refreshIntervalInSeconds = refreshIntervalInSeconds;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.configurationParser = applicationContext.getBean(ConfigurationParser.class);
+        this.configurationParser = configurationParser;
 
         cachedConfigurations = CacheBuilder.newBuilder()
                 .refreshAfterWrite(refreshIntervalInSeconds, TimeUnit.SECONDS)
@@ -90,7 +81,7 @@ public class FileSystemConfigurationRepository implements ConfigurationRepositor
 
     protected Map<String, Configuration<?>> loadConfigurations(String filename) {
         final String configurationText = loadResource(filename);
-        final Collection<Configuration<?>> configurations = configurationParser.getConfigurations(
+        final Collection<Configuration<?>> configurations = configurationParser.parseConfigurations(
                 configurationText);
 
         final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();

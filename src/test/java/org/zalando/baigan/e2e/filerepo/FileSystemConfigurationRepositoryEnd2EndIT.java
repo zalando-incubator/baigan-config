@@ -15,7 +15,7 @@ import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfigObject;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
 import org.zalando.baigan.service.FileSystemConfigurationRepository;
-import org.zalando.baigan.service.FileSystemConfigurationRepositoryBuilder;
+import org.zalando.baigan.service.RepositoryFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,7 +40,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     private Path configFile;
 
     @Test
-    public void givenAConfiguraionFile_whenConfigurationIsChanged_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException, IOException {
+    public void givenAConfigurationFile_whenConfigurationIsChanged_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException, IOException {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
         assertThat(someConfiguration.someConfig(), nullValue());
@@ -54,7 +54,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
         Files.writeString(configFile, "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"an irrelevant value\"}," +
                 "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
                 "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}, " +
-                "{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}], " +
+                "{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}, " +
                 "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
         Thread.sleep(1100);
@@ -99,8 +99,8 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     static class RepoConfig {
 
         @Bean
-        FileSystemConfigurationRepository configurationRepository(Path configFile) {
-            return new FileSystemConfigurationRepositoryBuilder()
+        FileSystemConfigurationRepository configurationRepository(Path configFile, RepositoryFactory repositoryFactory) {
+            return repositoryFactory.fileSystemConfigurationRepository()
                     .fileName(configFile.toString())
                     .refreshIntervalInSeconds(1)
                     .build();

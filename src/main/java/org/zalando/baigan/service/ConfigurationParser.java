@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.proxy.ConfigTypeProvider;
+import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -30,16 +31,16 @@ public class ConfigurationParser {
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationParser.class);
     final ObjectMapper objectMapper;
-    final ConfigTypeProvider configTypeProvider;
+    final BaiganConfigClasses baiganConfigClasses;
 
     @Autowired
-    public ConfigurationParser(final ConfigTypeProvider configTypeProvider, @Qualifier("baiganObjectMapper") final Optional<ObjectMapper> objectMapper) {
-        this.configTypeProvider = configTypeProvider;
+    public ConfigurationParser(final BaiganConfigClasses baiganConfigClasses, @Qualifier("baiganObjectMapper") final Optional<ObjectMapper> objectMapper) {
+        this.baiganConfigClasses = baiganConfigClasses;
         this.objectMapper = objectMapper.orElseGet(ObjectMapper::new);
     }
 
     @Nonnull
-    public List<Configuration<?>> getConfigurations(final String text) {
+    public List<Configuration<?>> parseConfigurations(final String text) {
         if (text == null || text.isEmpty()) {
             LOG.warn("Input to parse is empty: {}",  text);
             return List.of();
@@ -48,14 +49,7 @@ public class ConfigurationParser {
             List<Configuration<JsonNode>> rawConfigs = objectMapper.readValue(text, new TypeReference<>() {
             });
             return rawConfigs.stream()
-                    .map(config -> {
-                        final Optional<Configuration<?>> typedConfig = Optional.ofNullable(configTypeProvider.getType(config.getAlias()))
-                                .map(targetClass -> deserializeConfig(config, targetClass));
-                        if (typedConfig.isEmpty()) {
-                            LOG.info("Alias {} does not match any method in a class annotated with @BaiganConfig.", config.getAlias());
-                        }
-                        return typedConfig;
-                    })
+                    .map(this::convertToTypedConfig)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(toList());
@@ -63,6 +57,28 @@ public class ConfigurationParser {
                 IOException e) {
             throw new UncheckedIOException("Unable to deserialize the Configuration.", e);
         }
+    }
+
+    public Optional<Configuration<?>> parseConfiguration(final String text) {
+        if (text == null || text.isEmpty()) {
+            LOG.warn("Input to parse is empty: {}",  text);
+            return empty();
+        }
+        try {
+            Configuration<JsonNode> rawConfig = objectMapper.readValue(text, new TypeReference<>(){});
+            return convertToTypedConfig(rawConfig);
+        } catch (JsonProcessingException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private Optional<Configuration<?>> convertToTypedConfig(final Configuration<JsonNode> jsonConfig) {
+        final Optional<Configuration<?>> typedConfig = Optional.ofNullable(baiganConfigClasses.getConfigTypesByKey().get(jsonConfig.getAlias()))
+                .map(targetClass -> deserializeConfig(jsonConfig, targetClass));
+        if (typedConfig.isEmpty()) {
+            LOG.info("Alias {} does not match any method in a class annotated with @BaiganConfig.", jsonConfig.getAlias());
+        }
+        return typedConfig;
     }
 
     private <T> Configuration<?> deserializeConfig(Configuration<JsonNode> config, Type targetClass) {
