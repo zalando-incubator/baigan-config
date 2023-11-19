@@ -61,6 +61,8 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
         assertThat(someConfiguration.someConfig(), nullValue());
+        assertThat(someConfiguration.configList(), nullValue());
+        assertThat(someConfiguration.topLevelGenerics(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
@@ -71,6 +73,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), equalTo("some value"));
         assertThat(someConfiguration.someConfig(), nullValue());
+        assertThat(someConfiguration.configList(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
@@ -127,10 +130,10 @@ public class S3ConfigurationRepositoryEnd2EndIT {
 
         @Bean
         S3ConfigurationRepository configurationRepository(
+                RepositoryFactory repositoryFactory,
                 AmazonS3 amazonS3,
                 AWSKMS kms,
-                ScheduledThreadPoolExecutor executorService,
-                RepositoryFactory repositoryFactory
+                ScheduledThreadPoolExecutor executorService
         ) {
             amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
             return repositoryFactory.s3ConfigurationRepository()

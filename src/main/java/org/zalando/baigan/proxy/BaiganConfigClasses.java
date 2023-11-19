@@ -3,7 +3,7 @@ package org.zalando.baigan.proxy;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-class BaiganConfigClasses {
+public class BaiganConfigClasses {
     private Map<String, Type> configTypesByKey;
 
     public BaiganConfigClasses() {}

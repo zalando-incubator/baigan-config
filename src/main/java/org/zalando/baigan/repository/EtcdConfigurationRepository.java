@@ -1,8 +1,5 @@
 package org.zalando.baigan.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +7,6 @@ import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.repository.etcd.service.EtcdClient;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -22,13 +18,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 // TODO Upgrade to v3
 public class EtcdConfigurationRepository implements ConfigurationRepository {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new GuavaModule());
     private static final String CONFIG_PATH_PREFIX = "/v2/keys/";
-    private static final Logger LOG = LoggerFactory.getLogger(EtcdConfigurationRepository.class);
     private final EtcdClient etcdClient;
+    private final ConfigurationParser configurationParser;
 
-    EtcdConfigurationRepository(final String etcdUrl) {
-        etcdClient = new EtcdClient(etcdUrl);
+    EtcdConfigurationRepository(final String etcdUrl, final ConfigurationParser configurationParser) {
+        this.etcdClient = new EtcdClient(etcdUrl);
+        this.configurationParser = configurationParser;
     }
 
     @Override
@@ -40,19 +36,10 @@ public class EtcdConfigurationRepository implements ConfigurationRepository {
     @Override
     @Nonnull
     public Optional<Configuration> get(@Nonnull final String key) {
-        try {
-            checkArgument(!Strings.isNullOrEmpty(key),
-                    "Attempt to get configuration for an empty key !");
-            final Optional<String> optionalConfig = etcdClient.get(CONFIG_PATH_PREFIX + key);
+        checkArgument(!Strings.isNullOrEmpty(key),
+                "Attempt to get configuration for an empty key !");
+        final Optional<String> optionalConfig = etcdClient.get(CONFIG_PATH_PREFIX + key);
 
-            if (optionalConfig.isPresent()) {
-                return Optional.of(objectMapper.readValue(optionalConfig.get(),
-                        Configuration.class));
-            }
-
-        } catch (IOException e) {
-            LOG.warn("Error while loading configuration for key: " + key, e);
-        }
-        return Optional.empty();
+        return optionalConfig.flatMap(configurationParser::parseConfiguration);
     }
 }

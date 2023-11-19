@@ -9,10 +9,11 @@ import static java.util.Objects.requireNonNull;
  */
 public class EtcdConfigurationRepositoryBuilder {
 
+    private final ConfigurationParser configurationParser;
     private String etcdUrl;
 
-    EtcdConfigurationRepositoryBuilder() {
-
+    EtcdConfigurationRepositoryBuilder(final ConfigurationParser configurationParser) {
+        this.configurationParser = configurationParser;
     }
 
     public EtcdConfigurationRepositoryBuilder etcdUrl(final String etcdUrl) {
@@ -22,6 +23,6 @@ public class EtcdConfigurationRepositoryBuilder {
 
     public EtcdConfigurationRepository build() {
         requireNonNull(etcdUrl, "etcdUrl must not be null");
-        return new EtcdConfigurationRepository(etcdUrl);
+        return new EtcdConfigurationRepository(etcdUrl, configurationParser);
     }
 }

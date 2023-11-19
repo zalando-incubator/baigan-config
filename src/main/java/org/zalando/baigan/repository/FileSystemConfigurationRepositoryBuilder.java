@@ -11,8 +11,10 @@ public class FileSystemConfigurationRepositoryBuilder {
 
     private String filePath;
     private long refreshIntervalInSeconds = 60L;
+    private final ConfigurationParser configurationParser;
 
-    FileSystemConfigurationRepositoryBuilder() {
+    FileSystemConfigurationRepositoryBuilder(final ConfigurationParser configurationParser) {
+        this.configurationParser = configurationParser;
     }
 
     /**
@@ -34,6 +36,6 @@ public class FileSystemConfigurationRepositoryBuilder {
 
     public FileSystemConfigurationRepository build() {
         requireNonNull(filePath, "filePath must not be null");
-        return new FileSystemConfigurationRepository(filePath, refreshIntervalInSeconds);
+        return new FileSystemConfigurationRepository(filePath, refreshIntervalInSeconds, configurationParser);
     }
 }

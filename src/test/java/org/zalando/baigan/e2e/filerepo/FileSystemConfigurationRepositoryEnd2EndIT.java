@@ -40,7 +40,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     private Path configFile;
 
     @Test
-    public void givenAConfiguraionFile_whenConfigurationIsChanged_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException, IOException {
+    public void givenAConfigurationFile_whenConfigurationIsChanged_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException, IOException {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
         assertThat(someConfiguration.someConfig(), nullValue());
