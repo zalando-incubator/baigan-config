@@ -12,8 +12,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
-import org.zalando.baigan.service.FileSystemConfigurationRepository;
-import org.zalando.baigan.service.FileSystemConfigurationRepositoryBuilder;
+import org.zalando.baigan.repository.FileSystemConfigurationRepository;
+import org.zalando.baigan.repository.RepositoryFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -78,8 +78,8 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     static class RepoConfig {
 
         @Bean
-        FileSystemConfigurationRepository configurationRepository(Path configFile) {
-            return new FileSystemConfigurationRepositoryBuilder()
+        FileSystemConfigurationRepository configurationRepository(Path configFile, RepositoryFactory repositoryFactory) {
+            return repositoryFactory.fileSystemConfigurationRepository()
                     .fileName(configFile.toString())
                     .refreshIntervalInSeconds(1)
                     .build();

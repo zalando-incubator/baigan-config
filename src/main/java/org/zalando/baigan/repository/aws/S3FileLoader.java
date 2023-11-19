@@ -1,4 +1,4 @@
-package org.zalando.baigan.service.aws;
+package org.zalando.baigan.repository.aws;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.DecryptRequest;
@@ -18,7 +18,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 /* Provides transparent content decryption of encrypted configuration content using AWS KMS. All configuration values
  * starting with {@value #KMS_START_TAG} are decrypted automatically. The content must be Base64 encoded and
- * the decrypted content is interpreted as an UTF-8 encoded string. */
+ * the decrypted content is interpreted as a UTF-8 encoded string. */
 
 public class S3FileLoader {
 
@@ -38,7 +38,7 @@ public class S3FileLoader {
     private final String bucketName;
     private final String key;
 
-    S3FileLoader(@Nonnull String bucketName, @Nonnull String key, @Nonnull AmazonS3 s3Client, @Nonnull AWSKMS kmsClient) {
+    public S3FileLoader(@Nonnull String bucketName, @Nonnull String key, @Nonnull AmazonS3 s3Client, @Nonnull AWSKMS kmsClient) {
         this.s3Client = s3Client;
         this.kmsClient = kmsClient;
         this.bucketName = bucketName;

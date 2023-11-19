@@ -21,7 +21,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
-import org.zalando.baigan.provider.ContextProvider;
 
 /**
  * This class implements the {@link BeanPostProcessor} interface to register all

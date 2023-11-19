@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.zalando.baigan.provider.ContextProvider;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,7 +38,7 @@ public class TestConfigurationContextProviderBeanPostProcessor {
 
     private final ContextProviderRegistry registry = mock(ContextProviderRegistry.class);
 
-    private ConfigurationContextProviderBeanPostprocessor processor = new ConfigurationContextProviderBeanPostprocessor(() -> registry);
+    private final ConfigurationContextProviderBeanPostprocessor processor = new ConfigurationContextProviderBeanPostprocessor(() -> registry);
 
     @Test
     public void testMessenger() {

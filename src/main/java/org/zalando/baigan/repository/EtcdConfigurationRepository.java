@@ -1,11 +1,10 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.repository;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zalando.baigan.etcd.service.EtcdClient;
 import org.zalando.baigan.model.Configuration;
+import org.zalando.baigan.repository.etcd.service.EtcdClient;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -14,34 +13,17 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * @author mchand
+ * A {@link ConfigurationRepository} implementation that loads the configuration from an etcd server.
+ * The configuration is not cached and is fetched from etcd on every request.
  */
-
 public class EtcdConfigurationRepository extends AbstractConfigurationRepository {
 
-    private static final String ETCD_URL_ENV_NAME = "ETCD_URL";
     private static final String CONFIG_PATH_PREFIX = "/v2/keys/";
-    private Logger LOG = LoggerFactory.getLogger(EtcdConfigurationRepository.class);
-    private EtcdClient etcdClient;
+    private static final Logger LOG = LoggerFactory.getLogger(EtcdConfigurationRepository.class);
+    private final EtcdClient etcdClient;
 
-    @VisibleForTesting
-    public EtcdConfigurationRepository(final EtcdClient etcdClient) {
-        checkArgument(etcdClient != null);
-        this.etcdClient = etcdClient;
-
-    }
-
-    public EtcdConfigurationRepository() {
-        etcdClient = new EtcdClient(getUrl());
-    }
-
-    private String getUrl() {
-        String systemEtcdUrl = System.getenv(ETCD_URL_ENV_NAME);
-        if (Strings.isNullOrEmpty(systemEtcdUrl)) {
-            LOG.error("$" + ETCD_URL_ENV_NAME
-                    + " is undefined. This is required in order to by the baigan configuration service.");
-        }
-        return systemEtcdUrl;
+    EtcdConfigurationRepository(final String etcdUrl) {
+        etcdClient = new EtcdClient(etcdUrl);
     }
 
     public void put(@Nonnull final String key, @Nonnull final String value) {

@@ -26,10 +26,9 @@ import org.testcontainers.utility.DockerImageName;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
-import org.zalando.baigan.service.aws.S3ConfigurationRepository;
-import org.zalando.baigan.service.aws.S3ConfigurationRepositoryBuilder;
+import org.zalando.baigan.repository.RepositoryFactory;
+import org.zalando.baigan.repository.S3ConfigurationRepository;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -90,7 +89,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                 S3_CONFIG_BUCKET,
                 S3_CONFIG_KEY,
                 "[{\"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
-                    "{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
+                        "{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
         );
         Thread.sleep(1100);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
@@ -117,14 +116,19 @@ public class S3ConfigurationRepositoryEnd2EndIT {
     static class RepoConfig {
 
         @Bean(destroyMethod = "shutdownNow")
-        ScheduledThreadPoolExecutor baiganRefresherPoolExecutor(){
+        ScheduledThreadPoolExecutor baiganRefresherPoolExecutor() {
             return new ScheduledThreadPoolExecutor(1);
         }
 
         @Bean
-        S3ConfigurationRepository configurationRepository(AmazonS3 amazonS3, AWSKMS kms, ScheduledThreadPoolExecutor executorService) {
+        S3ConfigurationRepository configurationRepository(
+                AmazonS3 amazonS3,
+                AWSKMS kms,
+                ScheduledThreadPoolExecutor executorService,
+                RepositoryFactory repositoryFactory
+        ) {
             amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
-            return new S3ConfigurationRepositoryBuilder()
+            return repositoryFactory.s3ConfigurationRepository()
                     .bucketName(S3_CONFIG_BUCKET)
                     .key(S3_CONFIG_KEY)
                     .s3Client(amazonS3)

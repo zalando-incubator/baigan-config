@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.repository;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -22,8 +22,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Implementation of {@link ConfigurationRepository} supporting a file on
- * Classpath as the persistence storage for the Baigan configuration.
+ * A {@link ConfigurationRepository} implementation supporting a file on
+ * Classpath as the persistence storage for the Baigan configuration. The file is cached.
+ * The cache refresh time can be specified.
  *
  * @author mchand
  */

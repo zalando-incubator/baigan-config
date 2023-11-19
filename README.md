@@ -11,7 +11,6 @@ What makes Baigan a rockstar configuration framework ?
 * *Extensible*: Extend configurations, create rules, define types that suit you.
 * *Flexible*: Baigan is a client library that can read configurations from multiple repositories:
 	* Filesystem
-	* Github
 	* AWS S3
 	* Etcd
 
@@ -78,6 +77,20 @@ The above example code enables the application to inject _ExpressFeature_ spring
 	}
 ```
 
+#### Provide a configuration repository
+
+Finally, a `ConfigurationRepository` Spring Bean has to be provided that can provide the configuration values.
+This is done using the Spring Bean of type `RepositoryFactory`, which allows creating builders for all repository
+types. The following example shows how to configure a filesystem based repository.
+
+```Java
+	@Bean
+	public ConfigurationRepository configurationRepository(RepositoryFactory factory) {
+		return factory.fileSystemConfigurationRepository()
+					  .fileName("configs.json");
+	}
+``` 
+
 ### Creating configurations
 Baigan configurations follow a specific schema and can be stored on any of the supported repositories.
 
@@ -118,7 +131,7 @@ A configuration object should conform to the following JSON Schema:
                     },
             		"conditionType": {
                         "description": "Type of condition to evaluate. This can be custom defined, with custom defined properties.",
-                        "type": "object",
+                        "type": "object"
                     }
                 }
             }
@@ -156,9 +169,6 @@ This step depends on the chosen repository.
 ##### Filesystem
 Save a file named express-feature.json with the content above anywhere on the filesystem and bundle it as part of your application. To use it just specify the classpath in the constructor.
 
-##### Github
-Save a file named express-feature.json with the content above and push it to any Github repository. To use it just provide the required Github  settings to the provider. Github Enterprise is also supported.
-
 ##### AWS S3
 Save a file named express-feature.json with the content above and upload it to any S3 bucket. To use it just provide the bucket name and the object key.
 
@@ -177,7 +187,7 @@ curl -v -XPUT http://127.0.0.1:2379/v2/keys/express.feature.enabled -d value="$(
 ```
 
 ## 0.18.0 + 0.19.0 + 0.19.1 releases
-With certain JDK/JRE versions used, annotated configuration interfaces were not registered as beans. Be aware, that this issue does not occur when application code is being executed by a test runner or alike, only in production setups. Therefore we recommend using a higher version to avoid this.
+With certain JDK/JRE versions used, annotated configuration interfaces were not registered as beans. Be aware, that this issue does not occur when application code is being executed by a test runner or alike, only in production setups. Therefore, we recommend using a higher version to avoid this.
 
 ## License
 

@@ -11,10 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.zalando.baigan.context.ContextProviderRetriever;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.provider.ContextProvider;
+import org.zalando.baigan.context.ContextProvider;
 import org.zalando.baigan.proxy.ProxyUtils;
-import org.zalando.baigan.service.ConditionsProcessor;
-import org.zalando.baigan.service.ConfigurationRepository;
+import org.zalando.baigan.repository.ConfigurationRepository;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

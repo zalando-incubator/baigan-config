@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +17,7 @@ public abstract class AbstractConfigurationRepository implements ConfigurationRe
     @Nonnull
     protected List<Configuration> getConfigurations(final String text) {
         try {
-            return objectMapper.readValue(text, new TypeReference<List<Configuration>>() {
+            return objectMapper.readValue(text, new TypeReference<>() {
             });
         } catch (IOException e) {
             throw new UncheckedIOException("Unable to deserialize the Configuration.", e);
