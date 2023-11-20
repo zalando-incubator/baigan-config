@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.zalando.baigan.etcd.service;
+package org.zalando.baigan.repository.etcd.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zalando.baigan.etcd.model.KeyResultNode;
+import org.zalando.baigan.repository.etcd.model.KeyResultNode;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public final class EtcdClient {
         etcdUrl = url;
     }
 
-    public final Optional<String> get(@Nonnull final String key) {
+    public Optional<String> get(@Nonnull final String key) {
         try {
             final URL url = new URL(etcdUrl + key);
 

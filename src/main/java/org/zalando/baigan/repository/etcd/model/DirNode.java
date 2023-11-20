@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2015 Zalando SE (http://tech.zalando.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
-package org.zalando.baigan.provider;
+package org.zalando.baigan.repository.etcd.model;
 
-import java.util.Set;
-
-import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
- * Provides the value of the named context parameter at runtime.
- *
  * @author mchand
- *
  */
-public interface ContextProvider {
+public class DirNode extends AbstractNode {
+    private boolean dir;
+    private List<KeyNode> nodes;
 
-    String getContextParam(@Nonnull final String name);
+    public boolean isDir() {
+        return dir;
+    }
 
-    Set<String> getProvidedContexts();
+    public void setDir(final boolean dir) {
+        this.dir = dir;
+    }
+
+    public List<KeyNode> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(final List<KeyNode> nodes) {
+        this.nodes = nodes;
+    }
 }

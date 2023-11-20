@@ -1,4 +1,4 @@
-package org.zalando.baigan.service.aws;
+package org.zalando.baigan.repository;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
@@ -23,6 +23,9 @@ public class S3ConfigurationRepositoryBuilder {
     private long refreshIntervalInSeconds = 60;
     private String bucketName;
     private String key;
+
+    S3ConfigurationRepositoryBuilder() {
+    }
 
     /**
      * @param s3Client The S3 client to be used to fetch the configuration file.

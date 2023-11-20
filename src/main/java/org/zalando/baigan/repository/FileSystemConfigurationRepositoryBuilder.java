@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.repository;
 
 import static java.util.Objects.requireNonNull;
 
@@ -11,6 +11,9 @@ public class FileSystemConfigurationRepositoryBuilder {
 
     private String filePath;
     private long refreshIntervalInSeconds = 60L;
+
+    FileSystemConfigurationRepositoryBuilder() {
+    }
 
     /**
      * @param filePath The path to the file that contains the configuration data.

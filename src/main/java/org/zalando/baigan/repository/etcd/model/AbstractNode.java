@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2015 Zalando SE (http://tech.zalando.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,30 +14,37 @@
  * limitations under the License.
  */
 
-package org.zalando.baigan.etcd.model;
-
-import java.util.List;
+package org.zalando.baigan.repository.etcd.model;
 
 /**
  * @author mchand
  */
-public class DirNode extends AbstractNode {
-    private boolean dir;
-    private List<KeyNode> nodes;
+public abstract class AbstractNode {
+    private String key;
+    private int modifiedIndex;
+    private int createdIndex;
 
-    public boolean isDir() {
-        return dir;
+    public String getKey() {
+        return key;
     }
 
-    public void setDir(final boolean dir) {
-        this.dir = dir;
+    public void setKey(final String key) {
+        this.key = key;
     }
 
-    public List<KeyNode> getNodes() {
-        return nodes;
+    public int getModifiedIndex() {
+        return modifiedIndex;
     }
 
-    public void setNodes(final List<KeyNode> nodes) {
-        this.nodes = nodes;
+    public void setModifiedIndex(final int modifiedIndex) {
+        this.modifiedIndex = modifiedIndex;
+    }
+
+    public int getCreatedIndex() {
+        return createdIndex;
+    }
+
+    public void setCreatedIndex(final int createdIndex) {
+        this.createdIndex = createdIndex;
     }
 }
