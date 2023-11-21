@@ -1,6 +1,8 @@
 package org.zalando.baigan.repository;
 
 import com.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.repository.etcd.service.EtcdClient;
 
@@ -17,6 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class EtcdConfigurationRepository implements ConfigurationRepository {
 
     private static final String CONFIG_PATH_PREFIX = "/v2/keys/";
+    private static final Logger LOG = LoggerFactory.getLogger(EtcdConfigurationRepository.class);
     private final EtcdClient etcdClient;
     private final ConfigurationParser configurationParser;
 
@@ -36,9 +39,7 @@ public class EtcdConfigurationRepository implements ConfigurationRepository {
      *
      * @param key The key for which the configuration is to be fetched.
      * @return The configuration for the given key, if present. Empty, if the key
-     * does not exist in etcd or fetching it from etcd fails.
-     *
-     * @throws UncheckedIOException if the configuration cannot be parsed.
+     * does not exist in etcd, fetching it from etcd fails, or the configuration cannot be parsed.
      */
     @Override
     @Nonnull
@@ -47,6 +48,11 @@ public class EtcdConfigurationRepository implements ConfigurationRepository {
                 "Attempt to get configuration for an empty key !");
         final Optional<String> optionalConfig = etcdClient.get(CONFIG_PATH_PREFIX + key);
 
-        return optionalConfig.flatMap(configurationParser::parseConfiguration);
+        try {
+            return optionalConfig.flatMap(configurationParser::parseConfiguration);
+        } catch (UncheckedIOException e) {
+            LOG.warn("Error while loading configuration for key: " + key, e);
+            return Optional.empty();
+        }
     }
 }

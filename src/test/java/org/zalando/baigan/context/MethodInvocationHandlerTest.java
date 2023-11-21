@@ -71,7 +71,7 @@ public class MethodInvocationHandlerTest {
     }
 
     @Test
-    public void testPrimitiveType() throws Throwable {
+    public void testBoxedPrimitiveType() throws Throwable {
 
         final ConfigurationRepository repo = mock(ConfigurationRepository.class);
         final Configuration<Integer> configuration = new Configuration<>("express.max.delivery.days", DESCRIPTION, of(), 3);
