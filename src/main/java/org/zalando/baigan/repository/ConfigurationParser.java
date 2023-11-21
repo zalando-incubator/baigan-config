@@ -14,7 +14,6 @@ import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -41,32 +40,28 @@ public class ConfigurationParser {
 
     @Nonnull
     public List<Configuration<?>> parseConfigurations(final String text) {
-        if (text == null || text.isEmpty()) {
-            LOG.warn("Input to parse is empty: {}",  text);
-            return List.of();
-        }
-        try {
-            List<Configuration<JsonNode>> rawConfigs = objectMapper.readValue(text, new TypeReference<>() {
-            });
-            return rawConfigs.stream()
-                    .map(this::convertToTypedConfig)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(toList());
-        } catch (
-                IOException e) {
-            throw new UncheckedIOException("Unable to deserialize the Configuration.", e);
-        }
+        List<Configuration<JsonNode>> rawConfigs = parseConfigText(text, new TypeReference<List<Configuration<JsonNode>>>() {
+        }).orElse(List.of());
+        return rawConfigs.stream()
+                .map(this::convertToTypedConfig)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toList());
     }
 
     public Optional<Configuration<?>> parseConfiguration(final String text) {
+        Optional<Configuration<JsonNode>> rawConfig = parseConfigText(text, new TypeReference<>() {
+        });
+        return rawConfig.flatMap(this::convertToTypedConfig);
+    }
+
+    private <T> Optional<T> parseConfigText(final String text, TypeReference<T> type) {
         if (text == null || text.isEmpty()) {
-            LOG.warn("Input to parse is empty: {}",  text);
+            LOG.warn("Input to parse is empty: {}", text);
             return empty();
         }
         try {
-            Configuration<JsonNode> rawConfig = objectMapper.readValue(text, new TypeReference<>(){});
-            return convertToTypedConfig(rawConfig);
+            return Optional.of(objectMapper.readValue(text, type));
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
         }
@@ -94,7 +89,7 @@ public class ConfigurationParser {
             }
         }).collect(toSet());
         try {
-             T typedDefaultValue = objectMapper.treeToValue(config.getDefaultValue(), objectMapper.constructType(targetClass));
+            T typedDefaultValue = objectMapper.treeToValue(config.getDefaultValue(), objectMapper.constructType(targetClass));
             return new Configuration<>(config.getAlias(), config.getDescription(), typedConditions, typedDefaultValue);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
