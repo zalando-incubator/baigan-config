@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.handler.ContextAwareConfigurationMethodInvocationHandler;
-import org.zalando.baigan.service.ConditionsProcessor;
-import org.zalando.baigan.service.ConfigurationRepository;
+import org.zalando.baigan.proxy.handler.ConditionsProcessor;
+import org.zalando.baigan.repository.ConfigurationRepository;
 
 import java.lang.reflect.InvocationHandler;
 import java.util.Optional;

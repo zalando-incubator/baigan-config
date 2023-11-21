@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.repository;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -25,8 +25,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Implementation of {@link ConfigurationRepository} supporting a file on
- * Classpath as the persistence storage for the Baigan configuration.
+ * A {@link ConfigurationRepository} implementation supporting a file on
+ * Classpath as the persistence storage for the Baigan configuration. The file is cached.
+ * The cache refresh time can be specified.
  *
  * @author mchand
  */
@@ -39,7 +40,7 @@ public class FileSystemConfigurationRepository implements ConfigurationRepositor
     private final String fileName;
     private final long refreshIntervalInSeconds;
 
-     FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
+    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
         this.fileName = fileName;
         this.refreshIntervalInSeconds = refreshIntervalInSeconds;
     }
@@ -90,8 +91,7 @@ public class FileSystemConfigurationRepository implements ConfigurationRepositor
 
     protected Map<String, Configuration<?>> loadConfigurations(String filename) {
         final String configurationText = loadResource(filename);
-        final Collection<Configuration<?>> configurations = configurationParser.getConfigurations(
-                configurationText);
+        final Collection<Configuration<?>> configurations = configurationParser.getConfigurations(configurationText);
 
         final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
         for (Configuration<?> each : configurations) {

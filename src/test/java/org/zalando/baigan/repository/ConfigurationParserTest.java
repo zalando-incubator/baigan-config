@@ -1,4 +1,4 @@
-package org.zalando.baigan.service;
+package org.zalando.baigan.repository;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2015 Zalando SE (http://tech.zalando.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.zalando.baigan;
+package org.zalando.baigan.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.model.Equals;
-import org.zalando.baigan.service.ConditionsProcessor;
+import org.zalando.baigan.proxy.handler.ConditionsProcessor;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -46,7 +46,7 @@ public class TestEtcdConfigService {
     @BeforeEach
     public void init() throws IOException {
 
-        final Condition<Boolean> condition = new Condition<Boolean>("appdomain",
+        final Condition<Boolean> condition = new Condition<>("appdomain",
                 new Equals("1"), true);
 
         final Set<Condition<Boolean>> conditions = ImmutableSet.of(condition);
@@ -70,7 +70,7 @@ public class TestEtcdConfigService {
     }
 
     @Test
-    public void testBooleanConfiguration() throws Exception {
+    public void testBooleanConfiguration() {
         testConfiguration(configuration);
     }
 

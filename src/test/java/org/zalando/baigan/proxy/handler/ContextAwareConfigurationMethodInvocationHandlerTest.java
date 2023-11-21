@@ -5,9 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.zalando.baigan.context.ContextProviderRetriever;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.provider.ContextProvider;
-import org.zalando.baigan.service.ConditionsProcessor;
-import org.zalando.baigan.service.ConfigurationRepository;
+import org.zalando.baigan.context.ContextProvider;
+import org.zalando.baigan.repository.ConfigurationRepository;
 
 import java.util.List;
 import java.util.Map;

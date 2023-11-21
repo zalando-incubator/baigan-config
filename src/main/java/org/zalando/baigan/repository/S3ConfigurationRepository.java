@@ -1,4 +1,4 @@
-package org.zalando.baigan.service.aws;
+package org.zalando.baigan.repository;
 
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.s3.AmazonS3;
@@ -9,8 +9,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.zalando.baigan.model.Configuration;
-import org.zalando.baigan.service.ConfigurationParser;
-import org.zalando.baigan.service.ConfigurationRepository;
+import org.zalando.baigan.repository.aws.S3FileLoader;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -22,6 +21,10 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A {@link ConfigurationRepository} implementation that loads the configuration from an S3 bucket in regular
+ * intervals. It can read KMS-encrypted configuration files.
+ */
 public class S3ConfigurationRepository implements ConfigurationRepository, ApplicationContextAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
