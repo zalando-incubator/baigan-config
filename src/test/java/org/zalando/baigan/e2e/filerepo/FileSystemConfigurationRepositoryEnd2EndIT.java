@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -54,7 +55,10 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
         Files.writeString(configFile, "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"an irrelevant value\"}," +
                 "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
                 "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}, " +
-                "{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}, " +
+                "{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {" +
+                    "\"config_key\":\"a value\"," +
+                    "\"extra_field\": \"objectMapper configured to not fail for unknown properties\"" +
+                "}}, " +
                 "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
         Thread.sleep(1100);
@@ -103,6 +107,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
             return repositoryFactory.fileSystemConfigurationRepository()
                     .fileName(configFile.toString())
                     .refreshIntervalInSeconds(1)
+                    .objectMapper(new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false))
                     .build();
         }
 
@@ -115,11 +120,6 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }
-
-        @Bean(name = "baiganObjectMapper")
-        ObjectMapper objectMapper() {
-            return new ObjectMapper();
         }
     }
 }

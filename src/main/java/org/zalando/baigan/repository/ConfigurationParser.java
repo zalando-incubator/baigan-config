@@ -30,7 +30,7 @@ public class ConfigurationParser {
 
     private final Logger LOG = LoggerFactory
             .getLogger(ConfigurationParser.class);
-    final ObjectMapper objectMapper;
+    ObjectMapper objectMapper;
     final BaiganConfigClasses baiganConfigClasses;
 
     @Autowired
@@ -70,6 +70,10 @@ public class ConfigurationParser {
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    void setObjectMapper(final ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     private Optional<Configuration<?>> convertToTypedConfig(final Configuration<JsonNode> jsonConfig) {

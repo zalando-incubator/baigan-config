@@ -4,6 +4,7 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,6 +28,7 @@ public class S3ConfigurationRepositoryBuilder {
     private long refreshIntervalInSeconds = 60;
     private String bucketName;
     private String key;
+    private ObjectMapper objectMapper;
     private final ConfigurationParser configurationParser;
 
     public S3ConfigurationRepositoryBuilder(final ConfigurationParser configurationParser) {
@@ -87,6 +89,14 @@ public class S3ConfigurationRepositoryBuilder {
         return this;
     }
 
+    /**
+     * @param objectMapper The {@link ObjectMapper} used to parse the configurations.
+     */
+    public S3ConfigurationRepositoryBuilder objectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        return this;
+    }
+
     public S3ConfigurationRepository build() {
         if (executor == null) {
             executor = new ScheduledThreadPoolExecutor(1);
@@ -96,6 +106,9 @@ public class S3ConfigurationRepositoryBuilder {
         }
         if (kmsClient == null) {
             kmsClient = AWSKMSClientBuilder.defaultClient();
+        }
+        if (objectMapper != null) {
+            configurationParser.setObjectMapper(objectMapper);
         }
 
         return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient, configurationParser);
