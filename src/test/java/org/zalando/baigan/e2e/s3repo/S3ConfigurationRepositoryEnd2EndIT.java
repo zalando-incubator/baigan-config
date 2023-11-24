@@ -25,6 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
+import org.zalando.baigan.e2e.configs.SomeConfigObject;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
 import org.zalando.baigan.repository.RepositoryFactory;
 import org.zalando.baigan.repository.S3ConfigurationRepository;
@@ -59,6 +60,9 @@ public class S3ConfigurationRepositoryEnd2EndIT {
     public void givenS3Configuration_whenConfigurationIsChangedOnS3_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException {
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), nullValue());
+        assertThat(someConfiguration.someConfig(), nullValue());
+        assertThat(someConfiguration.configList(), nullValue());
+        assertThat(someConfiguration.topLevelGenerics(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
@@ -68,16 +72,20 @@ public class S3ConfigurationRepositoryEnd2EndIT {
         Thread.sleep(1100);
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), equalTo("some value"));
+        assertThat(someConfiguration.someConfig(), nullValue());
+        assertThat(someConfiguration.configList(), nullValue());
 
         s3.putObject(
                 S3_CONFIG_BUCKET,
                 S3_CONFIG_KEY,
-                "[{ \"alias\": \"some.non.existing.config\", \"defaultValue\": \"some irrelevant value\"}," +
+                "[{ \"alias\": \"some.configuration.some.config\", \"defaultValue\": {\"config_key\":\"a value\"}}," +
+                        "{ \"alias\": \"some.non.existing.config\", \"defaultValue\": {\"other_config_key\":\"other value\"}}," +
                         "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
                         "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}, " +
                         "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
         Thread.sleep(1100);
+        assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
         assertThat(someConfiguration.configList(), equalTo(List.of("A", "B")));
@@ -122,10 +130,10 @@ public class S3ConfigurationRepositoryEnd2EndIT {
 
         @Bean
         S3ConfigurationRepository configurationRepository(
+                RepositoryFactory repositoryFactory,
                 AmazonS3 amazonS3,
                 AWSKMS kms,
-                ScheduledThreadPoolExecutor executorService,
-                RepositoryFactory repositoryFactory
+                ScheduledThreadPoolExecutor executorService
         ) {
             amazonS3.putObject(S3_CONFIG_BUCKET, S3_CONFIG_KEY, "[]");
             return repositoryFactory.s3ConfigurationRepository()

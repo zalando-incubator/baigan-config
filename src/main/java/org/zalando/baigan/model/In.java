@@ -16,7 +16,9 @@
 
 package org.zalando.baigan.model;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -45,4 +47,23 @@ public class In extends ConditionType {
         return inValue.contains(forValue);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        In in = (In) o;
+        return Objects.equals(inValue, in.inValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inValue);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", In.class.getSimpleName() + "[", "]")
+                .add("inValue=" + inValue)
+                .toString();
+    }
 }

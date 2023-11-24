@@ -40,14 +40,14 @@ public class ContextAwareConfigurationMethodInvocationHandlerTest {
     }
 
     @Test
-    public void whenConfigurationRepositoryReturnsEmpty_shouldReturnNull() throws Throwable {
+    public void whenConfigurationRepositoryReturnsEmpty_shouldReturnNull() {
         when(repository.get(key)).thenReturn(Optional.empty());
         final Object result = handler.handleInvocation((TestInterface) () -> null, TestInterface.class.getDeclaredMethods()[0], new Object[0]);
         assertThat(result, nullValue());
     }
 
     @Test
-    public void whenContextIsEmpty_shouldReturnValueFromConditionsProcessorCalledWithEmptyContext() throws Throwable {
+    public void whenContextIsEmpty_shouldReturnValueFromConditionsProcessorCalledWithEmptyContext() {
         final Configuration<Integer> configWithWrongType = new Configuration<>(key, "description", Set.of(), 1);
         when(repository.get(key)).thenReturn(Optional.of(configWithWrongType));
         when(contextProviderRetriever.getContextParameterKeys()).thenReturn(Set.of());
@@ -57,7 +57,7 @@ public class ContextAwareConfigurationMethodInvocationHandlerTest {
     }
 
     @Test
-    public void whenConfigReturnTypeDoesNotMatchMethodReturnType_shouldReturnNull() throws Throwable {
+    public void whenConfigReturnTypeDoesNotMatchMethodReturnType_shouldReturnNull() {
         when(repository.get(key)).thenReturn(Optional.of(config));
         when(contextProviderRetriever.getContextParameterKeys()).thenReturn(Set.of());
         when(conditionsProcessor.process(config, Map.of())).thenReturn(expectedConfigValue);
@@ -66,7 +66,7 @@ public class ContextAwareConfigurationMethodInvocationHandlerTest {
     }
 
     @Test
-    public void whenContextProvidersExist_shouldReturnValueFromConditionsProcessorCalledWithResultingContext() throws Throwable {
+    public void whenContextProvidersExist_shouldReturnValueFromConditionsProcessorCalledWithResultingContext() {
         when(repository.get(key)).thenReturn(Optional.of(config));
 
         final String param1 = "param1";
@@ -87,7 +87,7 @@ public class ContextAwareConfigurationMethodInvocationHandlerTest {
     }
 
     @Test
-    public void whenContextProvidersAreEmpty_shouldReturnValueFromConditionsProcessorCalledWithEmptyContext() throws Throwable {
+    public void whenContextProvidersAreEmpty_shouldReturnValueFromConditionsProcessorCalledWithEmptyContext() {
         when(repository.get(key)).thenReturn(Optional.of(config));
 
         final String param = "param";
@@ -102,7 +102,7 @@ public class ContextAwareConfigurationMethodInvocationHandlerTest {
 
     // FIXME this behavior seems strange
     @Test
-    public void whenThereAreMultipleContextProvidersForOneParam_shouldConsiderOnlyTheFirstContextProvider() throws Throwable {
+    public void whenThereAreMultipleContextProvidersForOneParam_shouldConsiderOnlyTheFirstContextProvider() {
         when(repository.get(key)).thenReturn(Optional.of(config));
 
         final String param = "param";

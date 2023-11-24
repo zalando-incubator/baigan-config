@@ -1,5 +1,6 @@
 package org.zalando.baigan.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,13 +10,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepositoryFactory {
 
+    private final ConfigurationParser configurationParser;
+
+    @Autowired
+    public RepositoryFactory(final ConfigurationParser configurationParser) {
+        this.configurationParser = configurationParser;
+    }
+
     /**
      *  Allows creating a {@link S3ConfigurationRepository}.
      *
      * @return {@link S3ConfigurationRepositoryBuilder} Builder to create the repository
      */
     public S3ConfigurationRepositoryBuilder s3ConfigurationRepository() {
-        return new S3ConfigurationRepositoryBuilder();
+        return new S3ConfigurationRepositoryBuilder(configurationParser);
     }
 
     /**
@@ -24,7 +32,7 @@ public class RepositoryFactory {
      * @return {@link FileSystemConfigurationRepositoryBuilder} Builder to create the repository
      */
     public FileSystemConfigurationRepositoryBuilder fileSystemConfigurationRepository() {
-        return new FileSystemConfigurationRepositoryBuilder();
+        return new FileSystemConfigurationRepositoryBuilder(configurationParser);
     }
 
     /**
@@ -33,7 +41,7 @@ public class RepositoryFactory {
      * @return {@link EtcdConfigurationRepositoryBuilder} Builder to create the repository
      */
     public EtcdConfigurationRepositoryBuilder etcdConfigurationRepository() {
-        return new EtcdConfigurationRepositoryBuilder();
+        return new EtcdConfigurationRepositoryBuilder(configurationParser);
     }
 
     /**

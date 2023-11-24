@@ -31,10 +31,16 @@ import org.springframework.util.StringUtils;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
+import static org.zalando.baigan.proxy.ProxyUtils.createKey;
 
 /**
  * ImportBeanDefinitionRegistrar implementation that finds the
@@ -42,10 +48,8 @@ import java.util.stream.Collectors;
  * packages and proxy bean creation further down to the corresponding
  * implementations.
  *
- * @see ConfigurationServiceBeanFactory
- *
  * @author mchand
- *
+ * @see ConfigurationServiceBeanFactory
  */
 public class ConfigurationBeanDefinitionRegistrar
         implements ImportBeanDefinitionRegistrar {
@@ -83,30 +87,41 @@ public class ConfigurationBeanDefinitionRegistrar
         final ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateInterfaceProvider();
         scanner.addIncludeFilter(new AnnotationTypeFilter(BaiganConfig.class));
 
+        List<Class<?>> baiganConfigClasses = new ArrayList<>();
+
         for (final String singlePackage : packages) {
             final Set<BeanDefinition> candidates = scanner.findCandidateComponents(singlePackage);
             for (BeanDefinition definition : candidates) {
                 if (definition instanceof GenericBeanDefinition) {
                     final GenericBeanDefinition genericDefinition = (GenericBeanDefinition) definition;
-                    registerAsBean(registry, genericDefinition);
+                    final Class<?> baiganConfigClass = registerAsBean(registry, genericDefinition);
+                    baiganConfigClasses.add(baiganConfigClass);
                 } else {
                     throw new IllegalStateException(
-                        String.format(
-                            "Unable to read required metadata of configuration candidate [%s]",
-                            definition
-                        )
+                            String.format(
+                                    "Unable to read required metadata of configuration candidate [%s]",
+                                    definition
+                            )
                     );
                 }
             }
         }
+        Map<String, Type> configTypesByKey = baiganConfigClasses.stream().flatMap(clazz ->
+                Arrays.stream(clazz.getMethods()).map(method -> new ConfigType(createKey(clazz, method), method.getGenericReturnType()))
+        ).collect(toMap(c -> c.key, c -> c.type));
+        GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+        beanDefinition.setBeanClass(BaiganConfigClasses.class);
+        beanDefinition.getPropertyValues().add("configTypesByKey", configTypesByKey);
+        registry.registerBeanDefinition("baiganConfigClasses", beanDefinition);
     }
 
-    private void registerAsBean(final BeanDefinitionRegistry registry, final GenericBeanDefinition genericDefinition) {
+    private Class<?> registerAsBean(final BeanDefinitionRegistry registry, final GenericBeanDefinition genericDefinition) {
         try {
             final Class<?> interfaceToImplement = genericDefinition.resolveBeanClass(
-                registry.getClass().getClassLoader()
+                    registry.getClass().getClassLoader()
             );
             registerAsBean(registry, interfaceToImplement);
+            return interfaceToImplement;
         } catch (final ClassNotFoundException e) {
             throw new IllegalStateException("Unable to register annotated interface as configuration bean", e);
         }
@@ -114,7 +129,7 @@ public class ConfigurationBeanDefinitionRegistrar
 
     private void registerAsBean(final BeanDefinitionRegistry registry, final Class<?> interfaceToImplement) {
         final BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(
-            ConfigurationServiceBeanFactory.class
+                ConfigurationServiceBeanFactory.class
         );
         builder.addPropertyValue("candidateInterface", interfaceToImplement);
 
@@ -123,7 +138,7 @@ public class ConfigurationBeanDefinitionRegistrar
     }
 
     private static class ClassPathScanningCandidateInterfaceProvider
-        extends ClassPathScanningCandidateComponentProvider {
+            extends ClassPathScanningCandidateComponentProvider {
 
         public ClassPathScanningCandidateInterfaceProvider() {
             super(false);
@@ -136,4 +151,13 @@ public class ConfigurationBeanDefinitionRegistrar
         }
     }
 
+    private static class ConfigType {
+        private final String key;
+        private final Type type;
+
+        public ConfigType(String key, Type type) {
+            this.key = key;
+            this.type = type;
+        }
+    }
 }

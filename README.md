@@ -51,12 +51,21 @@ And the _@ConfigurationServiceScan_ annotation hints the Baigan registrar to loo
 	@BaiganConfig
 	public interface ExpressFeature {
 
-	    public Boolean enabled();
+	    Boolean enabled();
 
-	    public String serviceUrl();
+	    String serviceUrl();
 
+        SomeStructuredConfigClass complexConfiguration();
+        
+        List<String> configList();
+
+		Map<UUID, List<SomeConfigObject>> nestedGenericConfiguration();
 	}
 ```
+
+The individual methods may have arbitrary classes as return types, in particular complex structured types are supported, including Generics.
+
+**Note**: Primitives are not supported as return types as they cannot be null and therefore cannot express a missing configuration value.
 
 The above example code enables the application to inject _ExpressFeature_ spring bean into any other Spring bean:
 
@@ -84,12 +93,19 @@ This is done using the Spring Bean of type `RepositoryFactory`, which allows cre
 types. The following example shows how to configure a filesystem based repository.
 
 ```Java
-	@Bean
-	public ConfigurationRepository configurationRepository(RepositoryFactory factory) {
-		return factory.fileSystemConfigurationRepository()
-					  .fileName("configs.json");
+	@Configuration
+	public class ApplicationConfiguration {
+		
+    	@Bean
+		public ConfigurationRepository configurationRepository(RepositoryFactory factory){
+			return factory.fileSystemConfigurationRepository()
+						  .fileName("configs.json");
+		}
 	}
 ``` 
+
+Check the documentation of the builders for details on how to configure the repositories. In particular, all
+repositories can be configured with a Jackson `ObjectMapper` used to deserialize the configuration.
 
 ### Creating configurations
 Baigan configurations follow a specific schema and can be stored on any of the supported repositories.

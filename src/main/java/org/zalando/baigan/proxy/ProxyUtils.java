@@ -19,6 +19,8 @@ package org.zalando.baigan.proxy;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 
+import java.lang.reflect.Method;
+
 /**
  * The class to contain utility methods used in proxying configuration beans.
  *
@@ -28,7 +30,15 @@ import com.google.common.base.Strings;
 public class ProxyUtils {
     private static final String NAMESPACE_SEPARATOR = ".";
 
-    public static String dottify(final String text) {
+    public static String createKey(final Class<?> clazz, Method method) {
+        final String methodName = method.getName();
+        final String nameSpace = clazz.getSimpleName();
+
+        return ProxyUtils.dottify(nameSpace) + "."
+                + ProxyUtils.dottify(methodName);
+    }
+
+    private static String dottify(final String text) {
 
         if (Strings.isNullOrEmpty(text)) {
             return NAMESPACE_SEPARATOR;

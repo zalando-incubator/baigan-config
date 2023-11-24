@@ -4,27 +4,35 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.annotation.Nonnull;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A builder to construct a {@link S3ConfigurationRepository}.
+ * Builder class for an S3ConfigurationRepository.
  * <p>
- * Requires that at least {@link S3ConfigurationRepositoryBuilder::bucketName} and
- * {@link S3ConfigurationRepositoryBuilder::key} are specified.
+ * Must specify non-null values for
+ * - {@link S3ConfigurationRepositoryBuilder#bucketName}
+ * - {@link S3ConfigurationRepositoryBuilder#key}
+ * <p>
  */
 public class S3ConfigurationRepositoryBuilder {
 
-    private ScheduledThreadPoolExecutor executor;
+    private ScheduledExecutorService executor;
     private AmazonS3 s3Client;
     private AWSKMS kmsClient;
     private long refreshIntervalInSeconds = 60;
     private String bucketName;
     private String key;
+    private ObjectMapper objectMapper;
+    private final ConfigurationParser configurationParser;
 
-    S3ConfigurationRepositoryBuilder() {
+    public S3ConfigurationRepositoryBuilder(final ConfigurationParser configurationParser) {
+        this.configurationParser = configurationParser;
     }
 
     /**
@@ -50,7 +58,7 @@ public class S3ConfigurationRepositoryBuilder {
     /**
      * @param bucketName The name of the S3 bucket that holds the configuration file.
      */
-    public S3ConfigurationRepositoryBuilder bucketName(final String bucketName) {
+    public S3ConfigurationRepositoryBuilder bucketName(@Nonnull final String bucketName) {
         this.bucketName = checkNotNull(bucketName, "bucketName must not be null");
         return this;
     }
@@ -58,7 +66,7 @@ public class S3ConfigurationRepositoryBuilder {
     /**
      * @param key The S3 key pointing to the JSON configuration file in the specified bucket.
      */
-    public S3ConfigurationRepositoryBuilder key(final String key) {
+    public S3ConfigurationRepositoryBuilder key(@Nonnull final String key) {
         this.key = checkNotNull(key, "key must not be null");
         return this;
     }
@@ -73,10 +81,19 @@ public class S3ConfigurationRepositoryBuilder {
     }
 
     /**
-     * @param executor The {@link ScheduledThreadPoolExecutor} used to run the configuration refresh.
+     * @param executor The {@link ScheduledThreadPoolExecutor} used to run the configuration refresh. If this is not
+     *                 specified, a new {@link ScheduledThreadPoolExecutor} with a single thread is used.
      */
-    public S3ConfigurationRepositoryBuilder executor(ScheduledThreadPoolExecutor executor) {
+    public S3ConfigurationRepositoryBuilder executor(ScheduledExecutorService executor) {
         this.executor = executor;
+        return this;
+    }
+
+    /**
+     * @param objectMapper The {@link ObjectMapper} used to parse the configurations.
+     */
+    public S3ConfigurationRepositoryBuilder objectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         return this;
     }
 
@@ -90,7 +107,10 @@ public class S3ConfigurationRepositoryBuilder {
         if (kmsClient == null) {
             kmsClient = AWSKMSClientBuilder.defaultClient();
         }
+        if (objectMapper != null) {
+            configurationParser.setObjectMapper(objectMapper);
+        }
 
-        return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient);
+        return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient, configurationParser);
     }
 }

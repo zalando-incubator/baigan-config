@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -22,18 +22,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A {@link ConfigurationRepository} implementation that loads the configuration from an S3 bucket in regular
  * intervals. It can read KMS-encrypted configuration files.
  */
-public class S3ConfigurationRepository extends AbstractConfigurationRepository {
+public class S3ConfigurationRepository implements ConfigurationRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ConfigurationRepository.class);
 
+    private final ConfigurationParser configurationParser;
     private final S3FileLoader s3Loader;
     private final long refreshInterval;
-    private final ScheduledThreadPoolExecutor executor;
-    private volatile Map<String, Configuration> configurationsMap = ImmutableMap.of();
+    private final ScheduledExecutorService executor;
+    private volatile Map<String, Configuration<?>> configurationsMap = ImmutableMap.of();
 
     S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
-                              final long refreshInterval, final ScheduledThreadPoolExecutor executor,
-                              final AmazonS3 s3Client, final AWSKMS kmsClient) {
+                              final long refreshInterval, final ScheduledExecutorService executor,
+                              final AmazonS3 s3Client, final AWSKMS kmsClient, ConfigurationParser configurationParser) {
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
         checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
@@ -44,6 +45,7 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
         this.refreshInterval = refreshInterval;
         this.executor = executor;
         this.s3Loader = new S3FileLoader(bucketName, key, s3Client, kmsClient);
+        this.configurationParser = configurationParser;
 
         loadConfigurations();
         if (refreshInterval > 0) {
@@ -51,14 +53,27 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
         }
     }
 
-    protected void loadConfigurations() {
+    @Nonnull
+    @Override
+    public Optional<Configuration> get(@Nonnull String key) {
+        return Optional.ofNullable(configurationsMap.get(key));
+    }
+
+    @Override
+    public void put(@Nonnull String key, @Nonnull String value) {
+        throw new UnsupportedOperationException("The S3ConfigurationRepository doesn't allow any changes.");
+    }
+
+    private void loadConfigurations() {
+        LOG.info("Loading configurations from S3 file");
         final String configurationText = s3Loader.loadContent();
-        final List<Configuration> configurations = getConfigurations(configurationText);
-        final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();
-        for (final Configuration configuration : configurations) {
+        final List<Configuration<?>> configurations = configurationParser.parseConfigurations(configurationText);
+        final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
+        for (final Configuration<?> configuration : configurations) {
             builder.put(configuration.getAlias(), configuration);
         }
         configurationsMap = builder.build();
+        LOG.info("Configuration now: {}", configurationsMap);
     }
 
     private void setupRefresh() {
@@ -74,16 +89,5 @@ public class S3ConfigurationRepository extends AbstractConfigurationRepository {
                 this.refreshInterval,
                 TimeUnit.SECONDS
         );
-    }
-
-    @Nonnull
-    @Override
-    public Optional<Configuration> get(@Nonnull String key) {
-        return Optional.ofNullable(configurationsMap.get(key));
-    }
-
-    @Override
-    public void put(@Nonnull String key, @Nonnull String value) {
-        throw new UnsupportedOperationException("The S3ConfigurationRepository doesn't allow any changes.");
     }
 }

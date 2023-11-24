@@ -1,5 +1,7 @@
 package org.zalando.baigan.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -11,8 +13,11 @@ public class FileSystemConfigurationRepositoryBuilder {
 
     private String filePath;
     private long refreshIntervalInSeconds = 60L;
+    private ObjectMapper objectMapper;
+    private final ConfigurationParser configurationParser;
 
-    FileSystemConfigurationRepositoryBuilder() {
+    FileSystemConfigurationRepositoryBuilder(final ConfigurationParser configurationParser) {
+        this.configurationParser = configurationParser;
     }
 
     /**
@@ -32,8 +37,21 @@ public class FileSystemConfigurationRepositoryBuilder {
         return this;
     }
 
+    /**
+     * @param objectMapper The {@link ObjectMapper} used to parse the configurations.
+     */
+    public FileSystemConfigurationRepositoryBuilder objectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        return this;
+    }
+
     public FileSystemConfigurationRepository build() {
         requireNonNull(filePath, "filePath must not be null");
-        return new FileSystemConfigurationRepository(filePath, refreshIntervalInSeconds);
+
+        if (objectMapper != null) {
+            configurationParser.setObjectMapper(objectMapper);
+        }
+
+        return new FileSystemConfigurationRepository(filePath, refreshIntervalInSeconds, configurationParser);
     }
 }

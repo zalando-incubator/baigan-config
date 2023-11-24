@@ -28,22 +28,23 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mchand
  */
-public class FileSystemConfigurationRepository extends AbstractConfigurationRepository {
+public class FileSystemConfigurationRepository implements ConfigurationRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemConfigurationRepository.class);
 
-    private final LoadingCache<String, Map<String, Configuration>> cachedConfigurations;
+    private final ConfigurationParser configurationParser;
+    private final LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
     private final String fileName;
 
-
-    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds) {
+    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final ConfigurationParser configurationParser) {
         this.fileName = fileName;
+        this.configurationParser = configurationParser;
 
         cachedConfigurations = CacheBuilder.newBuilder()
                 .refreshAfterWrite(refreshIntervalInSeconds, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
-                    public Map<String, Configuration> load(String filename) {
+                    public Map<String, Configuration<?>> load(String filename) {
                         try {
                             return loadConfigurations(filename);
                         } catch (final Exception e) {
@@ -53,9 +54,9 @@ public class FileSystemConfigurationRepository extends AbstractConfigurationRepo
                     }
 
                     @Override
-                    public ListenableFuture<Map<String, Configuration>> reload(
-                        String key, Map<String, Configuration> oldValue)
-                        throws Exception {
+                    public ListenableFuture<Map<String, Configuration<?>>> reload(
+                            String key, Map<String, Configuration<?>> oldValue)
+                            throws Exception {
                         LOG.info("Reloading the configuration from file [{}]", key);
                         return super.reload(key, oldValue);
                     }
@@ -79,13 +80,12 @@ public class FileSystemConfigurationRepository extends AbstractConfigurationRepo
     }
 
 
-    protected Map<String, Configuration> loadConfigurations(String filename) {
+    protected Map<String, Configuration<?>> loadConfigurations(String filename) {
         final String configurationText = loadResource(filename);
-        final Collection<Configuration> configurations = getConfigurations(
-                configurationText);
+        final Collection<Configuration<?>> configurations = configurationParser.parseConfigurations(configurationText);
 
-        final ImmutableMap.Builder<String, Configuration> builder = ImmutableMap.builder();
-        for (Configuration each : configurations) {
+        final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
+        for (Configuration<?> each : configurations) {
             builder.put(each.getAlias(), each);
         }
 
