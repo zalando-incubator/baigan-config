@@ -30,7 +30,6 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
     private final S3FileLoader s3Loader;
     private final long refreshInterval;
     private final ScheduledExecutorService executor;
-    private final String configFileS3Path;
     private volatile Map<String, Configuration<?>> configurationsMap = ImmutableMap.of();
 
     S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
@@ -47,7 +46,6 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
         this.executor = executor;
         this.s3Loader = new S3FileLoader(bucketName, key, s3Client, kmsClient);
         this.configurationParser = configurationParser;
-        this.configFileS3Path = "s3://" + bucketName + "/" + key;
 
         loadConfigurations();
         if (refreshInterval > 0) {
@@ -67,7 +65,7 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
     }
 
     private void loadConfigurations() {
-        LOG.debug("Loading configurations from S3 file {}", configFileS3Path);
+        LOG.debug("Loading configurations from S3 bucket {} at key {}", s3Loader.getBucketName(), s3Loader.getKey());
         final String configurationText = s3Loader.loadContent();
         final List<Configuration<?>> configurations = configurationParser.parseConfigurations(configurationText);
         final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
@@ -75,7 +73,7 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
             builder.put(configuration.getAlias(), configuration);
         }
         configurationsMap = builder.build();
-        LOG.debug("Loaded configurations from S3 file {}: {}", configFileS3Path, configurationsMap);
+        LOG.debug("Loaded configurations from S3 bucket {} at key {}", s3Loader.getBucketName(), s3Loader.getKey());
     }
 
     private void setupRefresh() {
@@ -84,7 +82,8 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
                     try {
                         loadConfigurations();
                     } catch (RuntimeException e) {
-                        LOG.error("Failed to refresh configuration from S3 file {}, keeping old state.", configFileS3Path, e);
+                        LOG.error("Failed to refresh configuration from S3 bucket {} at key {}. Keeping old state.",
+                                s3Loader.getBucketName(), s3Loader.getKey(), e);
                     }
                 },
                 this.refreshInterval,
