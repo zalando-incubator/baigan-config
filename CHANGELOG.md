@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.22.0](https://github.com/zalando-stups/baigan-config/tree/0.22.0) (2023-11-27)
+
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.21.0...0.22.0)
+
+**Merged pull requests:**
+
+- Fix Javadoc Build [\#85](https://github.com/zalando-stups/baigan-config/pull/85) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- introduce RepositoryFactory and builders; refactor packages [\#84](https://github.com/zalando-stups/baigan-config/pull/84) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+- Bump Testcontainers [\#83](https://github.com/zalando-stups/baigan-config/pull/83) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- end-2-end test for EtcdConfigurationRepository [\#81](https://github.com/zalando-stups/baigan-config/pull/81) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+- improve test coverage [\#80](https://github.com/zalando-stups/baigan-config/pull/80) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+- builder for FileSystemConfigurationRepository [\#79](https://github.com/zalando-stups/baigan-config/pull/79) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+- delete GitConfigurationRepository [\#78](https://github.com/zalando-stups/baigan-config/pull/78) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+- Enable structured types as config values [\#77](https://github.com/zalando-stups/baigan-config/pull/77) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+
 ## [0.21.0](https://github.com/zalando-stups/baigan-config/tree/0.21.0) (2023-09-05)
 
 [Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.20.0...0.21.0)
