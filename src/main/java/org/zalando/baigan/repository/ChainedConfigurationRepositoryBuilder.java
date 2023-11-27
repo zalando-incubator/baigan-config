@@ -8,7 +8,7 @@ import static org.springframework.util.Assert.notEmpty;
 /**
  * A builder to construct a {@link FileSystemConfigurationRepository}.
  * <p>
- * At least one repository has to be provided..
+ * At least one repository has to be provided.
  */
 public class ChainedConfigurationRepositoryBuilder {
 

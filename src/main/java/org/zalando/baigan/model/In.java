@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Implementation of ConditionType that evaluates to true if the context param
- * matches the configured value..
+ * matches the configured value.
  *
  * @author mchand
  *
