@@ -15,11 +15,11 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link ConfigurationRepository} implementation supporting a file on
@@ -36,12 +36,12 @@ public class FileSystemConfigurationRepository implements ConfigurationRepositor
     private final LoadingCache<String, Map<String, Configuration<?>>> cachedConfigurations;
     private final String fileName;
 
-    FileSystemConfigurationRepository(final String fileName, long refreshIntervalInSeconds, final ConfigurationParser configurationParser) {
+    FileSystemConfigurationRepository(final String fileName, Duration refreshInterval, final ConfigurationParser configurationParser) {
         this.fileName = fileName;
         this.configurationParser = configurationParser;
 
         cachedConfigurations = CacheBuilder.newBuilder()
-                .refreshAfterWrite(refreshIntervalInSeconds, TimeUnit.SECONDS)
+                .refreshAfterWrite(refreshInterval)
                 .build(new CacheLoader<>() {
                     @Override
                     public Map<String, Configuration<?>> load(String filename) {

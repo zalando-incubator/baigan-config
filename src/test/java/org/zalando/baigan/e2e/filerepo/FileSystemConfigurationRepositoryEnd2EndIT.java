@@ -20,6 +20,7 @@ import org.zalando.baigan.repository.RepositoryFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +41,9 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
     @Autowired
     private Path configFile;
 
+    private static final Duration CONFIG_REFRESH_INTERVAL = Duration.ofMillis(100);
+    private static final long TIME_TO_WAIT_FOR_CONFIG_REFRESH = CONFIG_REFRESH_INTERVAL.plusMillis(100).toMillis();
+
     @Test
     public void givenAConfigurationFile_whenConfigurationIsChanged_thenConfigurationBeanReturnsNewConfigAfterRefreshTime() throws InterruptedException, IOException {
         assertThat(someConfiguration.isThisTrue(), nullValue());
@@ -47,7 +51,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
         assertThat(someConfiguration.someConfig(), nullValue());
 
         Files.writeString(configFile, "[{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]");
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), equalTo("some value"));
         assertThat(someConfiguration.someConfig(), nullValue());
@@ -61,7 +65,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
                 "}}, " +
                 "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
         assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
@@ -74,12 +78,12 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
                 "{ \"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
                 "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
         );
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
 
         Files.writeString(configFile, "{invalid: \"configuration]");
-        Thread.sleep(1100);
+        Thread.sleep(200);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
     }
@@ -90,7 +94,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
                 "\"a8a23682-1623-450b-8817-50c98827ea4e\": [{\"config_key\":\"A\"}]," +
                 "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"config_key\":\"B\"}]}" +
                 "}]");
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.topLevelGenerics(), equalTo(Map.of(
                 UUID.fromString("a8a23682-1623-450b-8817-50c98827ea4e"), List.of(new SomeConfigObject("A")),
                 UUID.fromString("76ced443-6555-4748-a22e-8700f3864e59"), List.of(new SomeConfigObject("B"))
@@ -106,7 +110,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
         FileSystemConfigurationRepository configurationRepository(Path configFile, RepositoryFactory repositoryFactory) {
             return repositoryFactory.fileSystemConfigurationRepository()
                     .fileName(configFile.toString())
-                    .refreshIntervalInSeconds(1)
+                    .refreshInterval(CONFIG_REFRESH_INTERVAL)
                     .objectMapper(new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false))
                     .build();
         }
