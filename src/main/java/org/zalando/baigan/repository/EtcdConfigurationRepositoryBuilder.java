@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * A builder to construct an {@link EtcdConfigurationRepository}.
  * <p>
- * Requires that at least {@link EtcdConfigurationRepositoryBuilder::etcdUrl} is specified.
+ * Requires that at least {@link EtcdConfigurationRepositoryBuilder#etcdUrl(String)} is specified.
  */
 public class EtcdConfigurationRepositoryBuilder {
 

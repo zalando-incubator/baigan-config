@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * Represents a rule/condition that if met
  *
- * @param <T>
+ * @param <T> type of the value
  *
  * @author mchand
  */

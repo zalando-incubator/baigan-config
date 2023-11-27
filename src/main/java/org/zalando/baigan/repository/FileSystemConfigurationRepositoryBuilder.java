@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * A builder to construct a {@link FileSystemConfigurationRepository}.
  * <p>
- * Requires that at least {@link FileSystemConfigurationRepository::filePath} is specified.
+ * Requires that at least {@link FileSystemConfigurationRepositoryBuilder#fileName(String)} is specified.
  */
 public class FileSystemConfigurationRepositoryBuilder {
 

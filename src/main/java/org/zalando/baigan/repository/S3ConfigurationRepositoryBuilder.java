@@ -15,10 +15,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Builder class for an S3ConfigurationRepository.
  * <p>
- * Must specify non-null values for
- * - {@link S3ConfigurationRepositoryBuilder#bucketName}
- * - {@link S3ConfigurationRepositoryBuilder#key}
- * <p>
+ * Must specify non-null values for:
+ * <ul>
+ * <li>{@link S3ConfigurationRepositoryBuilder#bucketName(String)}
+ * <li>{@link S3ConfigurationRepositoryBuilder#key(String)}
+ * </ul>
  */
 public class S3ConfigurationRepositoryBuilder {
 
