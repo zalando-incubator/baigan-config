@@ -9,6 +9,7 @@ import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.repository.aws.S3FileLoader;
 
 import javax.annotation.Nonnull;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,16 +29,16 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
 
     private final ConfigurationParser configurationParser;
     private final S3FileLoader s3Loader;
-    private final long refreshInterval;
+    private final Duration refreshInterval;
     private final ScheduledExecutorService executor;
     private volatile Map<String, Configuration<?>> configurationsMap = ImmutableMap.of();
 
     S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
-                              final long refreshInterval, final ScheduledExecutorService executor,
+                              final Duration refreshInterval, final ScheduledExecutorService executor,
                               final AmazonS3 s3Client, final AWSKMS kmsClient, ConfigurationParser configurationParser) {
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
-        checkArgument(refreshInterval >= 0, "refreshInterval has to be >= 0");
+        checkArgument(!refreshInterval.isNegative(), "refreshInterval has to be >= 0");
         checkNotNull(executor, "executor is required");
         checkNotNull(s3Client, "s3Client is required");
         checkNotNull(kmsClient, "kmsClient is required");
@@ -48,7 +49,7 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
         this.configurationParser = configurationParser;
 
         loadConfigurations();
-        if (refreshInterval > 0) {
+        if (!refreshInterval.isZero()) {
             setupRefresh();
         }
     }
@@ -85,9 +86,9 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
                         LOG.error("Failed to refresh configuration, keeping old state.", e);
                     }
                 },
-                this.refreshInterval,
-                this.refreshInterval,
-                TimeUnit.SECONDS
+                this.refreshInterval.toMillis(),
+                this.refreshInterval.toMillis(),
+                TimeUnit.MILLISECONDS
         );
     }
 }

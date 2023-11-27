@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.annotation.Nonnull;
+import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -26,7 +27,7 @@ public class S3ConfigurationRepositoryBuilder {
     private ScheduledExecutorService executor;
     private AmazonS3 s3Client;
     private AWSKMS kmsClient;
-    private long refreshIntervalInSeconds = 60;
+    private Duration refreshInterval = Duration.ofMinutes(1);
     private String bucketName;
     private String key;
     private ObjectMapper objectMapper;
@@ -75,9 +76,12 @@ public class S3ConfigurationRepositoryBuilder {
     /**
      * @param refreshIntervalInSeconds The number of seconds between the starts of subsequent runs to refresh
      *                                 the configuration
+     * <p>
+     * {@code @Deprecated} use {@link S3ConfigurationRepositoryBuilder#refreshInterval(Duration)} instead
      */
+    @Deprecated
     public S3ConfigurationRepositoryBuilder refreshIntervalInSeconds(final long refreshIntervalInSeconds) {
-        this.refreshIntervalInSeconds = refreshIntervalInSeconds;
+        this.refreshInterval = Duration.ofSeconds(refreshIntervalInSeconds);
         return this;
     }
 
@@ -98,6 +102,14 @@ public class S3ConfigurationRepositoryBuilder {
         return this;
     }
 
+    /**
+     * @param refreshInterval The interval between the starts of subsequent runs to refresh the configuration.
+     */
+    public S3ConfigurationRepositoryBuilder refreshInterval(Duration refreshInterval) {
+        this.refreshInterval = refreshInterval;
+        return this;
+    }
+
     public S3ConfigurationRepository build() {
         if (executor == null) {
             executor = new ScheduledThreadPoolExecutor(1);
@@ -112,6 +124,6 @@ public class S3ConfigurationRepositoryBuilder {
             configurationParser.setObjectMapper(objectMapper);
         }
 
-        return new S3ConfigurationRepository(bucketName, key, refreshIntervalInSeconds, executor, s3Client, kmsClient, configurationParser);
+        return new S3ConfigurationRepository(bucketName, key, refreshInterval, executor, s3Client, kmsClient, configurationParser);
     }
 }

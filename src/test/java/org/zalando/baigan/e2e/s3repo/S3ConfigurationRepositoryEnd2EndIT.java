@@ -30,6 +30,7 @@ import org.zalando.baigan.e2e.configs.SomeConfiguration;
 import org.zalando.baigan.repository.RepositoryFactory;
 import org.zalando.baigan.repository.S3ConfigurationRepository;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -46,6 +47,9 @@ public class S3ConfigurationRepositoryEnd2EndIT {
 
     public static final String S3_CONFIG_BUCKET = "some-bucket";
     public static final String S3_CONFIG_KEY = "some-key";
+
+    private static final Duration CONFIG_REFRESH_INTERVAL = Duration.ofMillis(100);
+    private static final long TIME_TO_WAIT_FOR_CONFIG_REFRESH = CONFIG_REFRESH_INTERVAL.plusMillis(100).toMillis();
 
     @Autowired
     private AmazonS3 s3;
@@ -69,7 +73,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                 S3_CONFIG_KEY,
                 "[{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
         );
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.isThisTrue(), nullValue());
         assertThat(someConfiguration.someValue(), equalTo("some value"));
         assertThat(someConfiguration.someConfig(), nullValue());
@@ -84,7 +88,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                         "{ \"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}, " +
                         "{ \"alias\": \"some.configuration.config.list\", \"defaultValue\": [\"A\",\"B\"]}]"
         );
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.someConfig(), equalTo(new SomeConfigObject("a value")));
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
@@ -99,7 +103,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                 "[{\"alias\": \"some.configuration.is.this.true\", \"defaultValue\": true}, " +
                         "{\"alias\": \"some.configuration.some.value\", \"defaultValue\": \"some value\"}]"
         );
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
 
@@ -108,7 +112,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                 S3_CONFIG_KEY,
                 "an: invalid\"} config"
         );
-        Thread.sleep(1100);
+        Thread.sleep(TIME_TO_WAIT_FOR_CONFIG_REFRESH);
         assertThat(someConfiguration.isThisTrue(), equalTo(true));
         assertThat(someConfiguration.someValue(), equalTo("some value"));
     }
@@ -141,7 +145,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
                     .key(S3_CONFIG_KEY)
                     .s3Client(amazonS3)
                     .kmsClient(kms)
-                    .refreshIntervalInSeconds(1)
+                    .refreshInterval(CONFIG_REFRESH_INTERVAL)
                     .executor(executorService)
                     .build();
         }

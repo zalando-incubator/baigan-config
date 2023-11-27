@@ -2,6 +2,8 @@ package org.zalando.baigan.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.Duration;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -12,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 public class FileSystemConfigurationRepositoryBuilder {
 
     private String filePath;
-    private long refreshIntervalInSeconds = 60L;
+    private Duration refreshInterval = Duration.ofMinutes(1);
     private ObjectMapper objectMapper;
     private final ConfigurationParser configurationParser;
 
@@ -31,9 +33,11 @@ public class FileSystemConfigurationRepositoryBuilder {
     /**
      * @param refreshIntervalInSeconds The number of seconds between the starts of subsequent runs to refresh
      *                                 the configuration.
+     * <p>
+     * {@code @Deprecated} use {@link S3ConfigurationRepositoryBuilder#refreshInterval(Duration)} instead
      */
     public FileSystemConfigurationRepositoryBuilder refreshIntervalInSeconds(long refreshIntervalInSeconds) {
-        this.refreshIntervalInSeconds = refreshIntervalInSeconds;
+        this.refreshInterval = Duration.ofSeconds(refreshIntervalInSeconds);
         return this;
     }
 
@@ -45,6 +49,14 @@ public class FileSystemConfigurationRepositoryBuilder {
         return this;
     }
 
+    /**
+     * @param refreshInterval The interval between the starts of subsequent runs to refresh the configuration.
+     */
+    public FileSystemConfigurationRepositoryBuilder refreshInterval(Duration refreshInterval) {
+        this.refreshInterval = refreshInterval;
+        return this;
+    }
+
     public FileSystemConfigurationRepository build() {
         requireNonNull(filePath, "filePath must not be null");
 
@@ -52,6 +64,6 @@ public class FileSystemConfigurationRepositoryBuilder {
             configurationParser.setObjectMapper(objectMapper);
         }
 
-        return new FileSystemConfigurationRepository(filePath, refreshIntervalInSeconds, configurationParser);
+        return new FileSystemConfigurationRepository(filePath, refreshInterval, configurationParser);
     }
 }
