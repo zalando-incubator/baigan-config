@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.22.1](https://github.com/zalando-stups/baigan-config/tree/0.22.1) (2023-11-28)
+
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.22.0...0.22.1)
+
+**Merged pull requests:**
+
+- specify refresh interval as duration [\#88](https://github.com/zalando-stups/baigan-config/pull/88) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+- improve logging in S3ConfigurationRepository [\#87](https://github.com/zalando-stups/baigan-config/pull/87) ([lukas-c-wilhelm](https://github.com/lukas-c-wilhelm))
+- generate javadoc during build [\#86](https://github.com/zalando-stups/baigan-config/pull/86) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+
 ## [0.22.0](https://github.com/zalando-stups/baigan-config/tree/0.22.0) (2023-11-27)
 
 [Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.21.0...0.22.0)
