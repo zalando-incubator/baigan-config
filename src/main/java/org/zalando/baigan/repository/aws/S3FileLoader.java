@@ -50,6 +50,14 @@ public class S3FileLoader {
         return decryptIfNecessary(configurationText);
     }
 
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
     private String decryptIfNecessary(final String candidate) {
         final Optional<byte[]> encryptedValue = getEncryptedValue(candidate);
         if (encryptedValue.isPresent()) {

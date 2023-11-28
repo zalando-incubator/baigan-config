@@ -66,7 +66,7 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
     }
 
     private void loadConfigurations() {
-        LOG.info("Loading configurations from S3 file");
+        LOG.debug("Loading configurations from S3 bucket {} at key {}", s3Loader.getBucketName(), s3Loader.getKey());
         final String configurationText = s3Loader.loadContent();
         final List<Configuration<?>> configurations = configurationParser.parseConfigurations(configurationText);
         final ImmutableMap.Builder<String, Configuration<?>> builder = ImmutableMap.builder();
@@ -74,7 +74,7 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
             builder.put(configuration.getAlias(), configuration);
         }
         configurationsMap = builder.build();
-        LOG.info("Configuration now: {}", configurationsMap);
+        LOG.debug("Loaded configurations from S3 bucket {} at key {}", s3Loader.getBucketName(), s3Loader.getKey());
     }
 
     private void setupRefresh() {
@@ -83,7 +83,8 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
                     try {
                         loadConfigurations();
                     } catch (RuntimeException e) {
-                        LOG.error("Failed to refresh configuration, keeping old state.", e);
+                        LOG.error("Failed to refresh configuration from S3 bucket {} at key {}. Keeping old state.",
+                                s3Loader.getBucketName(), s3Loader.getKey(), e);
                     }
                 },
                 this.refreshInterval.toMillis(),
