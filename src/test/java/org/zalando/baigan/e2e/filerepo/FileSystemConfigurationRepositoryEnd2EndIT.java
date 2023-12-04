@@ -101,7 +101,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
         )));
     }
 
-    @ConfigurationServiceScan(basePackages = "org.zalando.baigan.e2e.configs")
+    @ConfigurationServiceScan(basePackageClasses = SomeConfiguration.class)
     @Testcontainers
     @ComponentScan(basePackageClasses = {BaiganSpringContext.class})
     static class RepoConfig {
