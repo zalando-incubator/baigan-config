@@ -42,14 +42,21 @@ public @interface ConfigurationServiceScan {
     /**
      * Alias for the {@link #basePackages()} attribute. Allows for more concise
      * annotation declarations e.g.:
-     * {@code @EnableConfigService("de.zalando.shop")} instead of
-     * {@code @EnableConfigService(basePackages= "de.zalando.shop"})}.
+     * {@code @ConfigurationServiceScan("de.zalando.shop")} instead of
+     * {@code @ConfigurationServiceScan(basePackages= "de.zalando.shop"})}.
      */
     String[] value() default {};
 
     /**
-     * Base packages to scan for AppConfigService interfaces.
+     * Base packages to scan for {@link BaiganConfig} interfaces.
      */
     String[] basePackages() default {};
+
+    /**
+     * Type-safe alternative to {@link #basePackages} for specifying the packages
+     * to scan for {@link BaiganConfig} interfaces. The package of each class
+     * specified will be scanned.
+     */
+    Class<?>[] basePackageClasses() default {};
 
 }

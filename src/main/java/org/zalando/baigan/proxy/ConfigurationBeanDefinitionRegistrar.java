@@ -27,6 +27,7 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
@@ -69,12 +70,17 @@ public class ConfigurationBeanDefinitionRegistrar
 
         final List<String> basePackages = Lists.newArrayList();
         basePackages.addAll(
-                Arrays.asList(annotationAttributes.getStringArray("value")));
-        basePackages.addAll(Arrays
-                .asList(annotationAttributes.getStringArray("basePackages")));
+            Arrays.asList(annotationAttributes.getStringArray("value"))
+        );
+        basePackages.addAll(
+            Arrays.asList(annotationAttributes.getStringArray("basePackages"))
+        );
+        for (Class<?> clazz : annotationAttributes.getClassArray("basePackageClasses")) {
+            basePackages.add(ClassUtils.getPackageName(clazz));
+        }
 
         final Set<String> saneSet = basePackages.stream()
-                .filter(str -> !StringUtils.isEmpty(str))
+                .filter(StringUtils::hasText)
                 .collect(Collectors.toSet());
 
         createAndRegisterBeanDefinitions(saneSet, registry);
