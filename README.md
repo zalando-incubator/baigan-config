@@ -15,7 +15,7 @@ What makes Baigan a rockstar configuration framework ?
 	* Etcd
 
 ## Prerequisites
-- Java 1.8
+- Java 11
 - Spring framework
 - AWS SDK
 
