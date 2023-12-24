@@ -67,6 +67,10 @@ The individual methods may have arbitrary classes as return types, in particular
 
 **Note**: Primitives are not supported as return types as they cannot be null and therefore cannot express a missing configuration value.
 
+> [!CAUTION]
+> Primitives are not supported as return types as they cannot be null and therefore cannot express a missing configuration value.
+> If you use Baigan with Kotlin, it means you need to use nullable primitive types, e.g. `Int?` instead of `Int`.
+
 The above example code enables the application to inject _ExpressFeature_ spring bean into any other Spring bean:
 
 ```Java

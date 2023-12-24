@@ -115,10 +115,20 @@ public class ConfigurationBeanDefinitionRegistrar
         Map<String, Type> configTypesByKey = baiganConfigClasses.stream().flatMap(clazz ->
                 Arrays.stream(clazz.getMethods()).map(method -> new ConfigType(createKey(clazz, method), method.getGenericReturnType()))
         ).collect(toMap(c -> c.key, c -> c.type));
+        assertNoPrimitiveTypes(configTypesByKey);
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(BaiganConfigClasses.class);
         beanDefinition.getPropertyValues().add("configTypesByKey", configTypesByKey);
         registry.registerBeanDefinition("baiganConfigClasses", beanDefinition);
+    }
+
+    private void assertNoPrimitiveTypes(final Map<String, Type> configTypesByKey) {
+        configTypesByKey.forEach((key, value) -> {
+            if (value instanceof Class && ((Class<?>)value).isPrimitive()) {
+                throw new IllegalArgumentException("Config " + key + " has an illegal return type " + value
+                        + ". Primitives are not supported as return type.");
+            }
+        });
     }
 
     private Class<?> registerAsBean(final BeanDefinitionRegistry registry, final GenericBeanDefinition genericDefinition) {
