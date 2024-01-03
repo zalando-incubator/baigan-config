@@ -12,7 +12,6 @@ What makes Baigan a rockstar configuration framework ?
 * *Flexible*: Baigan is a client library that can read configurations from multiple repositories:
 	* Filesystem
 	* AWS S3
-	* Etcd
 
 ## Prerequisites
 - Java 11
@@ -187,20 +186,6 @@ Save a file named express-feature.json with the content above anywhere on the fi
 
 ##### AWS S3
 Save a file named express-feature.json with the content above and upload it to any S3 bucket. To use it just provide the bucket name and the object key.
-
-##### Etcd
-To create a key in etcd, you can either use etcdctl or the good old curl in the following way.
-Save a file named express-feature.json with the content above and push it to your etcd cluster:
-
-With [etcdctl v2](https://github.com/coreos/etcd/blob/master/etcdctl/READMEv2.md):
-```bash
-etcdctl set express.feature.enabled < express-feature.json 
-```
-
-With curl:
-```bash
-curl -v -XPUT http://127.0.0.1:2379/v2/keys/express.feature.enabled -d value="$(cat express-feature.json)"
-```
 
 ## 0.18.0 + 0.19.0 + 0.19.1 releases
 With certain JDK/JRE versions used, annotated configuration interfaces were not registered as beans. Be aware, that this issue does not occur when application code is being executed by a test runner or alike, only in production setups. Therefore, we recommend using a higher version to avoid this.
