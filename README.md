@@ -23,7 +23,7 @@ What makes Baigan a rockstar configuration framework ?
 ### To build the project run:
 
 ```bash
-    mvn clean install -Pintegration-test
+./mvnw clean install -Pintegration-test
 ```
 
 ### Integrating Baigan config
@@ -35,8 +35,8 @@ Baigan config is a spring project. The larger part of integration involves confi
 
 import org.zalando.baigan.BaiganSpringContext;
 
-@ComponentScan(basePackageClasses = {BaiganSpringContext.class })
-@ConfigurationServiceScan(basePackages = {"com.foo.configurations" })
+@ComponentScan(basePackageClasses = { BaiganSpringContext.class })
+@ConfigurationServiceScan(basePackages = { "com.foo.configurations" })
 public class Application {
 }
 ```
@@ -47,19 +47,19 @@ And the _@ConfigurationServiceScan_ annotation hints the Baigan registrar to loo
 #### Annotate your configuration interfaces with _@BaiganConfig_
 
 ```Java
-	@BaiganConfig
-	public interface ExpressFeature {
+@BaiganConfig
+public interface ExpressFeature {
 
-	    Boolean enabled();
+    Boolean enabled();
 
-	    String serviceUrl();
+    String serviceUrl();
 
-        SomeStructuredConfigClass complexConfiguration();
-        
-        List<String> configList();
+    SomeStructuredConfigClass complexConfiguration();
 
-		Map<UUID, List<SomeConfigObject>> nestedGenericConfiguration();
-	}
+    List<String> configList();
+
+    Map<UUID, List<SomeConfigObject>> nestedGenericConfiguration();
+}
 ```
 
 The individual methods may have arbitrary classes as return types, in particular complex structured types are supported, including Generics.
@@ -69,20 +69,20 @@ The individual methods may have arbitrary classes as return types, in particular
 The above example code enables the application to inject _ExpressFeature_ spring bean into any other Spring bean:
 
 ```Java
-	@Component
-	public class ExpressServiceImpl implements ExpressService{
+@Component
+public class ExpressServiceImpl implements ExpressService {
 
-		@Inject
-		private ExpressFeature expressFeature;
+    @Inject
+    private ExpressFeature expressFeature;
 
-		@Override
-		public void sendShipment(final Shipment shipment){
-			if (expressFeature.enabled()){
-				final String serviceUrl = expressFeature.serviceUrl();
-				// Use the configuration
-			}
-		}
-	}
+    @Override
+    public void sendShipment(final Shipment shipment) {
+        if (expressFeature.enabled()) {
+            final String serviceUrl = expressFeature.serviceUrl();
+            // Use the configuration
+        }
+    }
+}
 ```
 
 #### Provide a configuration repository
@@ -92,15 +92,16 @@ This is done using the Spring Bean of type `RepositoryFactory`, which allows cre
 types. The following example shows how to configure a filesystem based repository.
 
 ```Java
-	@Configuration
-	public class ApplicationConfiguration {
-		
-    	@Bean
-		public ConfigurationRepository configurationRepository(RepositoryFactory factory){
-			return factory.fileSystemConfigurationRepository()
-						  .fileName("configs.json");
-		}
-	}
+@Configuration
+public class ApplicationConfiguration {
+
+    @Bean
+    public ConfigurationRepository configurationRepository(RepositoryFactory factory) {
+        return factory.fileSystemConfigurationRepository()
+                      .fileName("configs.json")
+                      .build();
+    }
+}
 ``` 
 
 Check the documentation of the builders for details on how to configure the repositories. In particular, all
@@ -138,13 +139,13 @@ A configuration object should conform to the following JSON Schema:
             "description": "List of conditions to check",
             "type": "array",
             "items": {
-            	"type": "object",
-            	"properties": {
+                "type": "object",
+                "properties": {
                     "value": {
                         "description": "Configuration value if this condition evaluates to true.",
                         "type": {}
                     },
-            		"conditionType": {
+                    "conditionType": {
                         "description": "Type of condition to evaluate. This can be custom defined, with custom defined properties.",
                         "type": "object"
                     }
@@ -161,21 +162,23 @@ A configuration object should conform to the following JSON Schema:
 This sample JSON defines a configuration for the key `express.feature.enabled` with the value _true_ when the _country_code_ is 3, and a default value of _false_.
 
 ```json
-{
-  "alias": "express.feature.enabled",
-  "description": "Feature toggle",
-  "defaultValue": false,
-  "conditions": [
-    {
-      "value": true,
-      "conditionType": {
-        "onValue": "3",
-        "type": "Equals"
-      },
-      "paramName": "country_code"
-    }
-  ]
-}
+[
+  {
+    "alias": "express.feature.enabled",
+    "description": "Feature toggle",
+    "defaultValue": false,
+    "conditions": [
+      {
+        "value": true,
+        "conditionType": {
+          "onValue": "3",
+          "type": "Equals"
+        },
+        "paramName": "country_code"
+      }
+    ]
+  }
+]
 ```
 
 #### Pushing configuration to repositories
