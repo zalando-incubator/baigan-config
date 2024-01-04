@@ -17,7 +17,6 @@
 package org.zalando.baigan.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,7 @@ public class TestConfigurationSerialization {
 
     @BeforeEach
     public void init() {
-        mapper = new ObjectMapper().registerModule(new GuavaModule());
+        mapper = new ObjectMapper();
         conditionsProcessor = new ConditionsProcessor();
 
     }
