@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 import org.zalando.baigan.annotation.BaiganConfig;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 import static org.zalando.baigan.proxy.ProxyUtils.createKey;
@@ -112,23 +114,23 @@ public class ConfigurationBeanDefinitionRegistrar
                 }
             }
         }
-        Map<String, Type> configTypesByKey = baiganConfigClasses.stream().flatMap(clazz ->
-                Arrays.stream(clazz.getMethods()).map(method -> new ConfigType(createKey(clazz, method), method.getGenericReturnType()))
-        ).collect(toMap(c -> c.key, c -> c.type));
-        assertNoPrimitiveTypes(configTypesByKey);
+        Map<String, Type> configTypesByKey = baiganConfigClasses.stream()
+                .flatMap(clazz -> Stream.of(clazz.getMethods()).map(method -> mapToConfigType(clazz, method)))
+                .collect(toMap(c -> c.key, c -> c.type));
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(BaiganConfigClasses.class);
         beanDefinition.getPropertyValues().add("configTypesByKey", configTypesByKey);
         registry.registerBeanDefinition("baiganConfigClasses", beanDefinition);
     }
 
-    private void assertNoPrimitiveTypes(final Map<String, Type> configTypesByKey) {
-        configTypesByKey.forEach((key, value) -> {
-            if (value instanceof Class && ((Class<?>)value).isPrimitive()) {
-                throw new IllegalArgumentException("Config " + key + " has an illegal return type " + value
-                        + ". Primitives are not supported as return type.");
-            }
-        });
+    private ConfigType mapToConfigType(final Class<?> clazz, final Method method) {
+        final String key = createKey(clazz, method);
+        final Class<?> returnType = method.getReturnType();
+        if (returnType.isPrimitive()) {
+            throw new IllegalArgumentException("Config " + key + " has an illegal return type " + returnType +
+                    ". Primitives are not supported as return type!");
+        }
+        return new ConfigType(key, method.getGenericReturnType());
     }
 
     private Class<?> registerAsBean(final BeanDefinitionRegistry registry, final GenericBeanDefinition genericDefinition) {
