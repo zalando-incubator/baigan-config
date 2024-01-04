@@ -36,15 +36,6 @@ public class RepositoryFactory {
     }
 
     /**
-     *  Allows creating a {@link EtcdConfigurationRepository}.
-     *
-     * @return {@link EtcdConfigurationRepositoryBuilder} Builder to create the repository
-     */
-    public EtcdConfigurationRepositoryBuilder etcdConfigurationRepository() {
-        return new EtcdConfigurationRepositoryBuilder(configurationParser);
-    }
-
-    /**
      *  Allows creating a {@link ChainedConfigurationRepository}.
      *
      * @return {@link ChainedConfigurationRepositoryBuilder} Builder to create the repository
