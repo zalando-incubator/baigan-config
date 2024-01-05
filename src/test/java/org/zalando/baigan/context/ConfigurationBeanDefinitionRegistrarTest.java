@@ -119,4 +119,17 @@ public class ConfigurationBeanDefinitionRegistrarTest {
         when(metaData.getAnnotationAttributes(ConfigurationServiceScan.class.getName())).thenReturn(ImmutableMap.of());
         assertThrows(IllegalArgumentException.class, () -> registrar.registerBeanDefinitions(metaData, registry));
     }
+
+    @Test
+    public void whenConfigurationContainsPrimitiveTypes_shouldThrowException() {
+        when(metaData.getAnnotationAttributes(ConfigurationServiceScan.class.getName())).thenReturn(
+                ImmutableMap.of(
+                        "value", new String[]{"org.zalando.baigan.context.packaged"},
+                        "basePackages", new String[]{},
+                        "basePackageClasses", new Class[]{}
+                )
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> registrar.registerBeanDefinitions(metaData, registry));
+    }
 }
