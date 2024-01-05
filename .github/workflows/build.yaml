@@ -18,6 +18,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        profile: ['', 'spring5']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -25,9 +28,9 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: 11
+          java-version: 17
           cache: 'maven'
       - name: Compile
         run: ./mvnw clean javadoc:javadoc package -DskipTests
       - name: Test
-        run: ./mvnw verify -P integration-test -B
+        run: ./mvnw verify -P "${{ matrix.profile }}" -P integration-test -B

@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/zalando-stups/baigan-config/workflows/build/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/org.zalando/baigan-config.svg)](https://maven-badges.herokuapp.com/maven-central/org.zalando/baigan-config)
 
-Baigan configuration is an easy to use configuration framework for [Spring](https://spring.io/) based applications.
+Baigan configuration is an easy-to-use configuration framework for [Spring](https://spring.io/) based applications.
 
 What makes Baigan a rockstar configuration framework ?
 
@@ -14,8 +14,8 @@ What makes Baigan a rockstar configuration framework ?
 	* AWS S3
 
 ## Prerequisites
-- Java 11
-- Spring framework
+- Java 17
+- Spring Framework 6 (backwards compatible to 5)
 - AWS SDK
 
 ## Getting started
