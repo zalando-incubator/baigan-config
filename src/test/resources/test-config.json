@@ -1,0 +1,52 @@
+[
+  {
+    "alias": "some.non.existing.config",
+    "defaultValue": "an irrelevant value"
+  },
+  {
+    "alias": "some.configuration.is.this.true",
+    "defaultValue": false,
+    "conditions": [
+      {
+        "value": true,
+        "conditionType": {
+          "onValue": "1",
+          "type": "Equals"
+        },
+        "paramName": "appdomain"
+      }
+    ]
+  },
+  {
+    "alias": "some.configuration.some.value",
+    "defaultValue": "some value"
+  },
+  {
+    "alias": "some.configuration.some.config",
+    "defaultValue": {
+      "config_key": "a value",
+      "extra_field": "objectMapper configured to not fail for unknown properties"
+    }
+  },
+  {
+    "alias": "some.configuration.toggle.flag",
+    "defaultValue": false,
+    "conditions": [
+      {
+        "value": true,
+        "conditionType": {
+          "onValue": "1",
+          "type": "Equals"
+        },
+        "paramName": "appdomain"
+      }
+    ]
+  },
+  {
+    "alias": "some.configuration.config.list",
+    "defaultValue": [
+      "A",
+      "B"
+    ]
+  }
+]
