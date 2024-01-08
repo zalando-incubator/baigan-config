@@ -11,8 +11,10 @@ import org.springframework.util.CollectionUtils;
 import org.zalando.baigan.context.ContextProviderRetriever;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.context.ContextProvider;
+import org.zalando.baigan.repository.ConfigurationParser;
 import org.zalando.baigan.repository.ConfigurationRepository;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,7 +68,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
                 .map(ContextProvider.class::cast)
                 .collect(Collectors.toList());
 
-        final Object result = getConfig(key,contextProviders);
+        final Object result = getConfig(key, contextProviders);
         if (result == null) {
             LOG.warn("Configuration not found for key: {}", key);
             return null;
@@ -104,10 +106,15 @@ public class ContextAwareConfigurationMethodInvocationHandler
             context.put(param, provider.getContextParam(param));
         }
 
-        contextProviders.forEach(provider ->
-                provider.getProvidedContexts()
-                        .forEach(param -> context.put(param, provider.getContextParam(param)))
-        );
+        if (!CollectionUtils.isEmpty(contextProviders)) {
+            if (contextProviders.size() > 1) {
+                LOG.warn("The key [{}] has more than one context provider, and therefore only the first context will be used", key);
+            }
+            final ContextProvider contextProvider = contextProviders.get(0);
+            contextProvider
+                    .getProvidedContexts()
+                    .forEach(param -> context.put(param, contextProvider.getContextParam(param)));
+        }
 
         return conditionsProcessor.get().process(optional.get(), context);
 

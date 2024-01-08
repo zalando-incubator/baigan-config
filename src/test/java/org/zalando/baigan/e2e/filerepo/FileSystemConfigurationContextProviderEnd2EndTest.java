@@ -34,9 +34,9 @@ public class FileSystemConfigurationContextProviderEnd2EndTest {
 
     @Test
     public void testConfigurationsWithContext() {
-        assertThat(someConfiguration.toggleFlag(new CustomContextProvider("1")), equalTo(true));
-        assertThat(someConfiguration.toggleFlag(new CustomContextProvider("2")), equalTo(false));
-        assertThat(someConfiguration.toggleFlag(null), equalTo(false));
+        assertThat(someConfiguration.toggleFlag(new CustomContextProvider("1"),new CustomContextProvider("3")), equalTo(true));
+        assertThat(someConfiguration.toggleFlag(new CustomContextProvider("2"),new CustomContextProvider("1")), equalTo(false));
+        assertThat(someConfiguration.toggleFlag(null,null), equalTo(false));
     }
 
     @ConfigurationServiceScan(basePackageClasses = SomeConfiguration.class)
