@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.0-RC.0](https://github.com/zalando-stups/baigan-config/tree/1.0.0-RC.0) (2024-01-09)
+
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.22.1...1.0.0-RC.0)
+
+**Closed issues:**
+
+- Drop support for etcd [\#92](https://github.com/zalando-stups/baigan-config/issues/92)
+- Update README with updated prerequisites [\#90](https://github.com/zalando-stups/baigan-config/issues/90)
+- Add support for Spring6/SpringBoot3 [\#75](https://github.com/zalando-stups/baigan-config/issues/75)
+- Add true E2E test [\#73](https://github.com/zalando-stups/baigan-config/issues/73)
+
+**Merged pull requests:**
+
+- Spring 6 and 5 compatibility [\#99](https://github.com/zalando-stups/baigan-config/pull/99) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- Remove unused jackson modules [\#98](https://github.com/zalando-stups/baigan-config/pull/98) ([yuppie-flu](https://github.com/yuppie-flu))
+- Remove JUnit4, use testcontainers bom [\#97](https://github.com/zalando-stups/baigan-config/pull/97) ([yuppie-flu](https://github.com/yuppie-flu))
+- Fix check for primitive return types [\#96](https://github.com/zalando-stups/baigan-config/pull/96) ([yuppie-flu](https://github.com/yuppie-flu))
+- Fix code formatting in README [\#95](https://github.com/zalando-stups/baigan-config/pull/95) ([yuppie-flu](https://github.com/yuppie-flu))
+- Remove unused git client dependency [\#94](https://github.com/zalando-stups/baigan-config/pull/94) ([yuppie-flu](https://github.com/yuppie-flu))
+- Removed etcd repository [\#93](https://github.com/zalando-stups/baigan-config/pull/93) ([tobr](https://github.com/tobr))
+- Updated readme with Java 11 [\#91](https://github.com/zalando-stups/baigan-config/pull/91) ([rameshmalla](https://github.com/rameshmalla))
+- Type-safe package scan for ConfigurationServiceScan [\#89](https://github.com/zalando-stups/baigan-config/pull/89) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+
 ## [0.22.1](https://github.com/zalando-stups/baigan-config/tree/0.22.1) (2023-11-28)
 
 [Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.22.0...0.22.1)
