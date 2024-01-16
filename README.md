@@ -88,6 +88,10 @@ public class ExpressServiceImpl implements ExpressService {
     }
 }
 ```
+> [!CAUTION]
+> Due to the way bean access is managed, concurrent use of Baigan's proxies from multiple threads during the early stages of Spring context initialization can result in concurrency issues, including the potential for deadlock. 
+> To mitigate this risk, it is advisable to refrain from accessing Baigan's proxies until the Spring context has been initialized.
+
 
 #### Provide a configuration repository
 
