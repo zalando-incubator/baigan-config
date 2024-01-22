@@ -3,9 +3,200 @@
 ![Build Status](https://github.com/zalando-stups/baigan-config/workflows/build/badge.svg)
 [![Maven Central](https://img.shields.io/maven-central/v/org.zalando/baigan-config.svg)](https://maven-badges.herokuapp.com/maven-central/org.zalando/baigan-config)
 
-Baigan configuration is an easy-to-use configuration framework for [Spring](https://spring.io/) based applications. 
+Baigan configuration is an easy-to-use configuration framework for [Spring](https://spring.io/) based applications.
 
-Please refer to the [wiki](https://github.com/zalando-stups/baigan-config/wiki) to know more about usage, information, HOWTO, etc.
+What makes Baigan a rockstar configuration framework ?
+
+* *Simple*: Using Baigan configurations is as simple as annotating a Java interface.
+* *Extensible*: Extend configurations, create rules, define types that suit you.
+* *Flexible*: Baigan is a client library that can read configurations from multiple repositories:
+	* Filesystem
+	* AWS S3
+
+## Prerequisites
+- Java 17+
+- Spring Framework 6 (backwards compatible to 5)
+- AWS SDK
+
+## Getting started
+
+### To build the project run:
+
+```bash
+./mvnw clean install -Pintegration-test
+```
+
+### Integrating Baigan config
+Baigan config is a spring project. The larger part of integration involves configuring beans to facilitate the spring beans.
+
+#### Configuring components and Configuration interface scanning.
+
+```Java
+
+import org.zalando.baigan.BaiganSpringContext;
+
+@ComponentScan(basePackageClasses = { BaiganSpringContext.class })
+@ConfigurationServiceScan(basePackages = { "com.foo.configurations" })
+public class Application {
+}
+```
+
+The _BaiganSpringContext_ class includes the Baigan-Config beans required to be loaded into the spring application context.
+And the _@ConfigurationServiceScan_ annotation hints the Baigan registrar to look into the packages where the _@BaiganConfig_ annotated interfaces could be found.
+
+#### Annotate your configuration interfaces with _@BaiganConfig_
+
+```Java
+@BaiganConfig
+public interface ExpressFeature {
+
+    Boolean enabled();
+
+    String serviceUrl();
+
+    SomeStructuredConfigClass complexConfiguration();
+
+    List<String> configList();
+
+    Map<UUID, List<SomeConfigObject>> nestedGenericConfiguration();
+}
+```
+
+The individual methods may have arbitrary classes as return types, in particular complex structured types are supported, including Generics.
+
+**Note**: Primitives are not supported as return types as they cannot be null and therefore cannot express a missing configuration value.
+
+> [!CAUTION]
+> Primitives are not supported as return types as they cannot be null and therefore cannot express a missing configuration value.
+> If you use Baigan with Kotlin, it means you need to use nullable primitive types, e.g. `Int?` instead of `Int`.
+
+The above example code enables the application to inject _ExpressFeature_ spring bean into any other Spring bean:
+
+```Java
+@Component
+public class ExpressServiceImpl implements ExpressService {
+
+    @Inject
+    private ExpressFeature expressFeature;
+
+    @Override
+    public void sendShipment(final Shipment shipment) {
+        if (expressFeature.enabled()) {
+            final String serviceUrl = expressFeature.serviceUrl();
+            // Use the configuration
+        }
+    }
+}
+```
+> [!CAUTION]
+> Due to the way bean access is managed, concurrent use of Baigan's proxies from multiple threads during the early stages of Spring context initialization can result in concurrency issues, including the potential for deadlock. 
+> To mitigate this risk, it is advisable to refrain from accessing Baigan's proxies until the Spring context has been initialized.
+
+
+#### Provide a configuration repository
+
+Finally, a `ConfigurationRepository` Spring Bean has to be provided that can provide the configuration values.
+This is done using the Spring Bean of type `RepositoryFactory`, which allows creating builders for all repository
+types. The following example shows how to configure a filesystem based repository.
+
+```Java
+@Configuration
+public class ApplicationConfiguration {
+
+    @Bean
+    public ConfigurationRepository configurationRepository(RepositoryFactory factory) {
+        return factory.fileSystemConfigurationRepository()
+                      .fileName("configs.json")
+                      .build();
+    }
+}
+``` 
+
+Check the documentation of the builders for details on how to configure the repositories. In particular, all
+repositories can be configured with a Jackson `ObjectMapper` used to deserialize the configuration.
+
+### Creating configurations
+Baigan configurations follow a specific schema and can be stored on any of the supported repositories.
+
+#### Configuration schema
+Configurations are stored in its simplest form as key values.
+A configuration is a pair of a dot(.) separated key and a value objects in JSON format.
+
+A configuration object should conform to the following JSON Schema:
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Configuration",
+    "description": "A baigan configuration object value.",
+    "type": "object",
+    "properties": {
+        "alias": {
+            "description": "The identifier for the configuration, same as its key.",
+            "type": "string"
+        },
+         "description": {
+            "description": "Summary of the configuration.",
+            "type": "string"
+        },
+         "defaultValue": {
+            "description": "Default configuration if none of the condition is satisfied.",
+            "type": {}
+        },
+         "conditions": {
+            "description": "List of conditions to check",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "description": "Configuration value if this condition evaluates to true.",
+                        "type": {}
+                    },
+                    "conditionType": {
+                        "description": "Type of condition to evaluate. This can be custom defined, with custom defined properties.",
+                        "type": "object"
+                    }
+                }
+            }
+        }
+    },
+    "required": ["defaultValue"]
+}
+```
+
+#### Example configurations
+
+This sample JSON defines a configuration for the key `express.feature.enabled` with the value _true_ when the _country_code_ is 3, and a default value of _false_.
+
+```json
+[
+  {
+    "alias": "express.feature.enabled",
+    "description": "Feature toggle",
+    "defaultValue": false,
+    "conditions": [
+      {
+        "value": true,
+        "conditionType": {
+          "onValue": "3",
+          "type": "Equals"
+        },
+        "paramName": "country_code"
+      }
+    ]
+  }
+]
+```
+
+#### Pushing configuration to repositories
+This step depends on the chosen repository. 
+
+##### Filesystem
+Save a file named express-feature.json with the content above anywhere on the filesystem and bundle it as part of your application. To use it just specify the classpath in the constructor.
+
+##### AWS S3
+Save a file named express-feature.json with the content above and upload it to any S3 bucket. To use it just provide the bucket name and the object key.
 
 ## 0.18.0 + 0.19.0 + 0.19.1 releases
 With certain JDK/JRE versions used, annotated configuration interfaces were not registered as beans. Be aware, that this issue does not occur when application code is being executed by a test runner or alike, only in production setups. Therefore, we recommend using a higher version to avoid this.
