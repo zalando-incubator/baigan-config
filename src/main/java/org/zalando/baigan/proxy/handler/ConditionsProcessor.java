@@ -44,10 +44,10 @@ public class ConditionsProcessor {
 
         for (Condition<T> condition : configuration.getConditions()) {
 
-            final String conditionalContxtParamValue = context
+            final String conditionalContextParamValue = context
                     .get(condition.getParamName());
             final boolean result = condition.getConditionType()
-                    .eval(conditionalContxtParamValue);
+                    .eval(conditionalContextParamValue);
 
             // Return if any of the condition evaluates to true from the ordered
             // set of conditions.
