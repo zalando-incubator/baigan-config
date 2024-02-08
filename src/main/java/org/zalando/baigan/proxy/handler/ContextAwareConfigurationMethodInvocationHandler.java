@@ -59,7 +59,7 @@ public class ContextAwareConfigurationMethodInvocationHandler
         final String key = createKey(getClass(proxy), method);
         final Object result = getConfig(key);
         if (result == null) {
-            LOG.warn("Configuration not found for key: {}", key);
+            LOG.warn("No configuration found for key [{}] in configuration source, falling back to null.", key);
             return null;
         }
         if (!method.getReturnType().isInstance(result)) {

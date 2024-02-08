@@ -49,12 +49,6 @@ public class ConfigurationParser {
                 .collect(toList());
     }
 
-    public Optional<Configuration<?>> parseConfiguration(final String text) {
-        Optional<Configuration<JsonNode>> rawConfig = parseConfigText(text, new TypeReference<>() {
-        });
-        return rawConfig.flatMap(this::convertToTypedConfig);
-    }
-
     private <T> Optional<T> parseConfigText(final String text, TypeReference<T> type) {
         if (text == null || text.isEmpty()) {
             LOG.warn("Input to parse is empty: {}", text);
@@ -75,7 +69,10 @@ public class ConfigurationParser {
         final Optional<Configuration<?>> typedConfig = Optional.ofNullable(baiganConfigClasses.getConfigTypesByKey().get(jsonConfig.getAlias()))
                 .map(targetClass -> deserializeConfig(jsonConfig, targetClass));
         if (typedConfig.isEmpty()) {
-            LOG.info("Alias {} does not match any method in a class annotated with @BaiganConfig.", jsonConfig.getAlias());
+            LOG.info(
+                "Alias [{}] in configuration source does not match any method of any @BaiganConfig interface, ignoring it.",
+                jsonConfig.getAlias()
+            );
         }
         return typedConfig;
     }
