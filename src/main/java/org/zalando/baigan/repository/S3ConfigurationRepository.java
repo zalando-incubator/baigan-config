@@ -1,12 +1,12 @@
 package org.zalando.baigan.repository;
 
-import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.repository.aws.S3FileLoader;
+import software.amazon.awssdk.services.kms.KmsClient;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -35,7 +35,7 @@ public class S3ConfigurationRepository implements ConfigurationRepository {
 
     S3ConfigurationRepository(@Nonnull final String bucketName, @Nonnull final String key,
                               final Duration refreshInterval, final ScheduledExecutorService executor,
-                              final AmazonS3 s3Client, final AWSKMS kmsClient, ConfigurationParser configurationParser) {
+                              final S3Client s3Client, final KmsClient kmsClient, ConfigurationParser configurationParser) {
         checkNotNull(bucketName, "bucketName is required");
         checkNotNull(key, "key is required");
         checkArgument(!refreshInterval.isNegative(), "refreshInterval has to be >= 0");

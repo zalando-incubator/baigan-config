@@ -1,13 +1,15 @@
 package org.zalando.baigan.repository.aws;
 
-import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.model.DecryptRequest;
-import com.amazonaws.services.kms.model.DependencyTimeoutException;
-import com.amazonaws.services.kms.model.KMSInternalException;
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.io.BaseEncoding;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.kms.KmsClient;
+import software.amazon.awssdk.services.kms.model.DecryptRequest;
+import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
+import software.amazon.awssdk.services.kms.model.KmsInternalException;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
@@ -28,17 +30,17 @@ public class S3FileLoader {
     private static final int RETRY_SECONDS_WAIT = 10;
 
     private final RetryPolicy<ByteBuffer> retryPolicy = new RetryPolicy<ByteBuffer>()
-            .handle(KMSInternalException.class)
+            .handle(KmsInternalException.class)
             .handle(DependencyTimeoutException.class)
             .withBackoff(1, RETRY_SECONDS_WAIT, SECONDS)
             .withMaxRetries(MAX_RETRIES);
 
-    private final AmazonS3 s3Client;
-    private final AWSKMS kmsClient;
+    private final S3Client s3Client;
+    private final KmsClient kmsClient;
     private final String bucketName;
     private final String key;
 
-    public S3FileLoader(@Nonnull String bucketName, @Nonnull String key, @Nonnull AmazonS3 s3Client, @Nonnull AWSKMS kmsClient) {
+    public S3FileLoader(@Nonnull String bucketName, @Nonnull String key, @Nonnull S3Client s3Client, @Nonnull KmsClient kmsClient) {
         this.s3Client = s3Client;
         this.kmsClient = kmsClient;
         this.bucketName = bucketName;
@@ -46,7 +48,11 @@ public class S3FileLoader {
     }
 
     public String loadContent() {
-        final String configurationText = s3Client.getObjectAsString(bucketName, key);
+        final GetObjectRequest request = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        final String configurationText = s3Client.getObjectAsBytes(request).asUtf8String();
         return decryptIfNecessary(configurationText);
     }
 
@@ -68,8 +74,10 @@ public class S3FileLoader {
     }
 
     private ByteBuffer decryptValue(final byte[] encryptedBytes) {
-        final DecryptRequest request = new DecryptRequest().withCiphertextBlob(ByteBuffer.wrap(encryptedBytes));
-        return Failsafe.with(retryPolicy).get(() -> kmsClient.decrypt(request).getPlaintext());
+        final DecryptRequest request = DecryptRequest.builder()
+                .ciphertextBlob(SdkBytes.fromByteArray(encryptedBytes))
+                .build();
+        return Failsafe.with(retryPolicy).get(() -> kmsClient.decrypt(request).plaintext().asByteBuffer());
     }
 
     private static Optional<byte[]> getEncryptedValue(final String value) {

@@ -48,7 +48,7 @@
         <slf4j.version>2.0.7</slf4j.version>
         <mockito.version>5.3.1</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <awssdk.version>1.12.475</awssdk.version>
+        <awssdk.version>2.26.15</awssdk.version>
         <testcontainers.version>1.19.1</testcontainers.version>
     </properties>
 
@@ -58,6 +58,13 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
                 <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${awssdk.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -111,10 +118,14 @@
         </dependency>
 
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-            <version>${awssdk.version}</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>kms</artifactId>
+        </dependency>
+
 
         <!-- Google -->
         <dependency>
