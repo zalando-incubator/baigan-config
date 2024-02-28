@@ -12,7 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.zalando.baigan.BaiganSpringContext;
 import org.zalando.baigan.annotation.ConfigurationServiceScan;
-import org.zalando.baigan.e2e.configs.SomeConfiguration;
+import org.zalando.baigan.e2e.configs.TestContextConfiguration;
 import org.zalando.baigan.repository.FileSystemConfigurationRepository;
 import org.zalando.baigan.repository.RepositoryFactory;
 
@@ -21,6 +21,7 @@ import java.time.Duration;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {FileSystemConfigurationContextProviderEnd2EndTest.RepoConfig.class})
@@ -28,18 +29,22 @@ import static org.hamcrest.Matchers.equalTo;
 public class FileSystemConfigurationContextProviderEnd2EndTest {
 
     @Autowired
-    private SomeConfiguration someConfiguration;
+    private TestContextConfiguration testContextConfiguration;
 
     private static final Duration CONFIG_REFRESH_INTERVAL = Duration.ofMillis(100);
 
     @Test
-    public void testConfigurationsWithContext() {
-        assertThat(someConfiguration.toggleFlag(new CustomContextProvider("1"),new CustomContextProvider("3")), equalTo(true));
-        assertThat(someConfiguration.toggleFlag(new CustomContextProvider("2"),new CustomContextProvider("1")), equalTo(false));
-        assertThat(someConfiguration.toggleFlag(null,null), equalTo(false));
+    public void testConfigurationsWithMultipleContextsHavingTheSameKeyShouldFail() {
+        assertThrows(RuntimeException.class, () -> testContextConfiguration.toggleFlag(new CustomContextProvider("1"), new CustomContextProvider("3")));
     }
 
-    @ConfigurationServiceScan(basePackageClasses = SomeConfiguration.class)
+    @Test
+    public void testConfigurationsWithMultipleContexts() {
+        assertThat(testContextConfiguration.isThisTrue(new CustomContextProvider("1")), equalTo(true));
+        assertThat(testContextConfiguration.someValue(), equalTo("some value"));
+    }
+
+    @ConfigurationServiceScan(basePackageClasses = TestContextConfiguration.class)
     @Testcontainers
     @ComponentScan(basePackageClasses = {BaiganSpringContext.class})
     static class RepoConfig {

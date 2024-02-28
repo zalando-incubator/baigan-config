@@ -1,10 +1,6 @@
 [
   {
-    "alias": "some.non.existing.config",
-    "defaultValue": "an irrelevant value"
-  },
-  {
-    "alias": "some.configuration.is.this.true",
+    "alias": "test.context.configuration.is.this.true",
     "defaultValue": false,
     "conditions": [
       {
@@ -18,18 +14,11 @@
     ]
   },
   {
-    "alias": "some.configuration.some.value",
+    "alias": "test.context.configuration.some.value",
     "defaultValue": "some value"
   },
   {
-    "alias": "some.configuration.some.config",
-    "defaultValue": {
-      "config_key": "a value",
-      "extra_field": "objectMapper configured to not fail for unknown properties"
-    }
-  },
-  {
-    "alias": "some.configuration.toggle.flag",
+    "alias": "test.context.configuration.toggle.flag",
     "defaultValue": false,
     "conditions": [
       {
@@ -40,13 +29,6 @@
         },
         "paramName": "appdomain"
       }
-    ]
-  },
-  {
-    "alias": "some.configuration.config.list",
-    "defaultValue": [
-      "A",
-      "B"
     ]
   }
 ]

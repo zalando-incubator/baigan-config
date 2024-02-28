@@ -12,7 +12,6 @@ public interface SomeConfiguration {
     SomeConfigObject someConfig();
     String someValue();
     Boolean isThisTrue();
-    Boolean toggleFlag(CustomContextProvider customContextProvider,CustomContextProvider secondProvider);
     Map<UUID, List<SomeConfigObject>> topLevelGenerics();
     List<String> configList();
 }

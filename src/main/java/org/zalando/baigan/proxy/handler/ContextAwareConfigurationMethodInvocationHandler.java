@@ -107,13 +107,16 @@ public class ContextAwareConfigurationMethodInvocationHandler
         }
 
         if (!CollectionUtils.isEmpty(contextProviders)) {
-            if (contextProviders.size() > 1) {
-                LOG.warn("The key [{}] has more than one context provider, and therefore only the first context will be used", key);
-            }
-            final ContextProvider contextProvider = contextProviders.get(0);
-            contextProvider
-                    .getProvidedContexts()
-                    .forEach(param -> context.put(param, contextProvider.getContextParam(param)));
+            contextProviders.forEach(contextProvider -> {
+                contextProvider
+                        .getProvidedContexts()
+                        .forEach(contextParam -> {
+                            if(context.containsKey(contextParam)){
+                                throw new RuntimeException("Cannot have more than one context provider for the same context key "+contextParam);
+                            }
+                            context.put(contextParam, contextProvider.getContextParam(contextParam));
+                        });
+            });
         }
 
         return conditionsProcessor.get().process(optional.get(), context);
