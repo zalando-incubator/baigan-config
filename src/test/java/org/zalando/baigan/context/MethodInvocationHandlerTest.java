@@ -97,12 +97,8 @@ public class MethodInvocationHandlerTest {
     }
 
     private ContextAwareConfigurationMethodInvocationHandler createHandler(final ConfigurationRepository repository) {
-        final ContextProviderRetriever retriever = mock(
-                ContextProviderRetriever.class,
-                org.mockito.Answers.RETURNS_SMART_NULLS.toString());
 
         final BeanFactory beanFactory = mock(BeanFactory.class);
-        when(beanFactory.getBean(ContextProviderRetriever.class)).thenReturn(retriever);
         when(beanFactory.getBean(ConfigurationRepository.class)).thenReturn(repository);
         when(beanFactory.getBean(ConditionsProcessor.class)).thenReturn(new ConditionsProcessor());
 
