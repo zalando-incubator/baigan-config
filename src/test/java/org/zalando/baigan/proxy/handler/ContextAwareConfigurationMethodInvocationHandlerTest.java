@@ -1,6 +1,7 @@
 package org.zalando.baigan.proxy.handler;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanFactory;
@@ -82,17 +83,17 @@ public class ContextAwareConfigurationMethodInvocationHandlerTest {
     }
 
 
-    // FIXME this behavior seems strange
     @Test
-    public void whenThereAreMultipleContextProvidersForOneParam_shouldConsiderOnlyTheFirstContextProvider() {
+    public void shouldFailWhenMultipleContextProvidersExistForSingleParameter() {
         when(repository.get(key)).thenReturn(Optional.of(config));
 
         final String param1 = "param1";
         final String param2 = "param2";
 
         when(conditionsProcessor.process(config, Map.of(param1, "value1", param2, "value2"))).thenReturn(expectedConfigValue);
-        final Object result = handler.handleInvocation((TestInterface) () -> null, TestInterface.class.getDeclaredMethods()[0], new Object[]{new TestContextProvider(),new TestContextProvider()});
-        assertThat(result, equalTo(expectedConfigValue));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> handler.handleInvocation((TestInterface) () -> null, TestInterface.class.getDeclaredMethods()[0], new Object[]{new TestContextProvider(),new TestContextProvider()}),
+                "Cannot have more than one context provider for the same context key");
     }
 
     interface TestInterface {
