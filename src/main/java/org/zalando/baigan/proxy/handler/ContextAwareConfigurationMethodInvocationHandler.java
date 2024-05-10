@@ -8,16 +8,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.zalando.baigan.context.ContextProviderRetriever;
-import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.context.ContextProvider;
-import org.zalando.baigan.repository.ConfigurationParser;
+import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.repository.ConfigurationRepository;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +41,6 @@ public class ContextAwareConfigurationMethodInvocationHandler
 
     private Supplier<ConditionsProcessor> conditionsProcessor;
 
-    private Supplier<ContextProviderRetriever> contextProviderRetriever;
-
     /**
      * We have to defer dependency injection and bean resolution as this bean is required by the
      * {@link org.zalando.baigan.proxy.ConfigurationServiceBeanFactory}, which is loaded very
@@ -56,7 +50,6 @@ public class ContextAwareConfigurationMethodInvocationHandler
     public void setBeanFactory(final BeanFactory beanFactory) throws BeansException {
         this.configurationRepository = memoize(() -> beanFactory.getBean(ConfigurationRepository.class));
         this.conditionsProcessor = memoize(() -> beanFactory.getBean(ConditionsProcessor.class));
-        this.contextProviderRetriever = memoize(() -> beanFactory.getBean(ContextProviderRetriever.class));
     }
 
     @Override
@@ -90,21 +83,11 @@ public class ContextAwareConfigurationMethodInvocationHandler
     private Object getConfig(final String key, final List<ContextProvider> contextProviders) {
 
         final Optional<Configuration> optional = configurationRepository.get().get(key);
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             return null;
         }
 
         final Map<String, String> context = new HashMap<>();
-
-        final ContextProviderRetriever contextProviderRetriever = this.contextProviderRetriever.get();
-        for (final String param : contextProviderRetriever.getContextParameterKeys()) {
-            Collection<ContextProvider> providers = contextProviderRetriever.getProvidersFor(param);
-            if (CollectionUtils.isEmpty(providers)) {
-                continue;
-            }
-            final ContextProvider provider = providers.iterator().next();
-            context.put(param, provider.getContextParam(param));
-        }
 
         if (!CollectionUtils.isEmpty(contextProviders)) {
             contextProviders.forEach(contextProvider -> {
