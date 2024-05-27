@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.0-RC.1](https://github.com/zalando-stups/baigan-config/tree/1.0.0-RC.1) (2024-05-27)
+
+[Full Changelog](https://github.com/zalando-stups/baigan-config/compare/1.0.0-RC.0...1.0.0-RC.1)
+
+**Closed issues:**
+
+- Follow up of  https://github.com/zalando-stups/baigan-config/issues/100 clean up legacy context implementation [\#105](https://github.com/zalando-stups/baigan-config/issues/105)
+- Add support to accept context provider as an input parameter while fetching toggles. [\#100](https://github.com/zalando-stups/baigan-config/issues/100)
+
+**Merged pull requests:**
+
+- GH-105 Legacy context implementation cleanup [\#106](https://github.com/zalando-stups/baigan-config/pull/106) ([rameshmalla](https://github.com/rameshmalla))
+- clarified log messages on configuration mismatches [\#104](https://github.com/zalando-stups/baigan-config/pull/104) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- Add a warning for concurrent access during context initialisation [\#102](https://github.com/zalando-stups/baigan-config/pull/102) ([onurkaracali](https://github.com/onurkaracali))
+- Support contextprovider as a method parameter [\#101](https://github.com/zalando-stups/baigan-config/pull/101) ([rameshmalla](https://github.com/rameshmalla))
+
 ## [1.0.0-RC.0](https://github.com/zalando-stups/baigan-config/tree/1.0.0-RC.0) (2024-01-09)
 
 [Full Changelog](https://github.com/zalando-stups/baigan-config/compare/0.22.1...1.0.0-RC.0)
