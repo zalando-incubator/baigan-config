@@ -1,10 +1,8 @@
 package org.zalando.baigan.repository;
 
-import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.AWSKMSClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import software.amazon.awssdk.services.kms.KmsClient;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -25,8 +23,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class S3ConfigurationRepositoryBuilder {
 
     private ScheduledExecutorService executor;
-    private AmazonS3 s3Client;
-    private AWSKMS kmsClient;
+    private S3Client s3Client;
+    private KmsClient kmsClient;
     private Duration refreshInterval = Duration.ofMinutes(1);
     private String bucketName;
     private String key;
@@ -39,20 +37,20 @@ public class S3ConfigurationRepositoryBuilder {
 
     /**
      * @param s3Client The S3 client to be used to fetch the configuration file.
-     *                 If the S3 client is not specified explicitly, the builder
-     *                 uses {@link AmazonS3ClientBuilder#defaultClient()}
+     *                 If the S3 client is not specified explicitly, Baigan builds a default
+     *                 client using {@link S3Client#builder()}.
      */
-    public S3ConfigurationRepositoryBuilder s3Client(final AmazonS3 s3Client) {
+    public S3ConfigurationRepositoryBuilder s3Client(final S3Client s3Client) {
         this.s3Client = s3Client;
         return this;
     }
 
     /**
      * @param kmsClient The KMS client to be used to decrypt the configuration file.
-     *                  If the KMS client is not specified explicitly, the builder
-     *                  uses {@link AWSKMSClientBuilder#defaultClient()}
+     *                  If the KMS client is not specified explicitly, Baigan builds a default
+     *                  client using {@link KmsClient#builder()}.
      */
-    public S3ConfigurationRepositoryBuilder kmsClient(final AWSKMS kmsClient) {
+    public S3ConfigurationRepositoryBuilder kmsClient(final KmsClient kmsClient) {
         this.kmsClient = kmsClient;
         return this;
     }
@@ -115,10 +113,10 @@ public class S3ConfigurationRepositoryBuilder {
             executor = new ScheduledThreadPoolExecutor(1);
         }
         if (s3Client == null) {
-            s3Client = AmazonS3ClientBuilder.defaultClient();
+            s3Client = S3Client.builder().build();
         }
         if (kmsClient == null) {
-            kmsClient = AWSKMSClientBuilder.defaultClient();
+            kmsClient = KmsClient.builder().build();
         }
         if (objectMapper != null) {
             configurationParser.setObjectMapper(objectMapper);
