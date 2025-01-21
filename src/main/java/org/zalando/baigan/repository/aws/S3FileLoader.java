@@ -1,8 +1,8 @@
 package org.zalando.baigan.repository.aws;
 
 import com.google.common.io.BaseEncoding;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
+import dev.failsafe.Failsafe;
+import dev.failsafe.RetryPolicy;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.DecryptRequest;
@@ -29,11 +29,12 @@ public class S3FileLoader {
     private static final int MAX_RETRIES = 5;
     private static final int RETRY_SECONDS_WAIT = 10;
 
-    private final RetryPolicy<ByteBuffer> retryPolicy = new RetryPolicy<ByteBuffer>()
+    private final RetryPolicy<ByteBuffer> retryPolicy = RetryPolicy.<ByteBuffer>builder()
             .handle(KmsInternalException.class)
             .handle(DependencyTimeoutException.class)
             .withBackoff(1, RETRY_SECONDS_WAIT, SECONDS)
-            .withMaxRetries(MAX_RETRIES);
+            .withMaxRetries(MAX_RETRIES)
+            .build();
 
     private final S3Client s3Client;
     private final KmsClient kmsClient;
