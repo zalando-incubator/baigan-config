@@ -15,7 +15,7 @@ next=$(semver "${release}" -i minor)
 ./mvnw versions:set -D newVersion="${release}"
 
 docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v "$(pwd)":/usr/local/src/your-app \
-    githubchangeloggenerator/github-changelog-generator -u zalando-stups -p baigan-config --future-release ${release}
+    githubchangeloggenerator/github-changelog-generator -u zalando-incubator -p baigan-config --future-release ${release}
 
 git commit -am "Release ${release}"
 
