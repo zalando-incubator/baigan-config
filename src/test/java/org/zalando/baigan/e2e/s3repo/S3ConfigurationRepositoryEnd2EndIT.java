@@ -158,7 +158,7 @@ public class S3ConfigurationRepositoryEnd2EndIT {
 
         @Container
         private static final LocalStackContainer localstack = new LocalStackContainer(
-                DockerImageName.parse("localstack/localstack:2.1.0")
+                DockerImageName.parse("localstack/localstack:4.1.0")
         ).withServices(S3, KMS).withEnv("DEFAULT_REGION", Region.EU_CENTRAL_1.id());
 
         @Bean
