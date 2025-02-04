@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0-RC.3](https://github.com/zalando-incubator/baigan-config/tree/1.0.0-RC.3) (2025-02-04)
+
+[Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.0.0-RC.2...1.0.0-RC.3)
+
+**Merged pull requests:**
+
+- Bump org.apache.maven.plugins:maven-source-plugin from 3.3.0 to 3.3.1 [\#113](https://github.com/zalando-incubator/baigan-config/pull/113) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.sonatype.plugins:nexus-staging-maven-plugin from 1.6.13 to 1.7.0 [\#112](https://github.com/zalando-incubator/baigan-config/pull/112) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.slf4j:slf4j-api from 2.0.7 to 2.0.16 [\#111](https://github.com/zalando-incubator/baigan-config/pull/111) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.hamcrest:hamcrest-library from 2.2 to 3.0 [\#110](https://github.com/zalando-incubator/baigan-config/pull/110) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.apache.maven.plugins:maven-compiler-plugin from 3.11.0 to 3.13.0 [\#109](https://github.com/zalando-incubator/baigan-config/pull/109) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.0.0-RC.2](https://github.com/zalando-incubator/baigan-config/tree/1.0.0-RC.2) (2025-01-27)
 
 [Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.0.0-RC.1...1.0.0-RC.2)
