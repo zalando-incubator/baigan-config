@@ -5,3 +5,4 @@ approvals:
       - zalando
       - zalando-incubator
     collaborators: true
+X-Zalando-Team: "fulfillment-core"
