@@ -39,7 +39,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release> <!-- ensure Spring 5 compatibility -->
-        <spring6.version>6.2.2</spring6.version>
+        <spring6.version>6.2.3</spring6.version>
         <spring5.version>5.3.39</spring5.version>
         <spring.version>${spring6.version}</spring.version>
         <jackson.version>2.18.2</jackson.version>
