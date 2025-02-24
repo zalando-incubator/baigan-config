@@ -50,7 +50,7 @@
         <mockito.version>5.15.2</mockito.version>
         <hamcrest.version>3.0</hamcrest.version>
         <awssdk.version>2.30.12</awssdk.version>
-        <testcontainers.version>1.20.4</testcontainers.version>
+        <testcontainers.version>1.20.5</testcontainers.version>
     </properties>
 
     <dependencyManagement>
