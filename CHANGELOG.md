@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.0.0](https://github.com/zalando-incubator/baigan-config/tree/1.0.0) (2025-03-17)
+
+[Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.0.0-RC.3...1.0.0)
+
+**Merged pull requests:**
+
+- Bump org.apache.maven.plugins:maven-compiler-plugin from 3.13.0 to 3.14.0 [\#146](https://github.com/zalando-incubator/baigan-config/pull/146) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump io.quarkus:quarkus-junit4-mock from 3.18.1 to 3.19.3 [\#143](https://github.com/zalando-incubator/baigan-config/pull/143) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.testcontainers:testcontainers-bom from 1.20.4 to 1.20.6 [\#141](https://github.com/zalando-incubator/baigan-config/pull/141) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump junit.version from 5.11.4 to 5.12.0 [\#133](https://github.com/zalando-incubator/baigan-config/pull/133) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump Spring 5 [\#127](https://github.com/zalando-incubator/baigan-config/pull/127) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.5.0 to 3.11.2 [\#126](https://github.com/zalando-incubator/baigan-config/pull/126) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.fasterxml.jackson.core:jackson-databind from 2.15.1 to 2.18.2 [\#125](https://github.com/zalando-incubator/baigan-config/pull/125) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.google.guava:guava from 32.0.1-jre to 33.4.0-jre [\#124](https://github.com/zalando-incubator/baigan-config/pull/124) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.slf4j:slf4j-simple from 2.0.7 to 2.0.16 [\#123](https://github.com/zalando-incubator/baigan-config/pull/123) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump software.amazon.awssdk:bom from 2.26.15 to 2.30.12 [\#122](https://github.com/zalando-incubator/baigan-config/pull/122) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.apache.maven.plugins:maven-gpg-plugin from 3.1.0 to 3.2.7 [\#121](https://github.com/zalando-incubator/baigan-config/pull/121) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.testcontainers:testcontainers-bom from 1.19.1 to 1.20.4 [\#120](https://github.com/zalando-incubator/baigan-config/pull/120) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump spring.version from 6.1.2 to 6.2.2 [\#119](https://github.com/zalando-incubator/baigan-config/pull/119) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump mockito.version from 5.3.1 to 5.15.2 [\#118](https://github.com/zalando-incubator/baigan-config/pull/118) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.apache.maven.plugins:maven-surefire-plugin from 3.1.2 to 3.5.2 [\#117](https://github.com/zalando-incubator/baigan-config/pull/117) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump junit.version from 5.9.3 to 5.11.4 [\#116](https://github.com/zalando-incubator/baigan-config/pull/116) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump io.quarkus:quarkus-junit4-mock from 3.0.0.Final to 3.18.1 [\#115](https://github.com/zalando-incubator/baigan-config/pull/115) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.apache.maven.plugins:maven-failsafe-plugin from 3.1.2 to 3.5.2 [\#114](https://github.com/zalando-incubator/baigan-config/pull/114) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.0.0-RC.3](https://github.com/zalando-incubator/baigan-config/tree/1.0.0-RC.3) (2025-02-04)
 
 [Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.0.0-RC.2...1.0.0-RC.3)
