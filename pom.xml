@@ -42,7 +42,7 @@
         <spring6.version>6.2.2</spring6.version>
         <spring5.version>5.3.39</spring5.version>
         <spring.version>${spring6.version}</spring.version>
-        <jackson.version>2.18.2</jackson.version>
+        <jackson.version>2.18.3</jackson.version>
         <junit.version>5.12.1</junit.version>
         <guava.version>33.4.0-jre</guava.version>
         <failsafe.version>3.3.2</failsafe.version>
