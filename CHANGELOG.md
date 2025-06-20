@@ -1,12 +1,24 @@
 # Changelog
 
+## [1.1.0](https://github.com/zalando-incubator/baigan-config/tree/1.1.0) (2025-06-20)
+
+[Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.0.0...1.1.0)
+
+**Merged pull requests:**
+
+- Publish to Central Portal [\#180](https://github.com/zalando-incubator/baigan-config/pull/180) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- Bump junit.version from 5.12.0 to 5.12.1 [\#148](https://github.com/zalando-incubator/baigan-config/pull/148) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump com.fasterxml.jackson.core:jackson-databind from 2.18.2 to 2.18.3 [\#147](https://github.com/zalando-incubator/baigan-config/pull/147) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.apache.maven.plugins:maven-compiler-plugin from 3.13.0 to 3.14.0 [\#146](https://github.com/zalando-incubator/baigan-config/pull/146) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump spring.version from 6.2.2 to 6.2.4 [\#145](https://github.com/zalando-incubator/baigan-config/pull/145) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump org.slf4j:slf4j-simple from 2.0.16 to 2.0.17 [\#144](https://github.com/zalando-incubator/baigan-config/pull/144) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.0.0](https://github.com/zalando-incubator/baigan-config/tree/1.0.0) (2025-03-17)
 
 [Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.0.0-RC.3...1.0.0)
 
 **Merged pull requests:**
 
-- Bump org.apache.maven.plugins:maven-compiler-plugin from 3.13.0 to 3.14.0 [\#146](https://github.com/zalando-incubator/baigan-config/pull/146) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump io.quarkus:quarkus-junit4-mock from 3.18.1 to 3.19.3 [\#143](https://github.com/zalando-incubator/baigan-config/pull/143) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump org.testcontainers:testcontainers-bom from 1.20.4 to 1.20.6 [\#141](https://github.com/zalando-incubator/baigan-config/pull/141) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump junit.version from 5.11.4 to 5.12.0 [\#133](https://github.com/zalando-incubator/baigan-config/pull/133) ([dependabot[bot]](https://github.com/apps/dependabot))
