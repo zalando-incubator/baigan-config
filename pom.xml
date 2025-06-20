@@ -8,7 +8,7 @@
 
     <name>baigan-config</name>
     <description>The baigan-config distributed configuration service.</description>
-    <url>https://github.com/zalando/baigan-config</url>
+    <url>https://github.com/zalando-incubator/baigan-config</url>
 
     <licenses>
         <license>
@@ -18,23 +18,21 @@
         </license>
     </licenses>
 
-    <scm>
-        <connection>scm:git:git://github.com:zalando/baygan-config.git</connection>
-        <developerConnection>scm:git:git@github.com:zalando/baygan-config.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/zalando/baigan-config.git</url>
-    </scm>
+    <developers>
+        <developer>
+            <name>Zalando SE</name>
+            <email>info@zalando.de</email>
+            <organization>Zalando SE</organization>
+            <organizationUrl>https://github.com/zalando-incubator</organizationUrl>
+        </developer>
+    </developers>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
+    <scm>
+        <connection>scm:git:git://github.com:zalando-/baigan-config.git</connection>
+        <developerConnection>scm:git:git@github.com:zalando-incubator/baigan-config.git</developerConnection>
+        <tag>main</tag>
+        <url>https://github.com/zalando-incubator/baigan-config.git</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -292,6 +290,15 @@
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                             <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
                         </configuration>
                     </plugin>
                 </plugins>
