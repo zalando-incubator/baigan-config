@@ -18,7 +18,7 @@ package org.zalando.baigan.proxy.handler;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;

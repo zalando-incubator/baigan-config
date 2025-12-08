@@ -13,7 +13,7 @@ import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.util.List;
