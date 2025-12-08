@@ -18,7 +18,7 @@ package org.zalando.baigan.model;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;

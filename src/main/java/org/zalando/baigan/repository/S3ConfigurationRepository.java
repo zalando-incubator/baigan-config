@@ -8,7 +8,7 @@ import org.zalando.baigan.repository.aws.S3FileLoader;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;

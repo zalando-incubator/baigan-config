@@ -2,7 +2,7 @@ package org.zalando.baigan.repository;
 
 import org.zalando.baigan.model.Configuration;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Optional;
 
 /**
