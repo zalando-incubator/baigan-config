@@ -38,8 +38,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
         <spring6.version>6.2.4</spring6.version>
-        <spring5.version>5.3.39</spring5.version>
-        <spring.version>${spring6.version}</spring.version>
+        <spring7.version>7.0.1</spring7.version>
+        <spring.version>${spring7.version}</spring.version>
         <jackson.version>3.0.3</jackson.version>
         <junit.version>6.0.1</junit.version>
         <guava.version>33.5.0-jre</guava.version>
@@ -223,9 +223,9 @@
 
     <profiles>
         <profile>
-            <id>spring5</id>
+            <id>spring6</id>
             <properties>
-                <spring.version>${spring5.version}</spring.version>
+                <spring.version>${spring6.version}</spring.version>
             </properties>
         </profile>
         <profile>
