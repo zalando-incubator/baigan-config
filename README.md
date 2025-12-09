@@ -15,7 +15,7 @@ What makes Baigan a rockstar configuration framework ?
 
 ## Prerequisites
 - Java 17+
-- Spring Framework 6 (backwards compatible to 5)
+- Spring Framework 7 (backwards compatible to 6)
 - AWS SDK
 
 ## Getting started
