@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.0.0-RC.0](https://github.com/zalando-incubator/baigan-config/tree/2.0.0-RC.0) (2025-12-09)
+
+[Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.1.0...2.0.0-RC.0)
+
+**Closed issues:**
+
+- Spring 7 Support [\#217](https://github.com/zalando-incubator/baigan-config/issues/217)
+
+**Merged pull requests:**
+
+- Support Spring 7 [\#220](https://github.com/zalando-incubator/baigan-config/pull/220) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- Migrate to Jackson 3 [\#219](https://github.com/zalando-incubator/baigan-config/pull/219) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- Bump Baseline [\#218](https://github.com/zalando-incubator/baigan-config/pull/218) ([lukasniemeier-zalando](https://github.com/lukasniemeier-zalando))
+- Bump software.amazon.awssdk:bom from 2.30.12 to 2.36.2 [\#215](https://github.com/zalando-incubator/baigan-config/pull/215) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.1.0](https://github.com/zalando-incubator/baigan-config/tree/1.1.0) (2025-06-20)
 
 [Full Changelog](https://github.com/zalando-incubator/baigan-config/compare/1.0.0...1.1.0)
