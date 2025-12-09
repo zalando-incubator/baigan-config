@@ -1,9 +1,6 @@
 package org.zalando.baigan.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +9,10 @@ import org.springframework.stereotype.Component;
 import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-import jakarta.annotation.Nonnull;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
@@ -54,11 +52,7 @@ public class ConfigurationParser {
             LOG.warn("Input to parse is empty: {}", text);
             return empty();
         }
-        try {
-            return Optional.of(objectMapper.readValue(text, type));
-        } catch (JsonProcessingException e) {
-            throw new UncheckedIOException(e);
-        }
+        return Optional.of(objectMapper.readValue(text, type));
     }
 
     void setObjectMapper(final ObjectMapper objectMapper) {
@@ -78,18 +72,17 @@ public class ConfigurationParser {
     }
 
     private <T> Configuration<?> deserializeConfig(Configuration<JsonNode> config, Type targetClass) {
-        Set<Condition<T>> typedConditions = Optional.ofNullable(config.getConditions()).orElse(Set.of()).stream().map(c -> {
-            try {
-                return new Condition<>(c.getParamName(), c.getConditionType(), objectMapper.<T>treeToValue(c.getValue(), objectMapper.constructType(targetClass)));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        }).collect(toSet());
-        try {
-            T typedDefaultValue = objectMapper.treeToValue(config.getDefaultValue(), objectMapper.constructType(targetClass));
-            return new Configuration<>(config.getAlias(), config.getDescription(), typedConditions, typedDefaultValue);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        Set<Condition<T>> typedConditions = Optional.ofNullable(config.getConditions())
+                .orElse(Set.of()).stream()
+                .map(c ->
+                        new Condition<>(
+                                c.getParamName(),
+                                c.getConditionType(),
+                                objectMapper.<T>treeToValue(c.getValue(), objectMapper.constructType(targetClass))
+                        )
+                )
+                .collect(toSet());
+        T typedDefaultValue = objectMapper.treeToValue(config.getDefaultValue(), objectMapper.constructType(targetClass));
+        return new Configuration<>(config.getAlias(), config.getDescription(), typedConditions, typedDefaultValue);
     }
 }

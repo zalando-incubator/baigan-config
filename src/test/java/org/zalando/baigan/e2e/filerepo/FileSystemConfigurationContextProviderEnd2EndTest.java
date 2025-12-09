@@ -1,6 +1,5 @@
 package org.zalando.baigan.e2e.filerepo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +14,10 @@ import org.zalando.baigan.annotation.ConfigurationServiceScan;
 import org.zalando.baigan.e2e.configs.TestContextConfiguration;
 import org.zalando.baigan.repository.FileSystemConfigurationRepository;
 import org.zalando.baigan.repository.RepositoryFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,7 +53,7 @@ public class FileSystemConfigurationContextProviderEnd2EndTest {
             return repositoryFactory.fileSystemConfigurationRepository()
                     .fileName(FileSystemConfigurationContextProviderEnd2EndTest.class.getClassLoader().getResource("test-config.json").getPath())
                     .refreshInterval(CONFIG_REFRESH_INTERVAL)
-                    .objectMapper(new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false))
+                    .objectMapper(JsonMapper.builder().build())
                     .build();
         }
     }
