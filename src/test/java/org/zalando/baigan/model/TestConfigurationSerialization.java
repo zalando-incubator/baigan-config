@@ -16,12 +16,12 @@
 
 package org.zalando.baigan.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zalando.baigan.proxy.handler.ConditionsProcessor;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Set;
 

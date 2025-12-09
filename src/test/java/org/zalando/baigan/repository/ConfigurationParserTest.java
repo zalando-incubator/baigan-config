@@ -7,8 +7,8 @@ import org.zalando.baigan.model.Condition;
 import org.zalando.baigan.model.Configuration;
 import org.zalando.baigan.model.Equals;
 import org.zalando.baigan.proxy.BaiganConfigClasses;
+import tools.jackson.core.JacksonException;
 
-import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,7 +91,7 @@ public class ConfigurationParserTest {
     public void whenInputCannotBeParsedToJson_shouldThrowException() {
         final String input = "some invalid input";
 
-        assertThrows(UncheckedIOException.class, () -> parser.parseConfigurations(input));
+        assertThrows(JacksonException.class, () -> parser.parseConfigurations(input));
     }
 
     @Test
@@ -138,14 +138,14 @@ public class ConfigurationParserTest {
     public void whenConfigurationTypeHasGenerics_shouldParseCorrectly() throws NoSuchMethodException {
         final String input = "[{\"alias\":\"some.config.some.key\",\"defaultValue\":{" +
                 "\"a8a23682-1623-450b-8817-50c98827ea4e\": [{\"someConfig\":\"A\",\"someOtherConfig\":1}]," +
-                "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"someConfig\":\"B\"}]}" +
+                "\"76ced443-6555-4748-a22e-8700f3864e59\": [{\"someConfig\":\"B\",\"someOtherConfig\":2}]}" +
                 "}]";
 
         when(baiganConfigClasses.getConfigTypesByKey()).thenReturn(Map.of("some.config.some.key", ParameterizedConfig.class.getMethod("getConfig").getGenericReturnType()));
 
         assertThat(parser.parseConfigurations(input).get(0).getDefaultValue(), equalTo(Map.of(
                 UUID.fromString("a8a23682-1623-450b-8817-50c98827ea4e"), List.of(new StructuredConfig("A", 1)),
-                UUID.fromString("76ced443-6555-4748-a22e-8700f3864e59"), List.of(new StructuredConfig("B", 0))
+                UUID.fromString("76ced443-6555-4748-a22e-8700f3864e59"), List.of(new StructuredConfig("B", 2))
         )));
     }
 

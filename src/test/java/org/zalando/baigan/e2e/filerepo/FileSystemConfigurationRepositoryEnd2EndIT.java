@@ -1,6 +1,5 @@
 package org.zalando.baigan.e2e.filerepo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +15,7 @@ import org.zalando.baigan.e2e.configs.SomeConfigObject;
 import org.zalando.baigan.e2e.configs.SomeConfiguration;
 import org.zalando.baigan.repository.FileSystemConfigurationRepository;
 import org.zalando.baigan.repository.RepositoryFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
+import static tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {FileSystemConfigurationRepositoryEnd2EndIT.RepoConfig.class})
@@ -111,7 +111,7 @@ public class FileSystemConfigurationRepositoryEnd2EndIT {
             return repositoryFactory.fileSystemConfigurationRepository()
                     .fileName(configFile.toString())
                     .refreshInterval(CONFIG_REFRESH_INTERVAL)
-                    .objectMapper(new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false))
+                    .objectMapper(JsonMapper.builder().disable(FAIL_ON_UNKNOWN_PROPERTIES).build())
                     .build();
         }
 

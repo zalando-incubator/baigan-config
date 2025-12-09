@@ -1,6 +1,6 @@
 package org.zalando.baigan.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 
