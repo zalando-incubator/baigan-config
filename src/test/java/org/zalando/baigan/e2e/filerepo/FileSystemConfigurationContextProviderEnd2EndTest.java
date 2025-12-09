@@ -21,7 +21,6 @@ import java.time.Duration;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {FileSystemConfigurationContextProviderEnd2EndTest.RepoConfig.class})
@@ -54,7 +53,7 @@ public class FileSystemConfigurationContextProviderEnd2EndTest {
             return repositoryFactory.fileSystemConfigurationRepository()
                     .fileName(FileSystemConfigurationContextProviderEnd2EndTest.class.getClassLoader().getResource("test-config.json").getPath())
                     .refreshInterval(CONFIG_REFRESH_INTERVAL)
-                    .objectMapper(JsonMapper.builder().disable(FAIL_ON_UNKNOWN_PROPERTIES).build())
+                    .objectMapper(JsonMapper.builder().build())
                     .build();
         }
     }
