@@ -1,6 +1,11 @@
 version: 2
 updates:
-  - package-ecosystem: maven
+  - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      test-dependencies:
+        dependency-type: "development"
