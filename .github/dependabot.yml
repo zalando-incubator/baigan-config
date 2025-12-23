@@ -20,10 +20,7 @@ updates:
           - "org.slf4j*"
         exclude-patterns:
           - "org.springframework*"
-      minor-patch:
-        update-types:
-          - "minor"
-          - "patch"
+      dependencies:
         patterns:
           - "*"
         exclude-patterns:
