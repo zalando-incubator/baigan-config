@@ -9,6 +9,8 @@ updates:
     groups:
       test-dependencies:
         dependency-type: "development"
+        patterns:
+          - "org.testcontainers*"
         exclude-patterns:
           - "org.springframework*"
       minor-patch:
