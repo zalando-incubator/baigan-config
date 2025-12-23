@@ -48,7 +48,7 @@
         <mockito.version>5.20.0</mockito.version>
         <hamcrest.version>3.0</hamcrest.version>
         <awssdk.version>2.40.3</awssdk.version>
-        <testcontainers.version>2.0.2</testcontainers.version>
+        <testcontainers.version>2.0.3</testcontainers.version>
     </properties>
 
     <dependencyManagement>
