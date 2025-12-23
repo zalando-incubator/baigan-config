@@ -8,9 +8,12 @@ updates:
       default-days: 7
     groups:
       test-dependencies:
-        dependency-type: "development"
         patterns:
+          - "org.junit*"
+          - "org.hamcrest*"
+          - "org.mockito*"
           - "org.testcontainers*"
+          - "org.slf4j*"
         exclude-patterns:
           - "org.springframework*"
       minor-patch:
